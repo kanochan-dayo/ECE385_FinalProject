@@ -1,1 +1,6 @@
-.bak
+*.bak
+*~
+*/output_files/*
+*/*db/*
+*/*tmp*/*
+*/simulation/*
