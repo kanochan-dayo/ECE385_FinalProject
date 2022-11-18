@@ -118,7 +118,7 @@ module rhythm (
 	//assign hex_num_0 = 4'h0;
 	
 	//remember to rename the SOC as necessary
-	Lab7_soc u0 (
+	rhythm_soc u0 (
 		.clk_clk                           (MAX10_CLK1_50),    //clk.clk
 		.reset_reset_n                     (KEY[0]),             //reset.reset_n
 		.altpll_0_locked_conduit_export    (),    			   //altpll_0_locked_conduit.export
@@ -156,11 +156,11 @@ module rhythm (
 		.keycode_export(keycode),
 		
 		//VGA
-		.vga_port_red (VGA_R),
-		.vga_port_green (VGA_G),
-		.vga_port_blue (VGA_B),
-		.vga_port_hs (VGA_HS),
-		.vga_port_vs (VGA_VS)
+//		.vga_port_red (VGA_R),
+//		.vga_port_green (VGA_G),
+//		.vga_port_blue (VGA_B),
+//		.vga_port_hs (VGA_HS),
+//		.vga_port_vs (VGA_VS)
 		
 	 );
 
