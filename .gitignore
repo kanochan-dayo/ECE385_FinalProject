@@ -1,6 +1,6 @@
 *.bak
 *~
-*/output_files/*
+**/output_files/*
 **db*/*
 **tmp*/*
 simulation/*
