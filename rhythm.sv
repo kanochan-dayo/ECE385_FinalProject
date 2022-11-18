@@ -173,7 +173,7 @@ vga_controller vga_ctr(     .Clk(MAX10_CLK1_50),       // 50 MHz clock
 .hs(VGA_HS),       
 .vs(VGA_VS),      										 
 .* );   
-
+background_mapper bk(.*,.clock(MAX10_CLK1_50));
 
 logic [9:0] DrawX, DrawY;
 logic pixel_clk,blank,sync;
