@@ -6,3 +6,6 @@
 simulation/*
 .qsys_*/*
 *soc/
+**/.metadata/*
+*.o
+**/obj/**
