@@ -1,6 +1,8 @@
 *.bak
 *~
 */output_files/*
-*/*db/*
-*/*tmp*/*
-*/simulation/*
+**db*/*
+**tmp*/*
+simulation/*
+.qsys_*/*
+*soc/
