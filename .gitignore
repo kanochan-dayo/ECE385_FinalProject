@@ -9,3 +9,4 @@ simulation/*
 **/.metadata/*
 *.o
 **/obj/**
+!eclipse/*
