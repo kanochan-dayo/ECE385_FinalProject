@@ -14,7 +14,7 @@
 input_file = "background.txt"
 output_file = "background.mif"
 out=open(output_file, "w")
-out.write("DEPTH = 38400;\nWIDTH = 64;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n")
+out.write("DEPTH = 9600;\nWIDTH = 64;\nADDRESS_RADIX = HEX;\nDATA_RADIX = HEX;\nCONTENT\nBEGIN\n")
 count=0;
 temp="";
 with open(input_file) as f:
@@ -28,4 +28,5 @@ with open(input_file) as f:
             out.write(hex(count//8)[2:].zfill(4)+" : "+temp+";\n")
             temp=""
         count+=1
+out.write("END;\n")
 

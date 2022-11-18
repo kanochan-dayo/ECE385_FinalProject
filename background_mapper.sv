@@ -19,7 +19,7 @@ module background_mapper (
 always_comb
 begin
 
-	place = (DrawX + DrawY * 640)>>3;
+	place = (DrawX>>1 + (DrawY>>1) * 640)>>3;
 	number=DrawX[2:0];
 	case (number)
 	3'b0:
