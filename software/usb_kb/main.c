@@ -129,6 +129,10 @@ void setKeycode(WORD keycode)
 {
 	IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_BASE, keycode);
 }
+void setdfjk(WORD keycode)
+{
+	IOWR_ALTERA_AVALON_PIO_DATA(DFJK_BASE, keycode);
+}
 int main() {
 	BYTE rcode;
 	BOOT_MOUSE_REPORT buf;		//USB mouse report
@@ -164,9 +168,15 @@ int main() {
 					continue;
 				}
 				printf("keycodes: ");
+				BYTE dfjk = 0;
 				for (int i = 0; i < 6; i++) {
 					printf("%x ", kbdbuf.keycode[i]);
+					if(kbdbuf.keycode[i] != 0x7 && kbdbuf.keycode[i] != 0x9 && kbdbuf.keycode[i] != 0x19 && kbdbuf.keycode[i] != 0x1A)
+						setKeycode(kbdbuf.keycode[i]);
+						;
+					=kbdbuf.keycode[i];
 				}
+				setdfjk(dfjk[0])
 				setKeycode(kbdbuf.keycode[0]);
 				if(kbdbuf.keycode[0])
 				printSignedHex0(kbdbuf.keycode[0]);
