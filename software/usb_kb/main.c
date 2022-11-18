@@ -129,7 +129,7 @@ void setKeycode(WORD keycode)
 {
 	IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_BASE, keycode);
 }
-void setdfjk(WORD keycode)
+void setdfjk(BYTE keycode)
 {
 	IOWR_ALTERA_AVALON_PIO_DATA(DFJK_BASE, keycode);
 }
@@ -141,8 +141,8 @@ int main() {
 	BYTE runningdebugflag = 0;//flag to dump out a bunch of information when we first get to USB_STATE_RUNNING
 	BYTE errorflag = 0; //flag once we get an error device so we don't keep dumping out state info
 	BYTE device;
-	WORD keycode;
-
+	BYTE dfjk = 0;
+	WORD temp_keycode=0;
 	printf("initializing MAX3421E...\n");
 	MAX3421E_init();
 	printf("initializing USB...\n");
@@ -167,17 +167,34 @@ int main() {
 					printf("%x \n", rcode);
 					continue;
 				}
-				printf("keycodes: ");
-				BYTE dfjk = 0;
+				printf("dfjk: ");
 				for (int i = 0; i < 6; i++) {
-					printf("%x ", kbdbuf.keycode[i]);
-					if(kbdbuf.keycode[i] != 0x7 && kbdbuf.keycode[i] != 0x9 && kbdbuf.keycode[i] != 0x19 && kbdbuf.keycode[i] != 0x1A)
-						setKeycode(kbdbuf.keycode[i]);
-						;
-					=kbdbuf.keycode[i];
+					if (kbdbuf.keycode[i] == 0x7 )
+					{
+						dfjk |= 1<<7;
+					}
+					else if (kbdbuf.keycode[i] == 0x9)
+					{
+						dfjk |= 1<<6;
+
+					}
+					else if(kbdbuf.keycode[i] == 0x19)
+					{
+						dfjk |= 1<<5;
+						
+					}
+					else if(kbdbuf.keycode[i] == 0x1A)
+					{
+						dfjk |= 1<<4;
+					}
+					else if(kbdbuf.keycode[i]!=0)
+					{
+						temp_keycode = kbdbuf.keycode[i];
+					}
 				}
-				setdfjk(dfjk[0])
-				setKeycode(kbdbuf.keycode[0]);
+				setdfjk(dfjk);
+				printf("%x \n", dfjk);
+				setKeycode(temp_keycode);
 				if(kbdbuf.keycode[0])
 				printSignedHex0(kbdbuf.keycode[0]);
 				printSignedHex1(kbdbuf.keycode[1]);
