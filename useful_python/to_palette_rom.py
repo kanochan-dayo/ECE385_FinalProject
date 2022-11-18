@@ -22,7 +22,7 @@ with open(input_file) as f:
         try:
             line = line[line.index('#')+1:line.index('#')+7]
             line = line.upper()
-            out.writelines(line+'\n')
+            out.writelines("24'h"+line+',\n')
             continue
         except ValueError:
             pass
