@@ -67,6 +67,7 @@ module rhythm (
 	logic [1:0] signs;
 	logic [1:0] hundreds;
 	logic [7:0] keycode;
+	logic [3:0] DFJK;
 
 //=======================================================
 //  Structural coding
@@ -161,7 +162,20 @@ module rhythm (
 //		.vga_port_blue (VGA_B),
 //		.vga_port_hs (VGA_HS),
 //		.vga_port_vs (VGA_VS)
+
+		// DFJK
+		.key_dfjk_export(DFJK)
 		
 	 );
+
+vga_controller vga_ctr(     .Clk(MAX10_CLK1_50),       // 50 MHz clock
+.Reset(~KEY[0]),     // reset signal
+.hs(VGA_HS),       
+.vs(VGA_VS),      										 
+.* );   
+
+
+logic [9:0] DrawX, DrawY;
+logic pixel_clk,blank,sync;
 
 endmodule
