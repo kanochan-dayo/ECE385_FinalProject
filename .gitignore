@@ -10,3 +10,4 @@ simulation/*
 *.o
 **/obj/**
 !eclipse/*
+sdram_contorller/**
