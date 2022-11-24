@@ -129,16 +129,7 @@ module rhythm (
 		.key_external_connection_export    (KEY),    		   //key_external_connection.export
 
 		//SDRAM
-		.sdram_clk_clk(DRAM_CLK),            				   //clk_sdram.clk
-	   .sdram_wire_addr(DRAM_ADDR),               			   //sdram_wire.addr
-		.sdram_wire_ba(DRAM_BA),                			   //.ba
-		.sdram_wire_cas_n(DRAM_CAS_N),              		   //.cas_n
-		.sdram_wire_cke(DRAM_CKE),                 			   //.cke
-		.sdram_wire_cs_n(DRAM_CS_N),                		   //.cs_n
-		.sdram_wire_dq(DRAM_DQ),                  			   //.dq
-		.sdram_wire_dqm({DRAM_UDQM,DRAM_LDQM}),                //.dqm
-		.sdram_wire_ras_n(DRAM_RAS_N),              		   //.ras_n
-		.sdram_wire_we_n(DRAM_WE_N),                		   //.we_n
+
 
 		//USB SPI	
 		.spi0_SS_n(SPI0_CS_N),
@@ -164,18 +155,57 @@ module rhythm (
 //		.vga_port_vs (VGA_VS)
 
 		// DFJK
-		.key_dfjk_export(DFJK)
+		.key_dfjk_export(DFJK),
+		
+		//init bridge
+		.init_out_acknowledge(init_ac),           //                init_out.acknowledge
+		.init_out_irq(0),                   //                        .irq
+		.init_out_address(init_addr),               //                        .address
+		.init_out_bus_enable(init_bus),            //                        .bus_enable
+		.init_out_byte_enable(init_be),           //                        .byte_enable
+		.init_out_rw(init_rw),                    //                        .rw
+		.init_out_write_data(init_data),            //                        .write_data
+		.init_out_read_data(0)             //                        .read_data
 		
 	 );
 
-vga_controller vga_ctr(     .Clk(MAX10_CLK1_50),       // 50 MHz clock
-.Reset(~KEY[0]),     // reset signal
-.hs(VGA_HS),       
-.vs(VGA_VS),      										 
-.* );   
-background_mapper bk(.*,.clock(MAX10_CLK1_50));
+//vga_controller vga_ctr(     .Clk(MAX10_CLK1_50),       // 50 MHz clock
+//.Reset(~KEY[0]),     // reset signal
+//.hs(VGA_HS),       
+//.vs(VGA_VS),      										 
+//.* );   
+//background_mapper bk(.*,.clock(MAX10_CLK1_50));
+//
+//logic [9:0] DrawX, DrawY;
+//logic pixel_clk,blank,sync;
 
-logic [9:0] DrawX, DrawY;
-logic pixel_clk,blank,sync;
+sdram_contorller sdram1(
+		.sdram_clk_clk(DRAM_CLK),            				   //clk_sdram.clk
+	   .sdram_wire_addr(DRAM_ADDR),               			   //sdram_wire.addr
+		.sdram_wire_ba(DRAM_BA),                			   //.ba
+		.sdram_wire_cas_n(DRAM_CAS_N),              		   //.cas_n
+		.sdram_wire_cke(DRAM_CKE),                 			   //.cke
+		.sdram_wire_cs_n(DRAM_CS_N),                		   //.cs_n
+		.sdram_wire_dq(DRAM_DQ),                  			   //.dq
+		.sdram_wire_dqm({DRAM_UDQM,DRAM_LDQM}),                //.dqm
+		.sdram_wire_ras_n(DRAM_RAS_N),              		   //.ras_n
+		.sdram_wire_we_n(DRAM_WE_N),                		   //.we_n
+		.bridge_address(ar_addr),     //     bridge.address
+		.bridge_byte_enable(ar_be), //           .byte_enable
+		.bridge_read(ar_read),        //           .read
+		.bridge_write(ar_write),       //           .write
+		.bridge_write_data(ar_wrdata),  //           .write_data
+		.bridge_acknowledge(ar_ac), //           .acknowledge
+		.bridge_read_data(ar_rddata),   //           .read_data
+		.clk_clk(MAX10_CLK1_50),            //        clk.clk
+		.reset_reset_n(KEY[0])
+		);
+
+logic [25:0] ar_addr,init_addr;
+logic [1:0] ar_be,init_be;
+logic ar_read,ar_write,ar_ac;
+logic [15:0] ar_wrdata,ar_rddata,init_data;
+logic init_rw,init_ac,init_bus;
+logic [15:0] init_wrdata;
 
 endmodule
