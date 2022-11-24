@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'rhythm_soc'
  * SOPC Builder design path: ../../rhythm_soc.sopcinfo
  *
- * Generated: Wed Nov 23 19:37:05 CST 2022
+ * Generated: Wed Nov 23 20:30:56 CST 2022
  */
 
 /*
@@ -395,8 +395,8 @@
 #define ONCHIP_MEMORY2_1_READ_DURING_WRITE_MODE "DONT_CARE"
 #define ONCHIP_MEMORY2_1_SINGLE_CLOCK_OP 0
 #define ONCHIP_MEMORY2_1_SIZE_MULTIPLE 1
-#define ONCHIP_MEMORY2_1_SIZE_VALUE 32768
-#define ONCHIP_MEMORY2_1_SPAN 32768
+#define ONCHIP_MEMORY2_1_SIZE_VALUE 131072
+#define ONCHIP_MEMORY2_1_SPAN 131072
 #define ONCHIP_MEMORY2_1_TYPE "altera_avalon_onchip_memory2"
 #define ONCHIP_MEMORY2_1_WRITABLE 1
 
@@ -444,7 +444,7 @@
 #define SYSID_QSYS_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_0_NAME "/dev/sysid_qsys_0"
 #define SYSID_QSYS_0_SPAN 8
-#define SYSID_QSYS_0_TIMESTAMP 1669253761
+#define SYSID_QSYS_0_TIMESTAMP 1669256793
 #define SYSID_QSYS_0_TYPE "altera_avalon_sysid_qsys"
 
 

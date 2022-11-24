@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>2022-11-23 19:38:35</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1669253915246</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>2022-11-23 20:30:56</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1669257056108</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>G:\ECE385\ECE385_FinalProject\music_demo\software\initializer_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\rhythm_soc.sopcinfo</SopcDesignFile>
@@ -984,8 +984,8 @@
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>onchip_memory2_1</slaveDescriptor>
-                <addressRange>0x20000000 - 0x20007FFF</addressRange>
-                <addressSpan>32768</addressSpan>
+                <addressRange>0x20000000 - 0x2001FFFF</addressRange>
+                <addressSpan>131072</addressSpan>
                 <attributes>memory</attributes>
         </MemoryMap>
         <LinkerSection>
