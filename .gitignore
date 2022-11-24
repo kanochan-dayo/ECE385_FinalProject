@@ -1,9 +1,9 @@
 *.bak
 *~
-**/output_files/*
-**db*/*
-**tmp*/*
-simulation/*
+**/*output_files/*
+**/*db*/*
+**/*tmp*/*
+**/*simulation*/*
 .qsys_*/*
 *soc/
 **/.metadata/*
