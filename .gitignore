@@ -4,10 +4,10 @@
 **/*db*/*
 **/*tmp*/*
 **/*simulation*/*
-.qsys_*/*
+**/.qsys_*/*
 *soc/
 **/.metadata/*
 *.o
 **/obj/**
 !eclipse/*
-sdram_contorller/**
+**/sdram_contorller/**
