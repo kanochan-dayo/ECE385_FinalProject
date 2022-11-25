@@ -175,15 +175,15 @@ module rhythm (
 		
 	 );
 
-//vga_controller vga_ctr(     .Clk(MAX10_CLK1_50),       // 50 MHz clock
-//.Reset(~KEY[0]),     // reset signal
-//.hs(VGA_HS),       
-//.vs(VGA_VS),      										 
-//.* );   
+vga_controller vga_ctr(     .Clk(MAX10_CLK1_50),       // 50 MHz clock
+.Reset(Reset_h),     // reset signal
+.hs(VGA_HS),       
+.vs(VGA_VS),      										 
+.* );   
 //background_mapper bk(.*,.clock(MAX10_CLK1_50));
 //
-//logic [9:0] DrawX, DrawY;
-//logic pixel_clk,blank,sync;
+logic [9:0] DrawX, DrawY;
+logic pixel_clk,blank,sync;
 
 sdram_contorller sdram1(
 		.sdram_clk_clk(DRAM_CLK),            				   //clk_sdram.clk
@@ -211,24 +211,36 @@ logic [24:0] ar_addr,init_addr;
 logic [1:0] ar_be,init_be;
 logic ar_read,ar_write,ar_ac;
 logic [15:0] ar_wrdata,ar_rddata,init_data;
-logic init_rw,init_ac,init_done,init_cs_bo,init_sclk_o,init_mosi_o,init_miso_i,init_error;
+logic init_we,init_ac,init_done,init_cs_bo,init_sclk_o,init_mosi_o,init_miso_i,init_error;
 logic [15:0] init_wrdata;
 logic SPI0_CS_N_usb, SPI0_SCLK_usb, SPI0_MISO_usb, SPI0_MOSI_usb;
 
 sdcard_init sd_init(.clk50(MAX10_CLK1_50),
 	.reset(Reset_h),          //starts as soon reset is deasserted
-	.ram_we(init_rw),         //RAM interface pins
+	.ram_we(init_we),         //RAM interface pins
 	.ram_address(init_addr),
 	.ram_data(init_wrdata),
-	.ram_op_begun(init_ac),   //acknowledge from RAM to move to next word
-	.ram_init_error(init_error), //error initializing
-	.ram_init_done(init_done),  //done with reading all MAX_RAM_ADDRESS words
-	.cs_bo(init_cs_bo), //SD card pins (also make sure to disable USB CS if using DE10-Lite)
+	.ram_op_begun(init_ac),   			//acknowledge from RAM to move to next word
+	.ram_init_error(init_error), 		//error initializing
+	.ram_init_done(init_done),  		//done with reading all MAX_RAM_ADDRESS words
+	.cs_bo(init_cs_bo), 					//SD card pins (also make sure to disable USB CS if using DE10-Lite)
 	.sclk_o(init_sclk_o),
 	.mosi_o(init_mosi_o),
 	.miso_i(init_miso_i)  );
 	
 	
 arbiter_sdram arbiter(.*,.clk(MAX10_CLK1_50),.reset(Reset_h));
+
+logic new_frame;
+
+always_ff @(posedge pixel_clk)
+begin
+new_frame<=new_frame;
+
+if (DrawY==524)
+new_frame<=1;
+else if(DrawY==0)
+new_frame<=0;
+end
 
 endmodule

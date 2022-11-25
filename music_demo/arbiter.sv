@@ -1,10 +1,10 @@
 module arbiter_sdram (
 //general input
-input clk,reset,
+input clk,reset,new_frame,
 
 //sdram_init_input
 output [24:0]init_addr,
-input init_rw,
+input init_we,
 
 input [15:0] init_wrdata,
 input init_ac,   //acknowledge from RAM to move to next word
@@ -31,12 +31,42 @@ input SPI0_MISO,
 output SPI0_CS_N, SPI0_SCLK, SPI0_MOSI
 );
 
-enum logic[7:0] {Halted,Init_sdram,Init_sdram_done,
-line_buffer,line_buffer_done,
-background,score,key_track,note,
-pcm} state,next_state;
+enum logic[7:0] {Init_sdram,Init_sdram_done,
+Line_buffer,Line_buffer_done,
+Background,Score,Key_track,Note,
+PCM,Halted} State,Next_state;
 
+always_ff @ (posedge clk)
+begin
+State<=Next_state;
+end
 
+always_comb
+begin:State_transfer
+
+Next_state=State;
+if(reset)
+Next_state=Init_sdram;
+else
+case(State)
+
+Init_sdram:
+	if(init_done)
+		Next_state=Init_sdram_done;
+
+Init_sdram_done:
+	if (new_frame)
+		Next_state=PCM;
+PCM:
+	Next_state=Halted;
+
+Halted:
+	if (new_frame)
+		Next_state=PCM;
+
+endcase
+
+end
 
 
 
