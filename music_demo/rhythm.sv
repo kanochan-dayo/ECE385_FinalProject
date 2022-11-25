@@ -132,10 +132,16 @@ module rhythm (
 
 
 		//USB SPI	
-		.spi0_SS_n(SPI0_CS_N),
-		.spi0_MOSI(SPI0_MOSI),
-		.spi0_MISO(SPI0_MISO),
-		.spi0_SCLK(SPI0_SCLK),
+		
+//		.spi0_SS_n(SPI0_CS_N),
+//		.spi0_MOSI(SPI0_MOSI),
+//		.spi0_MISO(SPI0_MISO),
+//		.spi0_SCLK(SPI0_SCLK),
+		
+		.spi0_SS_n(SPI0_CS_N_usb),
+		.spi0_MOSI(SPI0_MOSI_usb),
+		.spi0_MISO(SPI0_MISO_usb),
+		.spi0_SCLK(SPI0_SCLK_usb),
 		
 		//USB GPIO
 		.usb_rst_export(USB_RST),
@@ -158,14 +164,14 @@ module rhythm (
 		.key_dfjk_export(DFJK),
 		
 		//init bridge
-		.init_out_acknowledge(init_ac),           //                init_out.acknowledge
-		.init_out_irq(0),                   //                        .irq
-		.init_out_address(init_addr),               //                        .address
-		.init_out_bus_enable(init_bus),            //                        .bus_enable
-		.init_out_byte_enable(init_be),           //                        .byte_enable
-		.init_out_rw(init_rw),                    //                        .rw
-		.init_out_write_data(init_data),            //                        .write_data
-		.init_out_read_data(0)             //                        .read_data
+//		.init_out_acknowledge(init_ac),           //                init_out.acknowledge
+//		.init_out_irq(0),                   //                        .irq
+//		.init_out_address(init_addr),               //                        .address
+//		.init_out_bus_enable(init_bus),            //                        .bus_enable
+//		.init_out_byte_enable(init_be),           //                        .byte_enable
+//		.init_out_rw(init_rw),                    //                        .rw
+//		.init_out_write_data(init_data),            //                        .write_data
+//		.init_out_read_data(0)             //                        .read_data
 		
 	 );
 
@@ -190,7 +196,7 @@ sdram_contorller sdram1(
 		.sdram_wire_dqm({DRAM_UDQM,DRAM_LDQM}),                //.dqm
 		.sdram_wire_ras_n(DRAM_RAS_N),              		   //.ras_n
 		.sdram_wire_we_n(DRAM_WE_N),                		   //.we_n
-		.bridge_address(ar_addr),     //     bridge.address
+		.bridge_address({ar_addr,1'b0}),     //     bridge.address
 		.bridge_byte_enable(ar_be), //           .byte_enable
 		.bridge_read(ar_read),        //           .read
 		.bridge_write(ar_write),       //           .write
@@ -201,11 +207,28 @@ sdram_contorller sdram1(
 		.reset_reset_n(KEY[0])
 		);
 
-logic [25:0] ar_addr,init_addr;
+logic [24:0] ar_addr,init_addr;
 logic [1:0] ar_be,init_be;
 logic ar_read,ar_write,ar_ac;
 logic [15:0] ar_wrdata,ar_rddata,init_data;
-logic init_rw,init_ac,init_bus;
+logic init_rw,init_ac,init_done,init_cs_bo,init_sclk_o,init_mosi_o,init_miso_i,init_error;
 logic [15:0] init_wrdata;
+logic SPI0_CS_N_usb, SPI0_SCLK_usb, SPI0_MISO_usb, SPI0_MOSI_usb;
+
+sdcard_init sd_init(.clk50(MAX10_CLK1_50),
+	.reset(Reset_h),          //starts as soon reset is deasserted
+	.ram_we(init_rw),         //RAM interface pins
+	.ram_address(init_addr),
+	.ram_data(init_wrdata),
+	.ram_op_begun(init_ac),   //acknowledge from RAM to move to next word
+	.ram_init_error(init_error), //error initializing
+	.ram_init_done(init_done),  //done with reading all MAX_RAM_ADDRESS words
+	.cs_bo(init_cs_bo), //SD card pins (also make sure to disable USB CS if using DE10-Lite)
+	.sclk_o(init_sclk_o),
+	.mosi_o(init_mosi_o),
+	.miso_i(init_miso_i)  );
+	
+	
+arbiter_sdram arbiter(.*,.clk(MAX10_CLK1_50),.reset(Reset_h));
 
 endmodule
