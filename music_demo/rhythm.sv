@@ -80,9 +80,9 @@ module rhythm (
 	assign ARDUINO_IO[12] = 1'bZ;
 	assign SPI0_MISO = ARDUINO_IO[12];
 	
-	assign ARDUINO_IO[9] = 1'bZ;
+//	assign ARDUINO_IO[9] = 1'bZ;
 	assign USB_IRQ = ARDUINO_IO[9];
-	assign ARDUINO_IO[5]=SD_CS;
+	assign ARDUINO_IO[9]=SD_CS;
 	
 	//Assignments specific to Sparkfun USBHostShield-v13
 	//assign ARDUINO_IO[7] = USB_RST;
