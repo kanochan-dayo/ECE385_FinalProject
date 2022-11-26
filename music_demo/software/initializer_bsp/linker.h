@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'rhythm_soc'
  * SOPC Builder design path: ../../rhythm_soc.sopcinfo
  *
- * Generated: Fri Nov 25 23:02:01 CST 2022
+ * Generated: Sat Nov 26 00:33:29 CST 2022
  */
 
 /*
@@ -65,11 +65,11 @@
  *
  */
 
-#define ONCHIP_FLASH_0_DATA_REGION_BASE 0x80020
-#define ONCHIP_FLASH_0_DATA_REGION_SPAN 458720
-#define ONCHIP_MEMORY2_0_REGION_BASE 0x108000
+#define ONCHIP_FLASH_0_DATA_REGION_BASE 0x200020
+#define ONCHIP_FLASH_0_DATA_REGION_SPAN 1441760
+#define ONCHIP_MEMORY2_0_REGION_BASE 0x408000
 #define ONCHIP_MEMORY2_0_REGION_SPAN 32768
-#define RESET_REGION_BASE 0x80000
+#define RESET_REGION_BASE 0x200000
 #define RESET_REGION_SPAN 32
 
 

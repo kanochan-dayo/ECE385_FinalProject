@@ -3,7 +3,7 @@
 # Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'rhythm_soc'
 # SOPC Builder design path: ../../rhythm_soc.sopcinfo
 #
-# Generated: Fri Nov 25 23:02:01 CST 2022
+# Generated: Sat Nov 26 00:33:29 CST 2022
 
 # DO NOT MODIFY THIS FILE
 #
@@ -47,7 +47,7 @@
 # by allowing GDB to cache memory contents on the host.
 
 # onchip_flash_0_data
-memory 0x80000 0xf0000 cache
+memory 0x200000 0x360000 cache
 
 # onchip_memory2_0
-memory 0x108000 0x110000 cache
+memory 0x408000 0x410000 cache

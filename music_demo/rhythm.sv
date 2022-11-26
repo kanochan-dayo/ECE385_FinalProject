@@ -11,6 +11,7 @@ module rhythm (
 
       ///////// Clocks /////////
       input    MAX10_CLK1_50,
+		input    MAX10_CLK2_50,
 
       ///////// KEY /////////
       input    [ 1: 0]   KEY,
@@ -120,7 +121,11 @@ module rhythm (
 //	assign HEX5 = {1'b1, ~signs[1], 3'b111, ~hundreds[1], ~hundreds[1], 1'b1};
 //	assign HEX2 = {1'b1, ~signs[0], 3'b111, ~hundreds[0], ~hundreds[0], 1'b1};
 	
-	
+assign i2c_serial_scl_in = ARDUINO_IO[15];
+assign ARDUINO_IO[15] = i2c_serial_scl_oe ? 1'b0 : 1'bz;
+assign i2c_serial_sda_in = ARDUINO_IO[14];
+assign ARDUINO_IO[14] = i2c_serial_sda_oe ? 1'b0 : 1'bz;
+
 	assign {Reset_h}=~ (KEY[0]); 
 
 	//assign signs = 2'b00;
@@ -163,6 +168,12 @@ module rhythm (
 		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0}),
 		.leds_export({hundreds, signs, LEDR_NIOS}),
 		.keycode_export(keycode),
+		
+		//I2C
+		.i2c_sda_in(i2c_serial_sda_in),                     //                     i2c.sda_in
+		.i2c_scl_in(i2c_serial_scl_in),                     //                        .scl_in
+		.i2c_sda_oe(i2c_serial_sda_oe),                     //                        .sda_oe
+		.i2c_scl_oe(i2c_serial_scl_oe), 
 		
 		//VGA
 //		.vga_port_red (VGA_R),
@@ -257,4 +268,13 @@ end
 
 assign LEDR[0]=init_done;
 assign LEDR[5]=init_error;
+
+assign ARDUINO_IO[3] = aud_mclk_ctr[1];	 //generate 12.5MHz CODEC mclk
+always_ff @(posedge MAX10_CLK2_50) begin
+	aud_mclk_ctr <= aud_mclk_ctr + 1;
+end
+
+logic [1:0] aud_mclk_ctr;
+
+
 endmodule

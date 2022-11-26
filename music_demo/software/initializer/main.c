@@ -1,6 +1,7 @@
+#include "main.h"
 
 int main(){
-	sleep(5);
+	usleep(5000000);
 	setup_i2c();
 return 0;
 }

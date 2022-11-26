@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'rhythm_soc'
  * SOPC Builder design path: ../../rhythm_soc.sopcinfo
  *
- * Generated: Fri Nov 25 23:02:01 CST 2022
+ * Generated: Sat Nov 26 00:33:29 CST 2022
  */
 
 /*
@@ -50,14 +50,14 @@
 
 MEMORY
 {
-    reset : ORIGIN = 0x80000, LENGTH = 32
-    onchip_flash_0_data : ORIGIN = 0x80020, LENGTH = 458720
-    onchip_memory2_0 : ORIGIN = 0x108000, LENGTH = 32768
+    reset : ORIGIN = 0x200000, LENGTH = 32
+    onchip_flash_0_data : ORIGIN = 0x200020, LENGTH = 1441760
+    onchip_memory2_0 : ORIGIN = 0x408000, LENGTH = 32768
 }
 
 /* Define symbols for each memory base-address */
-__alt_mem_onchip_flash_0_data = 0x80000;
-__alt_mem_onchip_memory2_0 = 0x108000;
+__alt_mem_onchip_flash_0_data = 0x200000;
+__alt_mem_onchip_memory2_0 = 0x408000;
 
 OUTPUT_FORMAT( "elf32-littlenios2",
                "elf32-littlenios2",
@@ -375,7 +375,7 @@ SECTIONS
 /*
  * Don't override this, override the __alt_stack_* symbols instead.
  */
-__alt_data_end = 0x110000;
+__alt_data_end = 0x410000;
 
 /*
  * The next two symbols define the location of the default stack.  You can
@@ -391,4 +391,4 @@ PROVIDE( __alt_stack_limit   = __alt_stack_base );
  * Override this symbol to put the heap in a different memory.
  */
 PROVIDE( __alt_heap_start    = end );
-PROVIDE( __alt_heap_limit    = 0x110000 );
+PROVIDE( __alt_heap_limit    = 0x410000 );
