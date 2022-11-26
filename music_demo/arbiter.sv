@@ -82,7 +82,7 @@ SPI0_CS_N=SPI0_CS_N_usb;
 SPI0_SCLK=SPI0_SCLK_usb;
 SPI0_MOSI=SPI0_MOSI_usb;
 init_miso_i=0;
-SD_CS=1'b0;
+SD_CS=init_cs_bo;
 
 case(State)
 Init_sdram:
@@ -90,7 +90,7 @@ begin
 init_ac=ar_ac;
 init_miso_i=SPI0_MISO;
 SPI0_MISO_usb=0;
-SPI0_CS_N=init_cs_bo;
+SPI0_CS_N=0;
 SPI0_SCLK=init_sclk_o;
 SPI0_MOSI=init_mosi_o;
 SD_CS=init_cs_bo;

@@ -4,9 +4,7 @@
 #include <io.h>
 
 
-void write_to_external_bus(DWORD address, WORD data){
-	IOWR_16DIRECT(TO_EXTERNAL_BUS_BRIDGE_0_BASE, address, data);
-}
+
 
 int main(){
 FILE *fp=scanf("ug_embedded_ip.bin");
@@ -17,7 +15,6 @@ FILE *fp=scanf("ug_embedded_ip.bin");
 	int i=0;
 	while(!feof(fp)){
 		WORD data=fgetc(fp);
-		write_to_external_bus(i,data);
 		i++;
 	}
 	return 0;

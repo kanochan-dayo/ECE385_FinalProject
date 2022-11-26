@@ -77,12 +77,11 @@ module rhythm (
 	assign ARDUINO_IO[10] = SPI0_CS_N;
 	assign ARDUINO_IO[13] = SPI0_SCLK;
 	assign ARDUINO_IO[11] = SPI0_MOSI;
-	assign ARDUINO_IO[12] = 1'bZ;
+//	assign ARDUINO_IO[12] = 1'bZ;
 	assign SPI0_MISO = ARDUINO_IO[12];
 	
-//	assign ARDUINO_IO[9] = 1'bZ;
+	assign ARDUINO_IO[9] = 1'bZ;
 	assign USB_IRQ = ARDUINO_IO[9];
-	assign ARDUINO_IO[9]=SD_CS;
 	
 	//Assignments specific to Sparkfun USBHostShield-v13
 	//assign ARDUINO_IO[7] = USB_RST;
@@ -92,6 +91,8 @@ module rhythm (
 	//Assignments specific to Circuits At Home UHS_20
 	assign ARDUINO_RESET_N = USB_RST;
 	assign ARDUINO_IO[8] = 1'bZ;
+	
+	assign ARDUINO_IO[6]=SD_CS;
 	//GPX is unconnected to shield, not needed for standard USB host - set to 0 to prevent interrupt
 	assign USB_GPX = 1'b0;
 	
