@@ -68,6 +68,8 @@ module rhythm (
 	logic [1:0] hundreds;
 	logic [7:0] keycode;
 	logic [3:0] DFJK;
+	logic [9:0] LEDRR;
+	logic SD_CS;
 
 //=======================================================
 //  Structural coding
@@ -80,6 +82,7 @@ module rhythm (
 	
 	assign ARDUINO_IO[9] = 1'bZ;
 	assign USB_IRQ = ARDUINO_IO[9];
+	assign ARDUINO_IO[5]=SD_CS;
 	
 	//Assignments specific to Sparkfun USBHostShield-v13
 	//assign ARDUINO_IO[7] = USB_RST;
@@ -93,21 +96,28 @@ module rhythm (
 	assign USB_GPX = 1'b0;
 	
 	//HEX drivers to convert numbers to HEX output
-	HexDriver hex_driver4 (hex_num_4, HEX4[6:0]);
+		
+	HexDriver hex_driver5 (init_addr[23:20], HEX5[6:0]);
+	assign HEX5[7] = 1'b1;
+	
+	HexDriver hex_driver4 (init_addr[19:16], HEX4[6:0]);
 	assign HEX4[7] = 1'b1;
 	
-	HexDriver hex_driver3 (hex_num_3, HEX3[6:0]);
+	HexDriver hex_driver3 (init_addr[15:12], HEX3[6:0]);
 	assign HEX3[7] = 1'b1;
 	
-	HexDriver hex_driver1 (hex_num_1, HEX1[6:0]);
+	HexDriver hex_driver2 (init_addr[11:5], HEX2[6:0]);
+	assign HEX2[7] = 1'b1;
+	
+	HexDriver hex_driver1 (init_addr[7:4], HEX1[6:0]);
 	assign HEX1[7] = 1'b1;
 	
-	HexDriver hex_driver0 (hex_num_0, HEX0[6:0]);
+	HexDriver hex_driver0 (init_addr[3:0], HEX0[6:0]);
 	assign HEX0[7] = 1'b1;
 	
 	//fill in the hundreds digit as well as the negative sign
-	assign HEX5 = {1'b1, ~signs[1], 3'b111, ~hundreds[1], ~hundreds[1], 1'b1};
-	assign HEX2 = {1'b1, ~signs[0], 3'b111, ~hundreds[0], ~hundreds[0], 1'b1};
+//	assign HEX5 = {1'b1, ~signs[1], 3'b111, ~hundreds[1], ~hundreds[1], 1'b1};
+//	assign HEX2 = {1'b1, ~signs[0], 3'b111, ~hundreds[0], ~hundreds[0], 1'b1};
 	
 	
 	assign {Reset_h}=~ (KEY[0]); 
@@ -150,7 +160,7 @@ module rhythm (
 		
 		//LEDs and HEX
 		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0}),
-		.leds_export({hundreds, signs, LEDR}),
+		.leds_export({hundreds, signs, LEDR_NIOS}),
 		.keycode_export(keycode),
 		
 		//VGA
@@ -243,4 +253,7 @@ else if(DrawY==0)
 new_frame<=0;
 end
 
+
+assign LEDR[0]=init_done;
+assign LEDR[5]=init_error;
 endmodule
