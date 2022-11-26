@@ -71,6 +71,7 @@ module rhythm (
 	logic [3:0] DFJK;
 	logic [9:0] LEDRR;
 	logic SD_CS;
+	assign LEDR[9:6]=LEDRR[9:6];
 
 //=======================================================
 //  Structural coding
