@@ -93,7 +93,7 @@ void printSignedHex1(signed char value)
 }
 
 
-int main()
+int setup_i2c()
 {
 	ALT_AVALON_I2C_DEV_t *i2c_dev; //pointer to instance structure
 	//get a pointer to the Avalon i2c instance
@@ -112,7 +112,7 @@ int main()
 	//configure PLL, input frequency is 12.5 MHz, output frequency is 180.6336 MHz if 44.1kHz is desired
 	//or 196.608 MHz else
 	BYTE int_divisor = 180633600/12500000;
-	WORD frac_divisor = (WORD)(((180633600.0f/12500000.0f) - (float)int_divisor) * 2048.0f);
+	WORD frac_divisor = (WORD)(((196608000.0f/12500000.0f) - (float)int_divisor) * 2048.0f);
 	printf( "Programming PLL with integer divisor: %d, fractional divisor %d\n", int_divisor, frac_divisor);
 	SGTL5000_Reg_Wr(i2c_dev, SGTL5000_CHIP_PLL_CTRL, \
 				int_divisor << SGTL5000_PLL_INT_DIV_SHIFT|
