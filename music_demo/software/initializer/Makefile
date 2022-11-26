@@ -142,7 +142,8 @@ ACDS_VERSION := 18.1
 ELF := initializer.elf
 
 # Paths to C, C++, and assembly source files.
-C_SRCS := main.c
+C_SRCS += sgtl5000/sgtl5000.c
+C_SRCS += sgtl5000_test.c
 CXX_SRCS :=
 ASM_SRCS :=
 
