@@ -111,7 +111,7 @@ int setup_i2c()
 
 	//configure PLL, input frequency is 12.5 MHz, output frequency is 180.6336 MHz if 44.1kHz is desired
 	//or 196.608 MHz else
-	BYTE int_divisor = 180633600/12500000;
+	BYTE int_divisor = 196608000/12500000;
 	WORD frac_divisor = (WORD)(((196608000.0f/12500000.0f) - (float)int_divisor) * 2048.0f);
 	printf( "Programming PLL with integer divisor: %d, fractional divisor %d\n", int_divisor, frac_divisor);
 	SGTL5000_Reg_Wr(i2c_dev, SGTL5000_CHIP_PLL_CTRL, \
@@ -149,7 +149,7 @@ int setup_i2c()
 
 	//MCLK is 12.5 MHz, configure clocks to use PLL
 	SGTL5000_Reg_Wr(i2c_dev, SGTL5000_CHIP_CLK_CTRL, \
-			SGTL5000_SYS_FS_44_1k << SGTL5000_SYS_FS_SHIFT |
+			SGTL5000_SYS_FS_48k << SGTL5000_SYS_FS_SHIFT |
 			SGTL5000_MCLK_FREQ_PLL << SGTL5000_MCLK_FREQ_SHIFT);
 	printf( "CHIP_CLK_CTRL register: %x\n", SGTL5000_Reg_Rd (i2c_dev, SGTL5000_CHIP_CLK_CTRL));
 

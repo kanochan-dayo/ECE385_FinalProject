@@ -75,9 +75,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  29 .quartus_project_dir 00000028  00000000  00000000  0007e17e  2**0
                   CONTENTS, READONLY
- 30 .jdi          0000521c  00000000  00000000  0007e1a6  2**0
+ 30 .jdi          00006530  00000000  00000000  0007e1a6  2**0
                   CONTENTS, READONLY
- 31 .sopcinfo     0008206a  00000000  00000000  000833c2  2**0
+ 31 .sopcinfo     0008206a  00000000  00000000  000846d6  2**0
                   CONTENTS, READONLY
 SYMBOL TABLE:
 00200000 l    d  .entry	00000000 .entry
@@ -1503,8 +1503,8 @@ int setup_i2c()
 
 	//configure PLL, input frequency is 12.5 MHz, output frequency is 180.6336 MHz if 44.1kHz is desired
 	//or 196.608 MHz else
-	BYTE int_divisor = 180633600/12500000;
-  200770:	00800384 	movi	r2,14
+	BYTE int_divisor = 196608000/12500000;
+  200770:	008003c4 	movi	r2,15
   200774:	e0bfff05 	stb	r2,-4(fp)
 	WORD frac_divisor = (WORD)(((196608000.0f/12500000.0f) - (float)int_divisor) * 2048.0f);
   200778:	e0bfff03 	ldbu	r2,-4(fp)
@@ -1539,7 +1539,7 @@ int setup_i2c()
   2007e0:	100492fa 	slli	r2,r2,11
 	//configure PLL, input frequency is 12.5 MHz, output frequency is 180.6336 MHz if 44.1kHz is desired
 	//or 196.608 MHz else
-	BYTE int_divisor = 180633600/12500000;
+	BYTE int_divisor = 196608000/12500000;
 	WORD frac_divisor = (WORD)(((196608000.0f/12500000.0f) - (float)int_divisor) * 2048.0f);
 	printf( "Programming PLL with integer divisor: %d, fractional divisor %d\n", int_divisor, frac_divisor);
 	SGTL5000_Reg_Wr(i2c_dev, SGTL5000_CHIP_PLL_CTRL, \
@@ -1624,11 +1624,11 @@ int setup_i2c()
 
 	//MCLK is 12.5 MHz, configure clocks to use PLL
 	SGTL5000_Reg_Wr(i2c_dev, SGTL5000_CHIP_CLK_CTRL, \
-  2008b4:	018001c4 	movi	r6,7
+  2008b4:	018002c4 	movi	r6,11
   2008b8:	01400104 	movi	r5,4
   2008bc:	e13ffe17 	ldw	r4,-8(fp)
   2008c0:	02003600 	call	200360 <SGTL5000_Reg_Wr>
-			SGTL5000_SYS_FS_44_1k << SGTL5000_SYS_FS_SHIFT |
+			SGTL5000_SYS_FS_48k << SGTL5000_SYS_FS_SHIFT |
 			SGTL5000_MCLK_FREQ_PLL << SGTL5000_MCLK_FREQ_SHIFT);
 	printf( "CHIP_CLK_CTRL register: %x\n", SGTL5000_Reg_Rd (i2c_dev, SGTL5000_CHIP_CLK_CTRL));
   2008c4:	01400104 	movi	r5,4

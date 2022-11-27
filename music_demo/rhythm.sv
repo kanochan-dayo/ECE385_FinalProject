@@ -72,6 +72,7 @@ module rhythm (
 	logic [9:0] LEDRR;
 	logic SD_CS;
 	assign LEDR[9:6]=LEDRR[9:6];
+	assign LEDR[2:1]={rdempty,wrfull};
 
 //=======================================================
 //  Structural coding
@@ -109,13 +110,13 @@ module rhythm (
 	HexDriver hex_driver3 (ar_wrdata[15:12], HEX3[6:0]);
 	assign HEX3[7] = 1'b1;
 	
-	HexDriver hex_driver2 (ar_wrdata[11:5], HEX2[6:0]);
+	HexDriver hex_driver2 ({1'b0,wrusedw[10:8]}, HEX2[6:0]);
 	assign HEX2[7] = 1'b1;
 	
-	HexDriver hex_driver1 (ar_wrdata[7:4], HEX1[6:0]);
+	HexDriver hex_driver1 (wrusedw[7:4], HEX1[6:0]);
 	assign HEX1[7] = 1'b1;
 	
-	HexDriver hex_driver0 (ar_wrdata[3:0], HEX0[6:0]);
+	HexDriver hex_driver0 (wrusedw[3:0], HEX0[6:0]);
 	assign HEX0[7] = 1'b1;
 	
 	//fill in the hundreds digit as well as the negative sign
@@ -283,12 +284,16 @@ I2S IIS
 .LRClk(ARDUINO_IO[4]),.SClk(ARDUINO_IO[5]),.sdram_Wait(I2S_sdram_Wait), .sdram_ac(I2S_sdram_ac), 
 .reset(Reset_h), .Clk50(MAX10_CLK1_50), .new_frame(new_frame), .sdram_rd(I2S_sdram_rd),
 .sdram_data(I2S_sdram_data),
-.busy(I2S_Busy),.Dout(ARDUINO_IO[2]),.Write_done(I2S_Done),
-.sdram_addr(I2S_sdram_addr)
+.busy(I2S_Busy),.Dout(Dout),.Write_done(I2S_Done),
+.sdram_addr(I2S_sdram_addr),.*
 );
 
-logic I2S_sdram_Wait,I2S_sdram_ac,I2S_sdram_rd,I2S_Busy,I2S_Done;
+logic I2S_sdram_Wait,I2S_sdram_ac,I2S_sdram_rd,I2S_Busy,I2S_Done,rdempty,wrfull;
 logic[15:0] I2S_sdram_data;
 logic[24:0] I2S_sdram_addr;
+logic [10:0] wrusedw;
+logic Dout;
+
+assign ARDUINO_IO[2]=Dout;
 
 endmodule

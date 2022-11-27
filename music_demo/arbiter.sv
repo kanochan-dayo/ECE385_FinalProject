@@ -91,7 +91,7 @@ init_miso_i=0;
 SD_CS=init_cs_bo;
 I2S_sdram_Wait=1;
 I2S_sdram_ac=0;
-I2S_sdram_data=0;
+I2S_sdram_data=ar_rddata;
 
 case(State)
 Init_sdram:
