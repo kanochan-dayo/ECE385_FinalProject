@@ -1,8 +1,12 @@
 #include "main.h"
 
 int main(){
-	usleep(5000000);
-//	setup_i2c();
-	IOWR_16DIRECT(LEDS_PIO_BASE,0,0x130);
+	setup_i2c();
+	*(volatile unsigned int*)LEDS_PIO_BASE=0xFFFF;
+	while(1)
+	{
+		usleep(1000000);
+		printf("hahahaha\n");
+	}
 return 0;
 }

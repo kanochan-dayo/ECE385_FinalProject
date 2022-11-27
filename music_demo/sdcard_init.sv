@@ -27,10 +27,10 @@ module sdcard_init (
 	output logic cs_bo, //SD card pins (also make sure to disable USB CS if using DE10-Lite)
 	output logic sclk_o,
 	output logic mosi_o,
-	input  logic miso_i  
+	input  logic miso_i
 );
 
-parameter 			MAX_RAM_ADDRESS = 25'h2E35FC;
+parameter 			MAX_RAM_ADDRESS = 25'h71AFE0;
 parameter			SDHC 				 = 1'b1;
 
 logic 				sd_read_block;
@@ -43,7 +43,7 @@ logic [7:0] 		sd_output_data;
 logic [31:0] 		sd_block_addr;
 
 //registers written in 2-always method
-enum logic [8:0]	{RESET, READBLOCK, READL_0, READL_1, READH_0, READH_1, WRITE, ERROR, DONE} state_r, state_x;
+enum logic [8:0]	{RESET, READBLOCK, READL_0, READL_1, READH_0, READH_1, WRITE,WRITE1, ERROR, DONE} state_r, state_x;
 logic [24:0]		ram_addr_r, ram_addr_x;  //word address for memory initialization
 logic [15:0]		data_r, data_x;
 
@@ -67,7 +67,7 @@ SdCardCtrl m_sdcard ( .clk_i(clk50),
 							 .sclk_o(sclk_o),
 							 .mosi_o(mosi_o),
 							 .miso_i(miso_i));
-							 
+logic[3:0] flag;						 
 
 always_ff @ (posedge clk50) 
 begin
@@ -80,7 +80,7 @@ begin
 		state_r <= state_x;
 		data_r <= data_x;
 		ram_addr_r <= ram_addr_x;
-	end
+		end
 end
 
 
@@ -92,7 +92,7 @@ begin
 	sd_data_next = 1'b0;
 	ram_we = 1'b0;
 	if (SDHC)//if SDHC mode, then this is block address (note that you need to change VHDL generic)
-		sd_block_addr = ram_addr_r >> 8;
+		sd_block_addr = (ram_addr_r >> 8) ;
 	else
 		sd_block_addr = ram_addr_r << 1; //in SD mode, this is the *byte* address, change for SDHC 
 	state_x = state_r;
@@ -143,7 +143,8 @@ begin
 			if (sd_data_rdy == 1'b0)//move on to next byte/write word
 				state_x = WRITE;
 		end
-		WRITE: begin //write 16-bit word, WE=1 and increment ram address for next word
+		WRITE:
+		begin
 			ram_we = 1'b1;
 			if (ram_op_begun == 1'b1) begin//RAM as responded
 				ram_addr_x = ram_addr_r + 1;

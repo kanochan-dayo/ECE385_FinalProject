@@ -100,22 +100,22 @@ module rhythm (
 	
 	//HEX drivers to convert numbers to HEX output
 		
-	HexDriver hex_driver5 (init_addr[23:20], HEX5[6:0]);
+	HexDriver hex_driver5 (ar_addr[23:20], HEX5[6:0]);
 	assign HEX5[7] = 1'b1;
 	
-	HexDriver hex_driver4 (init_addr[19:16], HEX4[6:0]);
+	HexDriver hex_driver4 (ar_addr[19:16], HEX4[6:0]);
 	assign HEX4[7] = 1'b1;
 	
-	HexDriver hex_driver3 (init_addr[15:12], HEX3[6:0]);
+	HexDriver hex_driver3 (ar_wrdata[15:12], HEX3[6:0]);
 	assign HEX3[7] = 1'b1;
 	
-	HexDriver hex_driver2 (init_addr[11:5], HEX2[6:0]);
+	HexDriver hex_driver2 (ar_wrdata[11:5], HEX2[6:0]);
 	assign HEX2[7] = 1'b1;
 	
-	HexDriver hex_driver1 (init_addr[7:4], HEX1[6:0]);
+	HexDriver hex_driver1 (ar_wrdata[7:4], HEX1[6:0]);
 	assign HEX1[7] = 1'b1;
 	
-	HexDriver hex_driver0 (init_addr[3:0], HEX0[6:0]);
+	HexDriver hex_driver0 (ar_wrdata[3:0], HEX0[6:0]);
 	assign HEX0[7] = 1'b1;
 	
 	//fill in the hundreds digit as well as the negative sign
@@ -167,7 +167,7 @@ assign ARDUINO_IO[14] = i2c_serial_sda_oe ? 1'b0 : 1'bz;
 		
 		//LEDs and HEX
 		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0}),
-		.leds_export({hundreds, signs, LEDR_NIOS}),
+		.leds_export({hundreds, signs, LEDRR}),
 		.keycode_export(keycode),
 		
 		//I2C
@@ -249,7 +249,7 @@ sdcard_init sd_init(.clk50(MAX10_CLK1_50),
 	.cs_bo(init_cs_bo), 					//SD card pins (also make sure to disable USB CS if using DE10-Lite)
 	.sclk_o(init_sclk_o),
 	.mosi_o(init_mosi_o),
-	.miso_i(init_miso_i)  );
+	.miso_i(init_miso_i),.*  );
 	
 	
 arbiter_sdram arbiter(.*,.clk(MAX10_CLK1_50),.reset(Reset_h));
@@ -277,5 +277,18 @@ end
 
 logic [1:0] aud_mclk_ctr;
 
+
+I2S IIS
+(
+.LRClk(ARDUINO_IO[4]),.SClk(ARDUINO_IO[5]),.sdram_Wait(I2S_sdram_Wait), .sdram_ac(I2S_sdram_ac), 
+.reset(Reset_h), .Clk50(MAX10_CLK1_50), .new_frame(new_frame), .sdram_rd(I2S_sdram_rd),
+.sdram_data(I2S_sdram_data),
+.busy(I2S_Busy),.Dout(ARDUINO_IO[2]),.Write_done(I2S_Done),
+.sdram_addr(I2S_sdram_addr)
+);
+
+logic I2S_sdram_Wait,I2S_sdram_ac,I2S_sdram_rd,I2S_Busy,I2S_Done;
+logic[15:0] I2S_sdram_data;
+logic[24:0] I2S_sdram_addr;
 
 endmodule

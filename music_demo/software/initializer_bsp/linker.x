@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'rhythm_soc'
  * SOPC Builder design path: ../../rhythm_soc.sopcinfo
  *
- * Generated: Sat Nov 26 00:33:29 CST 2022
+ * Generated: Sat Nov 26 15:58:17 CST 2022
  */
 
 /*
@@ -51,7 +51,7 @@
 MEMORY
 {
     reset : ORIGIN = 0x200000, LENGTH = 32
-    onchip_flash_0_data : ORIGIN = 0x200020, LENGTH = 1441760
+    onchip_flash_0_data : ORIGIN = 0x200020, LENGTH = 458720
     onchip_memory2_0 : ORIGIN = 0x408000, LENGTH = 32768
 }
 
@@ -86,7 +86,14 @@ SECTIONS
         KEEP (*(.entry))
     } > reset
 
-    .exceptions :
+    /*
+     *
+     * This section's LMA is set to the .text region.
+     * crt0 will copy to this section's specified mapped region virtual memory address (VMA)
+     *
+     */
+
+    .exceptions 0x200020 : AT ( 0x200020 )
     {
         PROVIDE (__ram_exceptions_start = ABSOLUTE(.));
         . = ALIGN(0x20);
@@ -117,7 +124,14 @@ SECTIONS
 
     PROVIDE (__flash_exceptions_start = LOADADDR(.exceptions));
 
-    .text :
+    /*
+     *
+     * This section's LMA is set to the .text region.
+     * crt0 will copy to this section's specified mapped region virtual memory address (VMA)
+     *
+     */
+
+    .text LOADADDR (.exceptions) + SIZEOF (.exceptions) : AT ( LOADADDR (.exceptions) + SIZEOF (.exceptions) )
     {
         /*
          * All code sections are merged into the text output section, along with
@@ -211,7 +225,14 @@ SECTIONS
         . = ALIGN(4);
     } > onchip_flash_0_data = 0x3a880100 /* NOP instruction (always in big-endian byte ordering) */
 
-    .rodata :
+    /*
+     *
+     * This section's LMA is set to the .text region.
+     * crt0 will copy to this section's specified mapped region virtual memory address (VMA)
+     *
+     */
+
+    .rodata LOADADDR (.text) + SIZEOF (.text) : AT ( LOADADDR (.text) + SIZEOF (.text) )
     {
         PROVIDE (__ram_rodata_start = ABSOLUTE(.));
         . = ALIGN(4);

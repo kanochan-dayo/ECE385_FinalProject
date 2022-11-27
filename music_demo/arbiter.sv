@@ -19,6 +19,12 @@ output init_miso_i,
 input SPI0_CS_N_usb, SPI0_SCLK_usb, SPI0_MOSI_usb,
 output SPI0_MISO_usb,
 
+//I2S input
+output I2S_sdram_Wait,I2S_sdram_ac,
+input I2S_sdram_rd,I2S_Busy,I2S_Done,
+output[15:0] I2S_sdram_data,
+input [24:0] I2S_sdram_addr,
+
 //result
 output [24:0] ar_addr,
 output [1:0] ar_be,
@@ -39,15 +45,15 @@ PCM,Halted} State,Next_state;
 always_ff @ (posedge clk)
 begin
 State<=Next_state;
+if(reset)
+State<=Init_sdram;
 end
 
 always_comb
 begin:State_transfer
 
 Next_state=State;
-if(reset)
-Next_state=Init_sdram;
-else
+
 case(State)
 
 Init_sdram:
@@ -58,7 +64,7 @@ Init_sdram_done:
 	if (new_frame)
 		Next_state=PCM;
 PCM:
-//	if (PCM_done)
+	if (I2S_Done)
 	Next_state=Halted;
 
 Halted:
@@ -83,6 +89,9 @@ SPI0_SCLK=SPI0_SCLK_usb;
 SPI0_MOSI=SPI0_MOSI_usb;
 init_miso_i=0;
 SD_CS=init_cs_bo;
+I2S_sdram_Wait=1;
+I2S_sdram_ac=0;
+I2S_sdram_data=0;
 
 case(State)
 Init_sdram:
@@ -95,6 +104,19 @@ SPI0_SCLK=init_sclk_o;
 SPI0_MOSI=init_mosi_o;
 SD_CS=init_cs_bo;
 end
+
+PCM:
+begin
+I2S_sdram_Wait=0;
+ar_addr=I2S_sdram_addr;
+ar_read=I2S_sdram_rd;
+ar_write=0;
+I2S_sdram_data=ar_rddata;
+I2S_sdram_ac=ar_ac;
+
+end
+Halted:
+ar_addr=I2S_sdram_addr;
 endcase
 end
 

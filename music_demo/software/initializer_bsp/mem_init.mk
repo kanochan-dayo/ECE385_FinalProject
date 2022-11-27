@@ -171,7 +171,7 @@ NIOS2_ELF_FORMAT ?= elf32-littlenios2
 #-------------------------------------
 
 # Memory: onchip_flash_0
-MEM_0 := rhythm_soc_onchip_flash_0
+MEM_0 := onchip_flash_0
 $(MEM_0)_NAME := onchip_flash_0
 $(MEM_0)_MEM_INIT_FILE_PARAM_NAME := INIT_FILENAME
 HEX_FILES += $(MEM_INIT_DIR)/$(MEM_0).hex
@@ -182,8 +182,8 @@ SYM_FILES += $(HDL_SIM_DIR)/$(MEM_0).sym
 HDL_SIM_INSTALL_FILES += $(HDL_SIM_INSTALL_DIR)/$(MEM_0).sym
 FLASH_FILES += $(MEM_0).flash
 $(MEM_0)_START := 0x00200000
-$(MEM_0)_END := 0x0035ffff
-$(MEM_0)_SPAN := 0x00160000
+$(MEM_0)_END := 0x0026ffff
+$(MEM_0)_SPAN := 0x00070000
 $(MEM_0)_HIERARCHICAL_PATH := onchip_flash_0
 $(MEM_0)_WIDTH := 32
 $(MEM_0)_HEX_DATA_WIDTH := 8

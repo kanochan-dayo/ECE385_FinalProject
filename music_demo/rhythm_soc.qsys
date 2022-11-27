@@ -253,7 +253,7 @@
    {
       datum baseAddress
       {
-         value = "4264248";
+         value = "4264240";
          type = "String";
       }
    }
@@ -333,7 +333,7 @@
    {
       datum baseAddress
       {
-         value = "4264232";
+         value = "4264224";
          type = "String";
       }
    }
@@ -394,7 +394,7 @@
    {
       datum baseAddress
       {
-         value = "4264240";
+         value = "4264232";
          type = "String";
       }
    }
@@ -655,7 +655,7 @@
   <parameter name="dataAddrWidth" value="23" />
   <parameter name="dataMasterHighPerformanceAddrWidth" value="1" />
   <parameter name="dataMasterHighPerformanceMapParam" value="" />
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='onchip_flash_0.data' start='0x200000' end='0x360000' type='altera_onchip_flash.data' /><slave name='onchip_memory2_0.s1' start='0x408000' end='0x410000' type='altera_avalon_onchip_memory2.s1' /><slave name='nios2_gen2_0.debug_mem_slave' start='0x410800' end='0x411000' type='altera_nios2_gen2.debug_mem_slave' /><slave name='timer_0.s1' start='0x411000' end='0x411040' type='altera_avalon_timer.s1' /><slave name='i2c_0.csr' start='0x411040' end='0x411080' type='altera_avalon_i2c.csr' /><slave name='spi_0.spi_control_port' start='0x411080' end='0x4110A0' type='altera_avalon_spi.spi_control_port' /><slave name='DFJK.s1' start='0x4110A0' end='0x4110B0' type='altera_avalon_pio.s1' /><slave name='key.s1' start='0x4110B0' end='0x4110C0' type='altera_avalon_pio.s1' /><slave name='leds_pio.s1' start='0x4110C0' end='0x4110D0' type='altera_avalon_pio.s1' /><slave name='hex_digits_pio.s1' start='0x4110D0' end='0x4110E0' type='altera_avalon_pio.s1' /><slave name='keycode.s1' start='0x4110E0' end='0x4110F0' type='altera_avalon_pio.s1' /><slave name='usb_rst.s1' start='0x4110F0' end='0x411100' type='altera_avalon_pio.s1' /><slave name='usb_irq.s1' start='0x411100' end='0x411110' type='altera_avalon_pio.s1' /><slave name='usb_gpx.s1' start='0x411110' end='0x411120' type='altera_avalon_pio.s1' /><slave name='onchip_flash_0.csr' start='0x411128' end='0x411130' type='altera_onchip_flash.csr' /><slave name='sysid_qsys_0.control_slave' start='0x411130' end='0x411138' type='altera_avalon_sysid_qsys.control_slave' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x411138' end='0x411140' type='altera_avalon_jtag_uart.avalon_jtag_slave' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='onchip_flash_0.data' start='0x200000' end='0x270000' type='altera_onchip_flash.data' /><slave name='onchip_memory2_0.s1' start='0x408000' end='0x410000' type='altera_avalon_onchip_memory2.s1' /><slave name='nios2_gen2_0.debug_mem_slave' start='0x410800' end='0x411000' type='altera_nios2_gen2.debug_mem_slave' /><slave name='timer_0.s1' start='0x411000' end='0x411040' type='altera_avalon_timer.s1' /><slave name='i2c_0.csr' start='0x411040' end='0x411080' type='altera_avalon_i2c.csr' /><slave name='spi_0.spi_control_port' start='0x411080' end='0x4110A0' type='altera_avalon_spi.spi_control_port' /><slave name='DFJK.s1' start='0x4110A0' end='0x4110B0' type='altera_avalon_pio.s1' /><slave name='key.s1' start='0x4110B0' end='0x4110C0' type='altera_avalon_pio.s1' /><slave name='leds_pio.s1' start='0x4110C0' end='0x4110D0' type='altera_avalon_pio.s1' /><slave name='hex_digits_pio.s1' start='0x4110D0' end='0x4110E0' type='altera_avalon_pio.s1' /><slave name='keycode.s1' start='0x4110E0' end='0x4110F0' type='altera_avalon_pio.s1' /><slave name='usb_rst.s1' start='0x4110F0' end='0x411100' type='altera_avalon_pio.s1' /><slave name='usb_irq.s1' start='0x411100' end='0x411110' type='altera_avalon_pio.s1' /><slave name='usb_gpx.s1' start='0x411110' end='0x411120' type='altera_avalon_pio.s1' /><slave name='onchip_flash_0.csr' start='0x411120' end='0x411128' type='altera_onchip_flash.csr' /><slave name='sysid_qsys_0.control_slave' start='0x411128' end='0x411130' type='altera_avalon_sysid_qsys.control_slave' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x411130' end='0x411138' type='altera_avalon_jtag_uart.avalon_jtag_slave' /></address-map>]]></parameter>
   <parameter name="data_master_high_performance_paddr_base" value="0" />
   <parameter name="data_master_high_performance_paddr_size" value="0" />
   <parameter name="data_master_paddr_base" value="0" />
@@ -694,7 +694,7 @@
   <parameter name="icache_tagramBlockType" value="Automatic" />
   <parameter name="impl" value="Tiny" />
   <parameter name="instAddrWidth" value="23" />
-  <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='onchip_flash_0.data' start='0x200000' end='0x360000' type='altera_onchip_flash.data' /><slave name='onchip_memory2_0.s1' start='0x408000' end='0x410000' type='altera_avalon_onchip_memory2.s1' /><slave name='nios2_gen2_0.debug_mem_slave' start='0x410800' end='0x411000' type='altera_nios2_gen2.debug_mem_slave' /><slave name='onchip_flash_0.csr' start='0x411128' end='0x411130' type='altera_onchip_flash.csr' /></address-map>]]></parameter>
+  <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='onchip_flash_0.data' start='0x200000' end='0x270000' type='altera_onchip_flash.data' /><slave name='onchip_memory2_0.s1' start='0x408000' end='0x410000' type='altera_avalon_onchip_memory2.s1' /><slave name='nios2_gen2_0.debug_mem_slave' start='0x410800' end='0x411000' type='altera_nios2_gen2.debug_mem_slave' /><slave name='onchip_flash_0.csr' start='0x411120' end='0x411128' type='altera_onchip_flash.csr' /></address-map>]]></parameter>
   <parameter name="instructionMasterHighPerformanceAddrWidth" value="1" />
   <parameter name="instructionMasterHighPerformanceMapParam" value="" />
   <parameter name="instruction_master_high_performance_paddr_base" value="0" />
@@ -820,19 +820,19 @@
    enabled="1">
   <parameter name="AUTO_CLOCK_RATE" value="50000000" />
   <parameter name="CLOCK_FREQUENCY" value="116.0" />
-  <parameter name="CONFIGURATION_MODE">Single Uncompressed Image with Memory Initialization</parameter>
+  <parameter name="CONFIGURATION_MODE">Single Uncompressed Image</parameter>
   <parameter name="CONFIGURATION_SCHEME">Internal Configuration</parameter>
   <parameter name="DATA_INTERFACE" value="Parallel" />
   <parameter name="DEVICE_FAMILY" value="MAX 10" />
   <parameter name="PART_NAME" value="10M50DAF484C7G" />
   <parameter name="READ_BURST_COUNT" value="8" />
   <parameter name="READ_BURST_MODE" value="Incrementing" />
-  <parameter name="SECTOR_ACCESS_MODE">Read and write,Read and write,Read only,Read only,Read only</parameter>
+  <parameter name="SECTOR_ACCESS_MODE">Read and write,Read and write,Read and write,Hidden,Hidden</parameter>
   <parameter name="autoInitializationFileName">$${FILENAME}_onchip_flash_0</parameter>
-  <parameter name="initFlashContent" value="true" />
+  <parameter name="initFlashContent" value="false" />
   <parameter name="initializationFileName">G:/ECE385/ECE385_FinalProject/music_demo/software/initializer/mem_init/rhythm_soc_onchip_flash_0.hex</parameter>
   <parameter name="initializationFileNameForSim">altera_onchip_flash.dat</parameter>
-  <parameter name="useNonDefaultInitFile" value="true" />
+  <parameter name="useNonDefaultInitFile" value="false" />
  </module>
  <module
    name="onchip_memory2_0"
@@ -851,7 +851,7 @@
   <parameter name="ecc_enabled" value="false" />
   <parameter name="enPRInitMode" value="false" />
   <parameter name="enableDiffWidth" value="false" />
-  <parameter name="initMemContent" value="true" />
+  <parameter name="initMemContent" value="false" />
   <parameter name="initializationFileName">G:/ECE385/ECE385_FinalProject/music_demo/software/initializer/mem_init/rhythm_soc_onchip_memory2_0.hex</parameter>
   <parameter name="instanceID" value="NONE" />
   <parameter name="memorySize" value="32768" />
@@ -862,7 +862,7 @@
   <parameter name="singleClockOperation" value="false" />
   <parameter name="slave1Latency" value="1" />
   <parameter name="slave2Latency" value="1" />
-  <parameter name="useNonDefaultInitFile" value="true" />
+  <parameter name="useNonDefaultInitFile" value="false" />
   <parameter name="useShallowMemBlocks" value="false" />
   <parameter name="writable" value="true" />
  </module>
@@ -949,7 +949,7 @@
    start="nios2_gen2_0.data_master"
    end="jtag_uart_0.avalon_jtag_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00411138" />
+  <parameter name="baseAddress" value="0x00411130" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -958,7 +958,7 @@
    start="nios2_gen2_0.data_master"
    end="sysid_qsys_0.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00411130" />
+  <parameter name="baseAddress" value="0x00411128" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -976,7 +976,7 @@
    start="nios2_gen2_0.data_master"
    end="onchip_flash_0.csr">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00411128" />
+  <parameter name="baseAddress" value="0x00411120" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1102,7 +1102,7 @@
    start="nios2_gen2_0.instruction_master"
    end="onchip_flash_0.csr">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00411128" />
+  <parameter name="baseAddress" value="0x00411120" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
