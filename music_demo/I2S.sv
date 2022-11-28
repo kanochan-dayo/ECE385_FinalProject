@@ -60,6 +60,12 @@ logic Play_flag,Flag_i,Flag_c;
 enum logic [6:0] {Halted,Init_data,Init_data2,Init_data3,Play,Play2,Playrr,Fill,Fill2,Fill3} State,Next_state;
 enum logic [2:0] {Stop,Plays,PlayH} Statep,Next_statep;
 
+initial
+begin
+sdram_addr=25'h80000;
+addr_max=25'h80000;
+end
+
 always_ff @ (posedge Clk50)
 begin
 
@@ -98,17 +104,17 @@ if(sdram_ac)
 Next_state=Init_data2;
 
 Init_data2:
-if(Write_done)
-begin
-Next_state=Playrr;
-end
-else if(~sdram_ac)
 Next_state=Init_data3;
 
 Init_data3:
 begin
+if(Write_done)
+Next_state=Playrr;
+else 
+begin
 Next_state=Init_data;
 wraddress_x=wraddress+1;
+end
 end
 
 Play:
@@ -130,16 +136,18 @@ if(sdram_ac)
 Next_state=Fill2;
 
 Fill2:
-if(Write_done)
-Next_state=Playrr;
-else 
-if(~sdram_ac)
 Next_state=Fill3;
 
 Fill3:
 begin
+if(Write_done)
+Next_state=Playrr;
+else 
+begin
 Next_state=Fill;
 wraddress_x=wraddress+1;
+end
+
 end
 
 Playrr:
@@ -177,8 +185,6 @@ Play_flag=0;
 busy=1;
 wrreq=1;
 sdram_addr_x=sdram_addr+1;
-if(sdram_addr>=addr_max)
-Write_done=1;
 end
 
 Init_data3:
@@ -186,7 +192,8 @@ begin
 Play_flag=0;
 busy=1;
 wrreq=1;
-
+if(sdram_addr>=addr_max)
+Write_done=1;
 end
 
 
@@ -209,8 +216,6 @@ Flag_i=1;
 busy=1;
 wrreq=1;
 sdram_addr_x=sdram_addr+1;
-if(sdram_addr>=addr_max)
-Write_done=1;
 end
 
 Fill3:
@@ -218,6 +223,8 @@ begin
 Flag_i=1;
 busy=1;
 wrreq=1;
+if(sdram_addr>=addr_max)
+Write_done=1;
 end
 
 Playrr:
@@ -324,7 +331,9 @@ counters=counter;
 end
 
 
-
 endmodule
+
+
+
 
 

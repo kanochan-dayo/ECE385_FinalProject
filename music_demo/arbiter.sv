@@ -65,8 +65,9 @@ Init_sdram_done:
 	if (new_frame)
 		Next_state=PCM;
 PCM:
-	if (I2S_Done)
-	Next_state=Halted;
+Next_state=PCM;
+//	if (I2S_Done)
+//	Next_state=Halted;
 
 Halted:
 	if (new_frame)
@@ -117,7 +118,10 @@ I2S_sdram_ac=ar_ac;
 
 end
 Halted:
+begin
 ar_addr=I2S_sdram_addr;
+I2S_sdram_ac=ar_ac;
+end
 endcase
 end
 

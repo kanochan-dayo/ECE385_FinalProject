@@ -272,7 +272,7 @@ assign LEDR[0]=init_done;
 assign LEDR[5]=init_error;
 
 assign ARDUINO_IO[3] = aud_mclk_ctr[1];	 //generate 12.5MHz CODEC mclk
-always_ff @(posedge MAX10_CLK2_50) begin
+always_ff @(posedge MAX10_CLK1_50) begin
 	aud_mclk_ctr <= aud_mclk_ctr + 1;
 end
 
