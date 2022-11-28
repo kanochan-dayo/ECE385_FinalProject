@@ -5,7 +5,7 @@ output sdram_rd,
 input [15:0]sdram_data,
 output busy,Dout,Write_done,rdempty,wrfull,
 output [24:0] sdram_addr,
-output [10:0] wrusedw
+ output [10:0] wrusedw
 );
 
 
@@ -19,7 +19,29 @@ fifo_audio adf(
 	);
 logic [10:0] rdaddress,wraddress;
 logic [10:0] rdaddress_x,wraddress_x;
-assign wrusedw=(wraddress>=rdaddress)?wraddress-rdaddress:(1+wraddress)+(11'd2047-rdaddress);
+
+always_ff @ (negedge LRClk)
+begin
+if(State==Halted||State==Init_data3||State==Init_data||State==Init_data2)
+begin
+wrusedw<=1580;
+Flag_c<=0;
+end
+else if(Flag_i==1&&Flag_c==0)
+begin
+Flag_c<=1;
+wrusedw+=1613;
+end
+else if(Flag_i==0&&Flag_c==1)
+begin
+Flag_c<=0;
+wrusedw-=2;
+end
+else
+wrusedw-=2;
+
+end
+
 	always_ff @ (negedge rdreq)
 	begin
 	tempdata<=tempdata1;
@@ -33,7 +55,7 @@ logic [24:0] sdram_addr_x,addr_max,addr_max_x;
 
 logic [4:0] counter,counter_x,counters;
 logic [1:0] PreLR;
-logic Play_flag;
+logic Play_flag,Flag_i,Flag_c;
 
 enum logic [6:0] {Halted,Init_data,Init_data2,Init_data3,Play,Play2,Playrr,Fill,Fill2,Fill3} State,Next_state;
 enum logic [2:0] {Stop,Plays,PlayH} Statep,Next_statep;
@@ -68,10 +90,7 @@ Halted:
 if(~sdram_Wait)
 begin
 Next_state=Init_data;
-if(wrusedw>200)
-addr_max_x=addr_max+1400;
-else
-addr_max_x=addr_max+1500;
+addr_max_x=addr_max+1580;
 end
 
 Init_data:
@@ -101,9 +120,9 @@ if(~sdram_Wait)
 begin
 Next_state=Fill;
 if(wrusedw>200)
-addr_max_x=addr_max+1400;
+addr_max_x=addr_max+1550;
 else
-addr_max_x=addr_max+1500;
+addr_max_x=addr_max+1615;
 end
 
 Fill:
@@ -133,6 +152,7 @@ end
 
 always_comb
 begin
+Flag_i=0;
 Play_flag=1;
 busy=0;
 wrreq=0;
@@ -178,12 +198,14 @@ end
 
 Fill:
 begin
+Flag_i=1;
 busy=1;
 sdram_rd=1;
 end
 
 Fill2:
 begin
+Flag_i=1;
 busy=1;
 wrreq=1;
 sdram_addr_x=sdram_addr+1;
@@ -193,13 +215,16 @@ end
 
 Fill3:
 begin
+Flag_i=1;
 busy=1;
 wrreq=1;
 end
 
 Playrr:
+begin
 wrreq=1;
-
+Write_done=1;
+end
 endcase
 end
 
@@ -301,3 +326,5 @@ end
 
 
 endmodule
+
+

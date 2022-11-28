@@ -154,7 +154,7 @@ int setup_i2c()
 	printf( "CHIP_CLK_CTRL register: %x\n", SGTL5000_Reg_Rd (i2c_dev, SGTL5000_CHIP_CLK_CTRL));
 
 	//Set as I2S master
-	SGTL5000_Reg_Wr(i2c_dev, SGTL5000_CHIP_I2S_CTRL, SGTL5000_I2S_MASTER);
+	SGTL5000_Reg_Wr(i2c_dev, SGTL5000_CHIP_I2S_CTRL, (SGTL5000_I2S_MASTER)|(0x0003<<4));
 	printf( "CHIP_I2S_CTRL register: %x\n", SGTL5000_Reg_Rd (i2c_dev, SGTL5000_CHIP_I2S_CTRL));
 
 	//ADC input from Line

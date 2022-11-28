@@ -1,3 +1,4 @@
+
 module arbiter_sdram (
 //general input
 input clk,reset,new_frame,

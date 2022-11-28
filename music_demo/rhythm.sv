@@ -261,9 +261,9 @@ always_ff @(posedge pixel_clk)
 begin
 new_frame<=new_frame;
 
-if (DrawY==524)
+if (DrawY==524&&DrawX==790)
 new_frame<=1;
-else if(DrawY==0)
+else
 new_frame<=0;
 end
 
@@ -295,5 +295,8 @@ logic [10:0] wrusedw;
 logic Dout;
 
 assign ARDUINO_IO[2]=Dout;
+//assign ARDUINO_IO[2]=ARDUINO_IO[1];
+
+
 
 endmodule
