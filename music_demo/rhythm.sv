@@ -107,16 +107,16 @@ module rhythm (
 	HexDriver hex_driver4 (ar_addr[19:16], HEX4[6:0]);
 	assign HEX4[7] = 1'b1;
 	
-	HexDriver hex_driver3 (ar_wrdata[15:12], HEX3[6:0]);
+	HexDriver hex_driver3 (tempdata1[15:12], HEX3[6:0]);
 	assign HEX3[7] = 1'b1;
 	
-	HexDriver hex_driver2 ({1'b0,wrusedw[10:8]}, HEX2[6:0]);
+	HexDriver hex_driver2 (tempdata1[11:8], HEX2[6:0]);
 	assign HEX2[7] = 1'b1;
 	
-	HexDriver hex_driver1 (wrusedw[7:4], HEX1[6:0]);
+	HexDriver hex_driver1 (tempdata1[7:4], HEX1[6:0]);
 	assign HEX1[7] = 1'b1;
 	
-	HexDriver hex_driver0 (wrusedw[3:0], HEX0[6:0]);
+	HexDriver hex_driver0 (tempdata1[3:0], HEX0[6:0]);
 	assign HEX0[7] = 1'b1;
 	
 	//fill in the hundreds digit as well as the negative sign
@@ -291,6 +291,7 @@ I2S IIS
 logic I2S_sdram_Wait,I2S_sdram_ac,I2S_sdram_rd,I2S_Busy,I2S_Done,rdempty,wrfull;
 logic[15:0] I2S_sdram_data;
 logic[24:0] I2S_sdram_addr;
+logic [15:0] tempdata1;
 logic [10:0] wrusedw;
 logic Dout;
 

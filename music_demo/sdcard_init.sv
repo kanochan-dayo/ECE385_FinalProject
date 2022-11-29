@@ -30,7 +30,7 @@ module sdcard_init (
 	input  logic miso_i
 );
 
-parameter 			MAX_RAM_ADDRESS = 25'h31AFE0;
+parameter 			MAX_RAM_ADDRESS = 25'h179AFDF;
 parameter			SDHC 				 = 1'b1;
 
 logic 				sd_read_block;
@@ -123,7 +123,7 @@ begin
 			if (sd_busy == 1'b0) //busy going low signals end of block, read next block
 				state_x = READBLOCK;
 			else if (sd_data_rdy == 1'b1) begin//still have more data in this block, read more bytes
-				data_x[15:8] = sd_output_data;
+				data_x[7:0] = sd_output_data;
 				state_x = READH_1;
 			end
 		end
@@ -134,7 +134,7 @@ begin
 		end
 		READL_0: begin //read second byte (lower byte)
 			if (sd_data_rdy == 1'b1) begin
-				data_x[7:0] = sd_output_data;
+				data_x[15:8] = sd_output_data;
 				state_x = READL_1;
 			end
 		end
