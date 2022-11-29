@@ -439,7 +439,6 @@ set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -
 set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
-set_global_assignment -name QIP_FILE fifo_audio.qip
 set_global_assignment -name SYSTEMVERILOG_FILE VGA_controller.sv
 set_global_assignment -name SYSTEMVERILOG_FILE sdcard_init.sv
 set_global_assignment -name VHDL_FILE SDCard.vhd
@@ -453,10 +452,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE audio_clk_gen.sv
 set_global_assignment -name SYSTEMVERILOG_FILE I2S.sv
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name QIP_FILE fifo_a.qip
-set_global_assignment -name QIP_FILE fifo_a1.qip
-set_global_assignment -name QIP_FILE fifo_a2.qip
-set_global_assignment -name QIP_FILE fifo_a3.qip
-set_global_assignment -name QIP_FILE fifo_a6.qip
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to MAX10_CLK1_50 -section_id auto_signaltap_0

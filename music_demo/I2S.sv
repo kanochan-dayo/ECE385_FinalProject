@@ -365,8 +365,8 @@ output [15:0] tempdata1,
 );
 
 
-fifo_a6 adf(
-	.data(sdram_data),
+fifo_a adf(
+	.data(write_temp),
 	.rdclk(~SClk),
 	.wrclk(~Clk50),
 	.wrreq(wrreq),
@@ -384,9 +384,13 @@ fifo_a6 adf(
 	begin
 	tempdata<=tempdata1;
 	end
-
 	
-logic [15:0] tempdata;
+always_ff @ (negedge sdram_ac)
+begin
+write_temp<=sdram_data;
+end
+	
+logic [15:0] tempdata,write_temp;
 
 logic rdreq,wrreq;
 
@@ -394,10 +398,10 @@ logic [24:0] sdram_addr_x,addr_max,addr_max_x;
 
 logic [4:0] counter,counter_x,counters;
 logic [1:0] PreLR;
-logic Play_flag,Flag_i;
+logic Play_flag;
 
-enum logic [6:0] {Halted,Init_data,Init_data2,Init_data3,Play,Play2,Playrr,Fill,Fill2,Fill3} State,Next_state;
-enum logic [2:0] {Stop,Plays,PlayH} Statep,Next_statep;
+enum logic [2:0] {Halted,Init_data,Init_data2,Init_data0,Play,Play2,Fill,Fill2} State,Next_state;
+enum logic [1:0] {Stop,Plays,PlayH} Statep,Next_statep;
 
 initial
 begin
@@ -431,26 +435,27 @@ case(State)
 Halted:
 if(~sdram_Wait)
 begin
-Next_state=Init_data;
+Next_state=Init_data0;
 addr_max_x=addr_max+1700;
 end
+
+Init_data0:
+if(sdram_ac)
+Next_state=Init_data2;
 
 Init_data:
 if(sdram_ac)
 Next_state=Init_data2;
 
 Init_data2:
-Next_state=Init_data3;
-
-Init_data3:
 begin
 if(Write_done)
-Next_state=Playrr;
+Next_state=Play;
 else 
-begin
 Next_state=Init_data;
 end
-end
+
+
 
 Play:
 if (new_frame)
@@ -469,23 +474,16 @@ if(sdram_ac)
 Next_state=Fill2;
 
 Fill2:
-Next_state=Fill3;
-
-Fill3:
 begin
-if(Write_done)
-Next_state=Playrr;
+if(sdram_addr==addr_max)
+Next_state=Play;
 else 
-begin
 Next_state=Fill;
 end
 
-end
 
-Playrr:
-begin
-Next_state=Play;
-end
+
+
 endcase
 end
 
@@ -507,23 +505,21 @@ begin
 Play_flag=0;
 busy=1;
 sdram_rd=1;
+wrreq=sdram_ac;
 end
 
 Init_data2:
 begin
 Play_flag=0;
 busy=1;
-//wrreq=1;
 sdram_addr_x=sdram_addr+1;
 end
 
-Init_data3:
+Init_data0:
 begin
-wrreq=1;
 Play_flag=0;
 busy=1;
-if(sdram_addr==addr_max)
-Write_done=1;
+sdram_rd=1;
 end
 
 
@@ -535,32 +531,17 @@ end
 
 Fill:
 begin
-Flag_i=1;
 busy=1;
 sdram_rd=1;
+wrreq=sdram_ac;
 end
 
 Fill2:
 begin
-Flag_i=1;
 busy=1;
-//wrreq=1;
 sdram_addr_x=sdram_addr+1;
 end
 
-Fill3:
-begin
-Flag_i=1;
-busy=1;
-wrreq=1;
-if(sdram_addr==addr_max)
-Write_done=1;
-end
-
-Playrr:
-begin
-Write_done=1;
-end
 endcase
 end
 

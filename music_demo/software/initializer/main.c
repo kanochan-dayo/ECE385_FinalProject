@@ -2,12 +2,13 @@
 
 int main(){
 	setup_i2c();
-	*(volatile unsigned int*)LEDS_PIO_BASE=0xFFFF;
-//	while(1)
-	int usb_init();
-//	{
-//		usleep(1000000);
-//		printf("hahahaha\n");
-//	}
+	setLED(9);
+	setLED(8);
+
+	usleep(10000000);
+	setLED(7);
+	setLED(6);
+	usb_init();
+
 return 0;
 }
