@@ -76,7 +76,7 @@
  <parameter name="hideFromIPCatalog" value="false" />
  <parameter name="lockedInterfaceDefinition" value="" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="player_demo.qpf" />
+ <parameter name="projectName" value="rhythm.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="0" />
  <parameter name="testBenchDutName" value="" />
@@ -101,7 +101,7 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="MAX 10" />
   <parameter name="addr_size" value="64" />
   <parameter name="addr_size_multiplier" value="Mbytes" />
-  <parameter name="data_size" value="16" />
+  <parameter name="data_size" value="64" />
  </module>
  <module name="clk_0" kind="clock_source" version="18.1" enabled="1">
   <parameter name="clockFrequency" value="50000000" />

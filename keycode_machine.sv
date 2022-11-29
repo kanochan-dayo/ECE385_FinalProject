@@ -6,5 +6,5 @@ pause_sign,
 result_ok
 );
 
-enum logic
+//enum logic
 endmodule

@@ -299,6 +299,14 @@ assign ARDUINO_IO[2]=Dout;
 
 
 
-background_mapper bk(.*,.clock(MAX10_CLK1_50));
+lineb lb(.*,.clock(MAX10_CLK1_50),.sdram_data(lb_sdram_data),
+		.sdram_addr(lb_sdram_addr),
+		.sdram_ac(lb_sdram_ac),
+		.sdram_rd(lb_sdram_rd),
+		.busy(lb_Busy),
+		.sdram_Wait(lb_sdram_Wait),.reset(Reset_h));
 
+logic frame_flip,lb_sdram_Wait,lb_sdram_ac,lb_sdram_rd,lb_Busy;
+logic[15:0] lb_sdram_data;
+logic[24:0] lb_sdram_addr;
 endmodule

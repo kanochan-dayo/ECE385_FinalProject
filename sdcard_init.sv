@@ -19,8 +19,8 @@ module sdcard_init (
 	input  logic clk50,
 	input  logic reset,          //starts as soon reset is deasserted
 	output logic ram_we,         //RAM interface pins
-	output logic [24:0] ram_address,
-	output logic [15:0] ram_data,
+	output logic [20:0] ram_address,
+	output logic [63:0] ram_data,
 	input  logic ram_op_begun,   //acknowledge from RAM to move to next word
 	output logic ram_init_error, //error initializing
 	output logic ram_init_done,  //done with reading all MAX_RAM_ADDRESS words

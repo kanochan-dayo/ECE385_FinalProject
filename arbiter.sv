@@ -2,6 +2,7 @@
 module arbiter_sdram (
 //general input
 input clk,reset,new_frame,
+input [9:0]DrawX,DrawY,
 
 //sdram_init_input
 input [24:0]init_addr,
@@ -26,6 +27,12 @@ input I2S_sdram_rd,I2S_Busy,I2S_Done,
 output[15:0] I2S_sdram_data,
 input [24:0] I2S_sdram_addr,
 
+//Line Buffer input
+input lb_sdram_rd,lb_Busy,
+output lb_sdram_Wait,lb_sdram_ac,
+output [15:0] lb_sdram_data,
+input [24:0] lb_sdram_addr,
+
 //result
 output [24:0] ar_addr,
 output [1:0] ar_be,
@@ -39,7 +46,7 @@ output SPI0_CS_N, SPI0_SCLK, SPI0_MOSI,SD_CS
 );
 
 enum logic[7:0] {Init_sdram,Init_sdram_done,
-Line_buffer,Line_buffer_done,
+Line_buffer,Line_buffer_mid,PCM_done,
 Background,Score,Key_track,Note,
 PCM,Halted} State,Next_state;
 
@@ -63,22 +70,38 @@ Init_sdram:
 
 Init_sdram_done:
 	if (new_frame)
-		Next_state=PCM;
-PCM:
-// Next_state=PCM;
-	if (I2S_Done)
-	Next_state=Halted;
+		Next_state=Line_buffer;
+		
+Line_buffer:
+	if (DrawY==479)
+	Next_state=PCM;
+	else if (~lb_Busy)
+	Next_state=Line_buffer_mid;
 
+	
+Line_buffer_mid:
+	if (DrawX==799)
+	Next_state=Line_buffer;
+	
 Halted:
 	if (new_frame)
-		Next_state=PCM;
-
+		Next_state=Line_buffer;
+PCM:
+	if (I2S_Done)
+	Next_state=PCM_done;
+PCM_done:
+	Next_state=Halted;
+	
 endcase
 end
 
 always_comb
 begin:Arb
 
+
+lb_sdram_Wait=1;
+lb_sdram_ac=0;
+lb_sdram_data=0;
 ar_addr=init_addr;
 ar_be=2'b11;
 ar_read=0;
@@ -115,13 +138,20 @@ ar_read=I2S_sdram_rd;
 ar_write=0;
 I2S_sdram_data=ar_rddata;
 I2S_sdram_ac=ar_ac;
-
 end
 Halted:
+ar_write=0;
+Line_buffer:
 begin
-ar_addr=I2S_sdram_addr;
-I2S_sdram_ac=ar_ac;
+ar_write=0;
+lb_sdram_Wait=0;
+ar_addr=lb_sdram_addr;
+ar_read=lb_sdram_rd;
+lb_sdram_data=ar_rddata;
+lb_sdram_ac=ar_ac;
 end
+Line_buffer_mid:
+ar_write=0;
 endcase
 end
 

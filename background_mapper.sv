@@ -20,17 +20,17 @@ module lineb (
 
 
  background_palette_rom er(.address(pixel_palette_index), .data_Out(RGB_ALL));
- line_buffer line_buf(.rdaddress(place_a),.clock(clock),.q(pixel_palette_a),.wraddress(place_b),.data(pixel_palette_b),.*);
+ line_buffer line_buf(.rdaddress(place_a),.clock(clock),.q(pixel_palette_a),.wraddress(place_b),.data(sdram_data),.*);
  logic [23:0] RGB_ALL;
  logic [9:0] place_a,place_b,WriteY,WriteX,WriteX_x;
  logic [7:0] pixel_palette_index;
- logic [15:0] pixel_palette_a,pixel_palette_b;
- logic number,flip,frame_flip,wren;
+ logic [15:0] pixel_palette_a;
+ logic number,flip,wren;
  
  parameter [19:0]Address1=20'h9CD20;
  parameter [19:0]Address2=20'hC2520;
  
- enum logic[2:0] {Halted,Read,Read1,Read2,Pause,Pause1,Pauserr} State,Next_state;
+ enum logic[2:0] {Halted,Read,Read1,Pause,Pause1,Pauserr} State,Next_state;
  
  always_ff @(posedge clock)
  begin
@@ -57,22 +57,21 @@ begin
  Next_state=State;
  case(State)
  Halted:
- if (new_frame)
+ if (new_frame&&(~sdram_Wait))
  Next_state=Read;
+ 
  Read:
  if (sdram_ac)
  Next_state=Read1;
+ 
  Read1:
  begin
- if(WriteX==639)
- Next_state=Pauserr;
- else if(~sdram_ac)
- Next_state=Read2;
- end
- Read2:
- Next_state=Read;
- Pauserr:
+ if(WriteX==638)
  Next_state=Pause;
+ else if(~sdram_ac)
+ Next_state=Read;
+ end
+ 
  Pause:
  if(DrawY==478)
  Next_state=Halted;
@@ -88,21 +87,26 @@ begin
 sdram_rd=0;
 busy=0;
 wren=0;
+WriteX_x=WriteX;
 case(State)
  Halted:
- ;
+ WriteX_x=0;
  Read:
  begin
  busy=1;
- sdram_rd=1
+ sdram_rd=1;
  end
  Read1:
  begin
- WriteX_x=Write_x+2
  wren=1;
+ WriteX_x=WriteX+2;
  busy=1;
  end
- Pauserr:
+ 
+Pause:
+WriteX_x=0;
+
+endcase
  
  
 
@@ -120,12 +124,13 @@ sdram_addr=WriteX[9:1]+(WriteY*320)+Address2;
 	place_a[8:0] = DrawX[9:1];
 	place_a[9]=flip;
 	place_b[9]=~flip;
+	place_b[8:0] = WriteX[9:1];
 	number=DrawX[0];
 	case (number)
 	1'b0:
-	pixel_palette_index=pixel_palette_b[15:8];
+	pixel_palette_index=pixel_palette_a[15:8];
 	1'b1:
-	pixel_palette_index=pixel_palette_b[7:0];
+	pixel_palette_index=pixel_palette_a[7:0];
 	endcase
 if (blank)
  begin
