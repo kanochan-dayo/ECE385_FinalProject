@@ -492,7 +492,6 @@ set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] 
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "I2S:IIS|State.Play2" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "I2S:IIS|State.Playrr" -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "I2S:IIS|State.Playrr" -section_id auto_signaltap_0
-set_global_assignment -name QIP_FILE audio_difo.qip
 set_global_assignment -name QIP_FILE fifo_audio.qip
 set_global_assignment -name SYSTEMVERILOG_FILE VGA_controller.sv
 set_global_assignment -name SYSTEMVERILOG_FILE sdcard_init.sv
