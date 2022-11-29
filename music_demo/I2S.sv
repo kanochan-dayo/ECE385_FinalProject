@@ -366,11 +366,11 @@ output [24:0] sdram_addr,
 
 fifo_a adf(
 	.data(sdram_data),
-	.rdclk(~SClk),
-	.wrclk(~Clk50),
+	.rdclk(SClk),
+	.wrclk(Clk50),
 	.wrreq(wrreq),
 	.rdreq(rdreq),
-	.q(tempdata1),
+	.q(tempdata),
 	.aclr(reset),
 	.wrusedw(wrusedw),
 .*
@@ -378,11 +378,11 @@ fifo_a adf(
 	
 	
 
-
-	always_ff @ (negedge rdreq)
-	begin
-	tempdata<=tempdata1;
-	end
+//
+//	always_ff @ (negedge rdreq)
+//	begin
+//	tempdata<=tempdata1;
+//	end
 	
 logic [15:0] tempdata,tempdata1;
 
@@ -424,7 +424,7 @@ end
 always_comb
 begin
 Next_state=State;
-addr_max_x<=addr_max;
+addr_max_x=addr_max;
 case(State)
 Halted:
 if(~sdram_Wait)
@@ -517,6 +517,7 @@ end
 
 Init_data3:
 begin
+//wrreq=1;
 Play_flag=0;
 busy=1;
 if(sdram_addr==addr_max)
@@ -549,13 +550,13 @@ Fill3:
 begin
 Flag_i=1;
 busy=1;
+//wrreq=1;
 if(sdram_addr==addr_max)
 Write_done=1;
 end
 
 Playrr:
 begin
-
 Write_done=1;
 end
 endcase
