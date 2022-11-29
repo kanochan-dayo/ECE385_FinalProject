@@ -43,9 +43,9 @@ logic [7:0] 		sd_output_data;
 logic [31:0] 		sd_block_addr;
 
 //registers written in 2-always method
-enum logic [8:0]	{RESET, READBLOCK, READL_0, READL_1, READH_0, READH_1, WRITE,WRITE1, ERROR, DONE} state_r, state_x;
+enum logic [8:0]	{RESET, READBLOCK, READL_0, READL_1, READ0_0, READ0_1, READ1_0, READ1_1,READ2_0, READ2_1, READ3_0, READ3_1, READ4_0, READ4_1,READ5_0, READ5_1,READH_0, READH_1, WRITE,WRITE1, ERROR, DONE} state_r, state_x;
 logic [24:0]		ram_addr_r, ram_addr_x;  //word address for memory initialization
-logic [15:0]		data_r, data_x;
+logic [63:0]		data_r, data_x;
 
 //assign primary outputs to correct registers
 assign ram_address = ram_addr_r;
@@ -92,9 +92,9 @@ begin
 	sd_data_next = 1'b0;
 	ram_we = 1'b0;
 	if (SDHC)//if SDHC mode, then this is block address (note that you need to change VHDL generic)
-		sd_block_addr = (ram_addr_r >> 8) ;
+		sd_block_addr = (ram_addr_r >> 5) ;
 	else
-		sd_block_addr = ram_addr_r << 1; //in SD mode, this is the *byte* address, change for SDHC 
+		sd_block_addr = ram_addr_r << 5; //in SD mode, this is the *byte* address, change for SDHC 
 	state_x = state_r;
 	data_x = data_r;
 	ram_addr_x = ram_addr_r;
@@ -123,11 +123,83 @@ begin
 			if (sd_busy == 1'b0) //busy going low signals end of block, read next block
 				state_x = READBLOCK;
 			else if (sd_data_rdy == 1'b1) begin//still have more data in this block, read more bytes
-				data_x[15:8] = sd_output_data;
+				data_x[63:56] = sd_output_data;
 				state_x = READH_1;
 			end
 		end
 		READH_1: begin //ack first byte
+			sd_data_next = 1'b1;
+			if (sd_data_rdy == 1'b0)//moved on to next byte
+				state_x = READ5_0;
+		end
+		
+		READ5_0: begin //read second byte (lower byte)
+			if (sd_data_rdy == 1'b1) begin
+				data_x[55:48] = sd_output_data;
+				state_x = READ5_1;
+			end
+		end
+		READ5_1: begin //ack second byte
+			sd_data_next = 1'b1;
+			if (sd_data_rdy == 1'b0)//move on to next byte/write word
+				state_x = READ4_0;
+		end
+		READ4_0: begin //read second byte (lower byte)
+			if (sd_data_rdy == 1'b1) begin
+				data_x[47:40] = sd_output_data;
+				state_x = READ4_1;
+			end
+		end
+		READ4_1: begin //ack second byte
+			sd_data_next = 1'b1;
+			if (sd_data_rdy == 1'b0)//move on to next byte/write word
+				state_x = READ3_0;
+		end
+		
+		READ3_0: begin //read second byte (lower byte)
+			if (sd_data_rdy == 1'b1) begin
+				data_x[39:32] = sd_output_data;
+				state_x = READ3_1;
+			end
+		end
+		READ3_1: begin //ack second byte
+			sd_data_next = 1'b1;
+			if (sd_data_rdy == 1'b0)//move on to next byte/write word
+				state_x = READ2_0;
+		end
+		READ2_0: begin //read first byte (higher byte)
+			if (sd_busy == 1'b0) //busy going low signals end of block, read next block
+				state_x = READBLOCK;
+			else if (sd_data_rdy == 1'b1) begin//still have more data in this block, read more bytes
+				data_x[31:24] = sd_output_data;
+				state_x = READ2_1;
+			end
+		end
+		READ2_1: begin //ack first byte
+			sd_data_next = 1'b1;
+			if (sd_data_rdy == 1'b0)//moved on to next byte
+				state_x = READ1_0;
+		end
+		READ1_0: begin //read second byte (lower byte)
+			if (sd_data_rdy == 1'b1) begin
+				data_x[23:16] = sd_output_data;
+				state_x = READ1_1;
+			end
+		end
+		READ1_1: begin //ack second byte
+			sd_data_next = 1'b1;
+			if (sd_data_rdy == 1'b0)//move on to next byte/write word
+				state_x = READH0_0;
+		end
+		READ0_0: begin //read first byte (higher byte)
+			if (sd_busy == 1'b0) //busy going low signals end of block, read next block
+				state_x = READBLOCK;
+			else if (sd_data_rdy == 1'b1) begin//still have more data in this block, read more bytes
+				data_x[15:8] = sd_output_data;
+				state_x = READ0_1;
+			end
+		end
+		READ0_1: begin //ack first byte
 			sd_data_next = 1'b1;
 			if (sd_data_rdy == 1'b0)//moved on to next byte
 				state_x = READL_0;
@@ -143,6 +215,7 @@ begin
 			if (sd_data_rdy == 1'b0)//move on to next byte/write word
 				state_x = WRITE;
 		end
+		
 		WRITE:
 		begin
 			ram_we = 1'b1;
