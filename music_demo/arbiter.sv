@@ -65,9 +65,9 @@ Init_sdram_done:
 	if (new_frame)
 		Next_state=PCM;
 PCM:
-Next_state=PCM;
-//	if (I2S_Done)
-//	Next_state=Halted;
+//Next_state=PCM;
+	if (I2S_Done)
+	Next_state=Halted;
 
 Halted:
 	if (new_frame)
