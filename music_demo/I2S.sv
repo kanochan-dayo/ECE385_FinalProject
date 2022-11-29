@@ -360,17 +360,18 @@ output sdram_rd,
 input [15:0]sdram_data,
 output busy,Dout,Write_done,rdempty,wrfull,
 output [24:0] sdram_addr,
+output [15:0] tempdata1,
  output [10:0] wrusedw
 );
 
 
-fifo_a adf(
+fifo_a6 adf(
 	.data(sdram_data),
-	.rdclk(SClk),
-	.wrclk(Clk50),
+	.rdclk(~SClk),
+	.wrclk(~Clk50),
 	.wrreq(wrreq),
 	.rdreq(rdreq),
-	.q(tempdata),
+	.q(tempdata1),
 	.aclr(reset),
 	.wrusedw(wrusedw),
 .*
@@ -378,13 +379,14 @@ fifo_a adf(
 	
 	
 
-//
-//	always_ff @ (negedge rdreq)
-//	begin
-//	tempdata<=tempdata1;
-//	end
+
+	always_ff @ (posedge rdreq)
+	begin
+	tempdata<=tempdata1;
+	end
+
 	
-logic [15:0] tempdata,tempdata1;
+logic [15:0] tempdata;
 
 logic rdreq,wrreq;
 
@@ -511,13 +513,13 @@ Init_data2:
 begin
 Play_flag=0;
 busy=1;
-wrreq=1;
+//wrreq=1;
 sdram_addr_x=sdram_addr+1;
 end
 
 Init_data3:
 begin
-//wrreq=1;
+wrreq=1;
 Play_flag=0;
 busy=1;
 if(sdram_addr==addr_max)
@@ -542,7 +544,7 @@ Fill2:
 begin
 Flag_i=1;
 busy=1;
-wrreq=1;
+//wrreq=1;
 sdram_addr_x=sdram_addr+1;
 end
 
@@ -550,7 +552,7 @@ Fill3:
 begin
 Flag_i=1;
 busy=1;
-//wrreq=1;
+wrreq=1;
 if(sdram_addr==addr_max)
 Write_done=1;
 end
