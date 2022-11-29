@@ -23,22 +23,41 @@ logic [10:0] rdaddress_x,wraddress_x;
 always_ff @ (negedge LRClk)
 begin
 if(State==Halted||State==Init_data3||State==Init_data||State==Init_data2)
+
 begin
+wrusedw_x<=1580;
 wrusedw<=1580;
 Flag_c<=0;
 end
+
 else if(Flag_i==1&&Flag_c==0)
 begin
 Flag_c<=1;
-wrusedw+=1613;
+if(wrusedw<201)
+wrusedw_x<=1613+wrusedw;
+else
+wrusedw_x<=1548+wrusedw;
+
+if(wrusedw_x<201)
+wrusedw<=1613+wrusedw_x;
+else
+wrusedw<=1548+wrusedw_x;
 end
+
+
+
 else if(Flag_i==0&&Flag_c==1)
 begin
 Flag_c<=0;
-wrusedw-=2;
+wrusedw_x<=-2+wrusedw;
+wrusedw<=-2+wrusedw_x;
 end
+
 else
-wrusedw-=2;
+begin
+wrusedw_x<=-2+wrusedw;
+wrusedw<=-2+wrusedw_x;
+end
 
 end
 
@@ -50,6 +69,7 @@ end
 logic [15:0] tempdata,tempdata1;
 
 logic rdreq,wrreq;
+logic [10:0] wrusedw_x;
 
 logic [24:0] sdram_addr_x,addr_max,addr_max_x;
 
@@ -192,7 +212,7 @@ begin
 Play_flag=0;
 busy=1;
 wrreq=1;
-if(sdram_addr>=addr_max)
+if(sdram_addr==addr_max)
 Write_done=1;
 end
 
@@ -223,7 +243,7 @@ begin
 Flag_i=1;
 busy=1;
 wrreq=1;
-if(sdram_addr>=addr_max)
+if(sdram_addr==addr_max)
 Write_done=1;
 end
 
