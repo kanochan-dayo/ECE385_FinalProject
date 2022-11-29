@@ -5,11 +5,11 @@
  version="1.0"
  fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2022.11.22.14:46:28 -->
+ <!-- 2022.11.29.01:56:31 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1669149988</value>
+  <value>1669708591</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -124,7 +124,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="data_size">
    <type>int</type>
-   <value>16</value>
+   <value>64</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -537,7 +537,7 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>avalon_readdata</name>
     <direction>Input</direction>
-    <width>16</width>
+    <width>64</width>
     <role>readdata</role>
    </port>
    <port>
@@ -549,7 +549,7 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>avalon_byteenable</name>
     <direction>Output</direction>
-    <width>2</width>
+    <width>8</width>
     <role>byteenable</role>
    </port>
    <port>
@@ -567,7 +567,7 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>avalon_writedata</name>
     <direction>Output</direction>
-    <width>16</width>
+    <width>64</width>
     <role>writedata</role>
    </port>
    <port>
@@ -632,7 +632,7 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>byte_enable</name>
     <direction>Input</direction>
-    <width>2</width>
+    <width>8</width>
     <role>export</role>
    </port>
    <port>
@@ -650,7 +650,7 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>write_data</name>
     <direction>Input</direction>
-    <width>16</width>
+    <width>64</width>
     <role>export</role>
    </port>
    <port>
@@ -662,7 +662,7 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>read_data</name>
     <direction>Output</direction>
-    <width>16</width>
+    <width>64</width>
     <role>export</role>
    </port>
   </interface>
