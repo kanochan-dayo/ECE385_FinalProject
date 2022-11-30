@@ -449,7 +449,7 @@ Next_state=Init_data2;
 
 Init_data2:
 begin
-if(Write_done)
+if(sdram_addr==addr_max)
 Next_state=Play;
 else 
 Next_state=Init_data;
