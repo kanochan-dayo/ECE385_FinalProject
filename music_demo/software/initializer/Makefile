@@ -145,10 +145,6 @@ ELF := initializer.elf
 C_SRCS += sgtl5000/sgtl5000.c
 C_SRCS += sgtl5000_test.c
 C_SRCS += main.c
-C_SRCS += main1.c
-C_SRCS += usb_kb/HID.c
-C_SRCS += usb_kb/MAX3421E.c
-C_SRCS += usb_kb/transfer.c
 CXX_SRCS :=
 ASM_SRCS :=
 
