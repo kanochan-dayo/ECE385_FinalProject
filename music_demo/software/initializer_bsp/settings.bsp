@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>2022-11-29 10:38:19</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1669739899494</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>2022-11-29 21:52:34</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1669780354400</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>G:\ECE385\ECE385_FinalProject\music_demo\software\initializer_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\rhythm_soc.sopcinfo</SopcDesignFile>

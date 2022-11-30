@@ -3,3 +3,4 @@
 #include <io.h>
 #include <system.h>
 int setup_i2c();
+int usb_set();

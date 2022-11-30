@@ -240,7 +240,7 @@ logic [15:0] init_wrdata;
 logic SPI0_CS_N_usb, SPI0_SCLK_usb, SPI0_MISO_usb, SPI0_MOSI_usb;
 
 sdcard_init sd_init(.clk50(MAX10_CLK1_50),
-	.reset(Reset_h),          //starts as soon reset is deasserted
+	.reset(init_wait),          //starts as soon reset is deasserted
 	.ram_we(init_we),         //RAM interface pins
 	.ram_address(init_addr),
 	.ram_data(init_wrdata),
@@ -269,7 +269,7 @@ end
 
 
 assign LEDR[0]=init_done;
-assign LEDR[5]=init_error;
+assign LEDR[3]=init_error;
 
 assign ARDUINO_IO[3] = aud_mclk_ctr[1];	 //generate 12.5MHz CODEC mclk
 always_ff @(posedge MAX10_CLK1_50) begin
@@ -293,7 +293,7 @@ logic[15:0] I2S_sdram_data;
 logic[24:0] I2S_sdram_addr;
 logic [15:0] tempdata1;
 logic [10:0] wrusedw;
-logic Dout;
+logic Dout,init_wait;
 
 assign ARDUINO_IO[2]=Dout;
 //assign ARDUINO_IO[2]=ARDUINO_IO[1];

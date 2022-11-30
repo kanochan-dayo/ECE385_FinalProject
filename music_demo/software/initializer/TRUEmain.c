@@ -1,0 +1,13 @@
+#include "main.h"
+
+int main(){
+	setup_i2c();
+	*(volatile unsigned int*)LEDS_PIO_BASE=0xFFFF;
+	usb_set();
+//	while(1)
+//	{
+//		usleep(1000000);
+//		printf("hahahaha\n");
+//	}
+return 0;
+}

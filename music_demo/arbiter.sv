@@ -15,6 +15,7 @@ input init_cs_bo, //SD card pins (also make sure to disable USB CS if using DE10
 input init_sclk_o,
 input init_mosi_o,
 output init_miso_i,
+init_wait,
 
 //usb_input
 input SPI0_CS_N_usb, SPI0_SCLK_usb, SPI0_MOSI_usb,
@@ -38,7 +39,7 @@ input SPI0_MISO,
 output SPI0_CS_N, SPI0_SCLK, SPI0_MOSI,SD_CS
 );
 
-enum logic[7:0] {Init_sdram,Init_sdram_done,
+enum logic[7:0] {Bootup,Init_sdram,Init_sdram_done,
 Line_buffer,Line_buffer_done,
 Background,Score,Key_track,Note,
 PCM,Halted} State,Next_state;
@@ -47,19 +48,25 @@ always_ff @ (posedge clk)
 begin
 State<=Next_state;
 if(reset)
-State<=Init_sdram;
+State<=Bootup;
 end
-
+initial
+begin
+init_wait=1;
+end
 always_comb
 begin:State_transfer
 
 Next_state=State;
 
 case(State)
+Bootup:
+if (new_frame)
+Next_state=Init_sdram;
 
 Init_sdram:
 	if(init_done)
-		Next_state=Halted;
+		Next_state=Init_sdram_done;
 
 Init_sdram_done:
 	if (new_frame)
@@ -78,7 +85,7 @@ end
 
 always_comb
 begin:Arb
-
+init_wait=1;
 ar_addr=init_addr;
 ar_be=2'b11;
 ar_read=0;
@@ -96,8 +103,9 @@ I2S_sdram_ac=0;
 I2S_sdram_data=ar_rddata;
 
 case(State)
-Init_sdram:
+Bootup:
 begin
+init_wait=1;
 init_ac=ar_ac;
 init_miso_i=SPI0_MISO;
 SPI0_MISO_usb=0;
@@ -107,8 +115,32 @@ SPI0_MOSI=init_mosi_o;
 SD_CS=init_cs_bo;
 end
 
+Init_sdram:
+begin
+init_wait=0;
+init_ac=ar_ac;
+init_miso_i=SPI0_MISO;
+SPI0_MISO_usb=0;
+SPI0_CS_N=0;
+SPI0_SCLK=init_sclk_o;
+SPI0_MOSI=init_mosi_o;
+SD_CS=init_cs_bo;
+end
+
+Init_sdram_done:
+begin
+init_wait=0;
+I2S_sdram_Wait=0;
+ar_addr=I2S_sdram_addr;
+ar_read=I2S_sdram_rd;
+ar_write=0;
+I2S_sdram_data=ar_rddata;
+I2S_sdram_ac=ar_ac;
+end
+
 PCM:
 begin
+init_wait=0;
 I2S_sdram_Wait=0;
 ar_addr=I2S_sdram_addr;
 ar_read=I2S_sdram_rd;
@@ -119,6 +151,7 @@ I2S_sdram_ac=ar_ac;
 end
 Halted:
 begin
+init_wait=0;
 ar_addr=I2S_sdram_addr;
 I2S_sdram_ac=ar_ac;
 end

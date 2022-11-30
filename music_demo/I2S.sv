@@ -365,7 +365,7 @@ output [15:0] tempdata1,
 );
 
 
-fifo_a6 adf(
+fifo_a adf(
 	.data(sdram_data),
 	.rdclk(~SClk),
 	.wrclk(~Clk50),
