@@ -233,14 +233,14 @@ sdram_contorller sdram1(
 
 logic [24:0] ar_addr,init_addr;
 logic [1:0] ar_be,init_be;
-logic ar_read,ar_write,ar_ac;
+logic ar_read,ar_write,ar_ac,init_wait_sign;
 logic [15:0] ar_wrdata,ar_rddata,init_data;
 logic init_we,init_ac,init_done,init_cs_bo,init_sclk_o,init_mosi_o,init_miso_i,init_error;
 logic [15:0] init_wrdata;
 logic SPI0_CS_N_usb, SPI0_SCLK_usb, SPI0_MISO_usb, SPI0_MOSI_usb;
 
 sdcard_init sd_init(.clk50(MAX10_CLK1_50),
-	.reset(Reset_h),          //starts as soon reset is deasserted
+	.reset(init_wait_sign),          //starts as soon reset is deasserted
 	.ram_we(init_we),         //RAM interface pins
 	.ram_address(init_addr),
 	.ram_data(init_wrdata),
@@ -255,7 +255,7 @@ sdcard_init sd_init(.clk50(MAX10_CLK1_50),
 	
 arbiter_sdram arbiter(.*,.clk(MAX10_CLK1_50),.reset(Reset_h));
 
-logic new_frame;
+logic new_frame,all_done;
 
 always_ff @(posedge pixel_clk)
 begin
@@ -282,7 +282,7 @@ logic [1:0] aud_mclk_ctr;
 I2S IIS
 (
 .LRClk(ARDUINO_IO[4]),.SClk(ARDUINO_IO[5]),.sdram_Wait(I2S_sdram_Wait), .sdram_ac(I2S_sdram_ac), 
-.reset(Reset_h), .Clk50(MAX10_CLK1_50), .new_frame(new_frame), .sdram_rd(I2S_sdram_rd),
+.reset(Reset_h), .Clk50(MAX10_CLK1_50), .new_frame(all_done), .sdram_rd(I2S_sdram_rd),
 .sdram_data(I2S_sdram_data),
 .busy(I2S_Busy),.Dout(Dout),.Write_done(I2S_Done),
 .sdram_addr(I2S_sdram_addr),.*
