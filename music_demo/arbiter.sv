@@ -130,7 +130,6 @@ end
 Init_sdram_done:
 begin
 init_wait=0;
-I2S_sdram_Wait=0;
 ar_addr=I2S_sdram_addr;
 ar_read=I2S_sdram_rd;
 ar_write=0;

@@ -444,7 +444,7 @@ Next_state=Init_data3;
 
 Init_data3:
 begin
-if(Write_done)
+if(sdram_addr==addr_max)
 Next_state=Playrr;
 else 
 begin
@@ -473,7 +473,7 @@ Next_state=Fill3;
 
 Fill3:
 begin
-if(Write_done)
+if(sdram_addr==addr_max)
 Next_state=Playrr;
 else 
 begin
@@ -515,6 +515,8 @@ Play_flag=0;
 busy=1;
 //wrreq=1;
 sdram_addr_x=sdram_addr+1;
+if(sdram_addr==addr_max)
+Write_done=1;
 end
 
 Init_data3:
@@ -522,8 +524,6 @@ begin
 wrreq=1;
 Play_flag=0;
 busy=1;
-if(sdram_addr==addr_max)
-Write_done=1;
 end
 
 
@@ -546,6 +546,8 @@ Flag_i=1;
 busy=1;
 //wrreq=1;
 sdram_addr_x=sdram_addr+1;
+if(sdram_addr==addr_max)
+Write_done=1;
 end
 
 Fill3:
@@ -553,13 +555,13 @@ begin
 Flag_i=1;
 busy=1;
 wrreq=1;
-if(sdram_addr==addr_max)
-Write_done=1;
+
 end
 
 Playrr:
 begin
 Write_done=1;
+//wrreq=1;
 end
 endcase
 end
