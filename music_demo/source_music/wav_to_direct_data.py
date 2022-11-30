@@ -1,4 +1,4 @@
-wavefile=open('CHASE.wav','rb')
+wavefile=open('chase_48.wav','rb')
 wavefile.seek(40)
 data=wavefile.read()
 data1=data[0:4]
@@ -12,7 +12,7 @@ data1=data[1313257:1313259]
 
 
 wavefile.close()
-datafile=open('CHASE.dat','wb')
+datafile=open('CHASE_48.dat','wb')
 # datafile.write(data1)
 # datafile.write(data1)
 # datafile.write(data1)
