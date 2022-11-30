@@ -396,7 +396,7 @@ logic [4:0] counter,counter_x,counters;
 logic [1:0] PreLR;
 logic Play_flag,Flag_i;
 
-enum logic [6:0] {Halted,Init_data,Init_data2,Init_data3,Play,Play2,Playrr,Fill,Fill2,Fill3} State,Next_state;
+enum logic [2:0] {Halted,Init_data,Init_data2,Play,Play2,Fill,Fill2} State,Next_state;
 enum logic [2:0] {Stop,Plays,PlayH} Statep,Next_statep;
 
 initial
@@ -440,17 +440,13 @@ if(sdram_ac)
 Next_state=Init_data2;
 
 Init_data2:
-Next_state=Init_data3;
-
-Init_data3:
-begin
 if(sdram_addr==addr_max)
-Next_state=Playrr;
+Next_state=Play;
 else 
 begin
 Next_state=Init_data;
 end
-end
+
 
 Play:
 if (new_frame)
@@ -469,23 +465,11 @@ if(sdram_ac)
 Next_state=Fill2;
 
 Fill2:
-Next_state=Fill3;
-
-Fill3:
-begin
 if(sdram_addr==addr_max)
-Next_state=Playrr;
-else 
-begin
-Next_state=Fill;
-end
-
-end
-
-Playrr:
-begin
 Next_state=Play;
-end
+else
+Next_state=Fill;
+
 endcase
 end
 
@@ -513,17 +497,10 @@ Init_data2:
 begin
 Play_flag=0;
 busy=1;
-//wrreq=1;
+wrreq=1;
 sdram_addr_x=sdram_addr+1;
 if(sdram_addr==addr_max)
 Write_done=1;
-end
-
-Init_data3:
-begin
-wrreq=1;
-Play_flag=0;
-busy=1;
 end
 
 
@@ -544,25 +521,12 @@ Fill2:
 begin
 Flag_i=1;
 busy=1;
-//wrreq=1;
+wrreq=1;
 sdram_addr_x=sdram_addr+1;
 if(sdram_addr==addr_max)
 Write_done=1;
 end
 
-Fill3:
-begin
-Flag_i=1;
-busy=1;
-wrreq=1;
-
-end
-
-Playrr:
-begin
-Write_done=1;
-//wrreq=1;
-end
 endcase
 end
 
