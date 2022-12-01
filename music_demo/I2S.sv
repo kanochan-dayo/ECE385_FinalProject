@@ -5,24 +5,33 @@ output sdram_rd,
 input [127:0]sdram_data,
 output busy,Dout,Write_done,
 output [21:0] sdram_addr,
- output [10:0] wrusedw,output [127:0] tempdata1
+ output [7:0] wrusedw,output [127:0] tempdata1
 );
 
 
-fifo_a adf(
+//fifo_a adf(
+//	.data(sdram_data),
+//	.rdclk(~SClk),
+//	.wrclk(~Clk50),
+//	.wrreq(wrreq),
+//	.rdreq(rdreq),
+//	.q(tempdata1),
+//	.aclr(reset),
+//	.wrusedw(wrusedw),
+//.*
+//	);
+//	
+fifo_a_ram adf(
+	.rdaddress(rdaddress[7:0]),
+	.wraddress(wraddress[7:0]),
+	.wren(wrreq),
 	.data(sdram_data),
-	.rdclk(~SClk),
-	.wrclk(~Clk50),
-	.wrreq(wrreq),
-	.rdreq(rdreq),
-	.q(tempdata1),
-	.aclr(reset),
-	.wrusedw(wrusedw),
-.*
-	);
-	
-	
+	.rdclock(~SClk),
+	.wrclock(~Clk50),
+	.q(tempdata1));
+logic [8:0]  rdaddress,wraddress,rdaddress_x,wraddress_x;
 
+assign wrusedw=(rdaddress[8]==wraddress[8])?(wraddress[7:0]-rdaddress[7:0]):(256+wraddress[7:0]-rdaddress[7:0]);
 	
 logic [127:0] tempdata;
 
@@ -30,6 +39,7 @@ logic [127:0] tempdata;
 	begin
 	tempdata<=tempdata1;
 	end
+
 	
 logic rdreq,wrreq;
 
@@ -53,12 +63,14 @@ begin
 
 if (reset)
 begin
+wraddress<=0;
 State<=Halted;
 sdram_addr<=23'h00000;
 addr_max<=23'h00000;
 end
 else
 begin
+wraddress<=wraddress_x;
 State<=Next_state;
 sdram_addr<=sdram_addr_x;
 addr_max<=addr_max_x;
@@ -68,6 +80,7 @@ end
 
 always_comb
 begin
+wraddress_x=wraddress;
 Next_state=State;
 addr_max_x=addr_max;
 case(State)
@@ -83,13 +96,15 @@ if(sdram_ac)
 Next_state=Init_data2;
 
 Init_data2:
+begin
+wraddress_x=wraddress+1;
 if(sdram_addr==addr_max)
 Next_state=Play;
 else 
 begin
 Next_state=Init_data;
 end
-
+end
 
 Play:
 if (new_frame)
@@ -108,10 +123,13 @@ if(sdram_ac)
 Next_state=Fill2;
 
 Fill2:
+begin
+wraddress_x=wraddress+1;
 if(sdram_addr==addr_max)
 Next_state=Play;
 else
 Next_state=Fill;
+end
 
 endcase
 end
@@ -192,21 +210,24 @@ always_ff @ (posedge SClk)
 begin
 if (reset)
 begin
+rdaddress<=0;
 counter<=0;
 end
 else
 begin
+rdaddress<=rdaddress_x;
 counter<=counter_x;
-
 end
 end
 
 always_comb
 begin
-
+rdaddress_x=rdaddress;
 Next_statep=Statep;
 case (Statep)
 Stop:
+begin
+rdaddress_x=0;
 if(Play_flag)
 begin
 if(LRClk)
@@ -214,6 +235,7 @@ Next_statep=PlayH;
 end
 else
 Next_statep=Statep;
+end
 
 
 PlayH:
@@ -226,11 +248,13 @@ else
 Next_statep=Stop;
 
 Plays:
+begin
+rdaddress_x=rdaddress+1;
 if (Play_flag)
 Next_statep=PlayH;
 else
 Next_statep=Stop;
-
+end
 endcase
 end
 

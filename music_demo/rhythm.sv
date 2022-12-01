@@ -225,7 +225,7 @@ sdram_contorller sdram1(
 		);
 
 logic [21:0] ar_addr,init_addr;
-logic [7:0] ar_be;
+logic [15:0] ar_be;
 logic ar_read,ar_write,ar_ac;
 logic [127:0] ar_wrdata,ar_rddata,init_data;
 logic init_we,init_ac,init_done,init_cs_bo,init_sclk_o,init_mosi_o,init_miso_i,init_error;
@@ -285,7 +285,7 @@ logic I2S_sdram_Wait,I2S_sdram_ac,I2S_sdram_rd,I2S_Busy,I2S_Done;
 logic [127:0] I2S_sdram_data;
 logic[21:0] I2S_sdram_addr;
 logic [127:0] tempdata1;
-logic [10:0] wrusedw;
+logic [7:0] wrusedw;
 logic Dout,init_wait;
 
 assign ARDUINO_IO[2]=Dout;

@@ -29,7 +29,7 @@ input [21:0] I2S_sdram_addr,
 
 //result
 output [21:0] ar_addr,
-output [7:0] ar_be,
+output [15:0] ar_be,
 output ar_read,ar_write,
 input ar_ac,
 output [127:0] ar_wrdata,
@@ -87,7 +87,7 @@ always_comb
 begin:Arb
 init_wait=1;
 ar_addr=init_addr;
-ar_be=8'b11111111;
+ar_be=16'hFFFF;
 ar_read=0;
 ar_write=init_we;
 init_ac=0;
