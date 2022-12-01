@@ -101,7 +101,7 @@ module rhythm (
 	
 	//HEX drivers to convert numbers to HEX output
 		
-	HexDriver hex_driver5 ({1'b0,ar_addr[22:20]}, HEX5[6:0]);
+	HexDriver hex_driver5 ({2'b00,ar_addr[21:20]}, HEX5[6:0]);
 	assign HEX5[7] = 1'b1;
 	
 	HexDriver hex_driver4 (ar_addr[19:16], HEX4[6:0]);
@@ -213,7 +213,7 @@ sdram_contorller sdram1(
 		.sdram_wire_dqm({DRAM_UDQM,DRAM_LDQM}),                //.dqm
 		.sdram_wire_ras_n(DRAM_RAS_N),              		   //.ras_n
 		.sdram_wire_we_n(DRAM_WE_N),                		   //.we_n
-		.bridge_address({ar_addr,3'b000}),     //     bridge.address
+		.bridge_address({ar_addr,4'b0000}),     //     bridge.address
 		.bridge_byte_enable(ar_be), //           .byte_enable
 		.bridge_read(ar_read),        //           .read
 		.bridge_write(ar_write),       //           .write
@@ -224,12 +224,12 @@ sdram_contorller sdram1(
 		.reset_reset_n(KEY[0])
 		);
 
-logic [22:0] ar_addr,init_addr;
+logic [21:0] ar_addr,init_addr;
 logic [7:0] ar_be;
 logic ar_read,ar_write,ar_ac;
-logic [63:0] ar_wrdata,ar_rddata,init_data;
+logic [127:0] ar_wrdata,ar_rddata,init_data;
 logic init_we,init_ac,init_done,init_cs_bo,init_sclk_o,init_mosi_o,init_miso_i,init_error;
-logic [63:0] init_wrdata;
+logic [127:0] init_wrdata;
 logic SPI0_CS_N_usb, SPI0_SCLK_usb, SPI0_MISO_usb, SPI0_MOSI_usb;
 
 sdcard_init sd_init(.clk50(MAX10_CLK1_50),
@@ -282,9 +282,9 @@ I2S IIS
 );
 
 logic I2S_sdram_Wait,I2S_sdram_ac,I2S_sdram_rd,I2S_Busy,I2S_Done;
-logic[63:0] I2S_sdram_data;
-logic[22:0] I2S_sdram_addr;
-logic [63:0] tempdata1;
+logic [127:0] I2S_sdram_data;
+logic[21:0] I2S_sdram_addr;
+logic [127:0] tempdata1;
 logic [10:0] wrusedw;
 logic Dout,init_wait;
 

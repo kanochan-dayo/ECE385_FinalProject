@@ -4,10 +4,10 @@ module arbiter_sdram (
 input clk,reset,new_frame,
 
 //sdram_init_input
-input [22:0]init_addr,
+input [21:0]init_addr,
 input init_we,
 
-input [63:0] init_wrdata,
+input [127:0] init_wrdata,
 output init_ac,   //acknowledge from RAM to move to next word
 input init_error, //error initializing
 input init_done,  //done with reading all MAX_RAM_ADDRESS words
@@ -24,16 +24,16 @@ output SPI0_MISO_usb,
 //I2S input
 output I2S_sdram_Wait,I2S_sdram_ac,
 input I2S_sdram_rd,I2S_Busy,I2S_Done,
-output[63:0] I2S_sdram_data,
-input [22:0] I2S_sdram_addr,
+output[127:0] I2S_sdram_data,
+input [21:0] I2S_sdram_addr,
 
 //result
-output [22:0] ar_addr,
+output [21:0] ar_addr,
 output [7:0] ar_be,
 output ar_read,ar_write,
 input ar_ac,
-output [63:0] ar_wrdata,
-input [63:0] ar_rddata,
+output [127:0] ar_wrdata,
+input [127:0] ar_rddata,
 
 input SPI0_MISO,
 output SPI0_CS_N, SPI0_SCLK, SPI0_MOSI,SD_CS

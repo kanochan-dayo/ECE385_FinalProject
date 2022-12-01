@@ -2,11 +2,10 @@ module I2S
 (
 input LRClk,SClk,sdram_Wait, sdram_ac, reset, Clk50, new_frame, 
 output sdram_rd,
-input [63:0]sdram_data,
+input [127:0]sdram_data,
 output busy,Dout,Write_done,
-output [22:0] sdram_addr,
-output [63:0] tempdata1,
- output [10:0] wrusedw
+output [21:0] sdram_addr,
+ output [10:0] wrusedw,output [127:0] tempdata1
 );
 
 
@@ -24,20 +23,19 @@ fifo_a adf(
 	
 	
 
+	
+logic [127:0] tempdata;
 
 	always_ff @ (posedge rdreq)
 	begin
 	tempdata<=tempdata1;
 	end
-
 	
-logic [63:0] tempdata;
-
 logic rdreq,wrreq;
 
-logic [22:0] sdram_addr_x,addr_max,addr_max_x;
+logic [21:0] sdram_addr_x,addr_max,addr_max_x;
 
-logic [6:0] counter,counter_x,counters;
+logic [7:0] counter,counter_x,counters;
 logic [1:0] PreLR;
 logic Play_flag;
 
@@ -46,8 +44,8 @@ enum logic [2:0] {Stop,Plays,PlayH} Statep,Next_statep;
 
 initial
 begin
-sdram_addr=23'h20000;
-addr_max=23'h20000;
+sdram_addr=23'h00000;
+addr_max=23'h00000;
 end
 
 always_ff @ (posedge Clk50)
@@ -56,8 +54,8 @@ begin
 if (reset)
 begin
 State<=Halted;
-sdram_addr<=23'h20000;
-addr_max<=23'h20000;
+sdram_addr<=23'h00000;
+addr_max<=23'h00000;
 end
 else
 begin
@@ -77,7 +75,7 @@ Halted:
 if(~sdram_Wait)
 begin
 Next_state=Init_data;
-addr_max_x=addr_max+425;
+addr_max_x=addr_max+210;
 end
 
 Init_data:
@@ -101,7 +99,7 @@ Play2:
 if(~sdram_Wait)
 begin
 Next_state=Fill;
-addr_max_x=addr_max+425-wrusedw;
+addr_max_x=addr_max+210-wrusedw;
 end
 
 
@@ -194,7 +192,6 @@ always_ff @ (posedge SClk)
 begin
 if (reset)
 begin
-
 counter<=0;
 end
 else
@@ -222,7 +219,7 @@ Next_statep=Statep;
 PlayH:
 if (Play_flag)
 begin
-if(counter==124)
+if(counter==252)
 Next_statep=Plays;
 end
 else
@@ -251,13 +248,13 @@ counter_x=counter+1;
 else
 begin
 counter_x[4:0]=1;
-counter_x[6:5]=counter[6:5];
+counter_x[7:5]=counter[7:5];
 end
 
 if(counters[4]==1)
 Dout=0;
 else
-Dout=tempdata[(15+(counters[6:5]<<4))-counters[3:0]];
+Dout=tempdata[(15+(counters[7:5]<<4))-counters[3:0]];
 end
 
 always_ff @ (negedge SClk)
