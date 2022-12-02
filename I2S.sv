@@ -2,68 +2,61 @@ module I2S
 (
 input LRClk,SClk,sdram_Wait, sdram_ac, reset, Clk50, new_frame, 
 output sdram_rd,
-input [15:0]sdram_data,
-output busy,Dout,Write_done,rdempty,wrfull,
-output [24:0] sdram_addr,
- output [10:0] wrusedw
+input [127:0]sdram_data,
+output busy,Dout,Write_done,
+output [21:0] sdram_addr,
+ output [7:0] wrusedw,output [127:0] tempdata1
 );
 
 
-fifo_audio adf(
+//fifo_a adf(
+//	.data(sdram_data),
+//	.rdclk(~SClk),
+//	.wrclk(~Clk50),
+//	.wrreq(wrreq),
+//	.rdreq(rdreq),
+//	.q(tempdata1),
+//	.aclr(reset),
+//	.wrusedw(wrusedw),
+//.*
+//	);
+//	
+fifo_a_ram adf(
+	.rdaddress(rdaddress[7:0]),
+	.wraddress(wraddress[7:0]),
+	.wren(wrreq),
 	.data(sdram_data),
 	.rdclock(~SClk),
 	.wrclock(~Clk50),
-	.wren(wrreq),
-	.q(tempdata1),
-.*
-	);
-logic [10:0] rdaddress,wraddress;
-logic [10:0] rdaddress_x,wraddress_x;
+	.q(tempdata1));
 
-always_ff @ (negedge LRClk)
-begin
-if(State==Halted||State==Init_data3||State==Init_data||State==Init_data2)
-begin
-wrusedw<=1580;
-Flag_c<=0;
-end
-else if(Flag_i==1&&Flag_c==0)
-begin
-Flag_c<=1;
-wrusedw+=1613;
-end
-else if(Flag_i==0&&Flag_c==1)
-begin
-Flag_c<=0;
-wrusedw-=2;
-end
-else
-wrusedw-=2;
+logic [8:0]  rdaddress,wraddress,rdaddress_x,wraddress_x;
 
-end
+assign wrusedw=(rdaddress[8]==wraddress[8])?(wraddress[7:0]-rdaddress[7:0]):(256+wraddress[7:0]-rdaddress[7:0]);
+	
+logic [127:0] tempdata;
 
-	always_ff @ (negedge rdreq)
+	always_ff @ (posedge rdreq)
 	begin
 	tempdata<=tempdata1;
 	end
-	
-logic [15:0] tempdata,tempdata1;
 
+	
 logic rdreq,wrreq;
 
-logic [24:0] sdram_addr_x,addr_max,addr_max_x;
+logic [21:0] sdram_addr_x,addr_max,addr_max_x;
 
-logic [4:0] counter,counter_x,counters;
+logic [7:0] counter,counter_x,counters;
 logic [1:0] PreLR;
-logic Play_flag,Flag_i,Flag_c;
+logic Play_flag;
 
-enum logic [6:0] {Halted,Init_data,Init_data2,Init_data3,Play,Play2,Playrr,Fill,Fill2,Fill3} State,Next_state;
+enum logic [2:0] {Halted,Init_data,Init_data2,Play,Play2,Fill,Fill2} State,Next_state;
 enum logic [2:0] {Stop,Plays,PlayH} Statep,Next_statep;
 
 initial
 begin
-sdram_addr=25'h80000;
-addr_max=25'h80000;
+sdram_addr=23'h00000;
+addr_max=23'h00000;
 end
 
 always_ff @ (posedge Clk50)
@@ -71,32 +64,32 @@ begin
 
 if (reset)
 begin
-State<=Halted;
-sdram_addr<=25'h80000;
-addr_max<=25'h80000;
 wraddress<=0;
+State<=Halted;
+sdram_addr<=23'h00000;
+addr_max<=23'h00000;
 end
 else
 begin
+wraddress<=wraddress_x;
 State<=Next_state;
 sdram_addr<=sdram_addr_x;
 addr_max<=addr_max_x;
-wraddress<=wraddress_x;
 end
 end
 
 
 always_comb
 begin
+wraddress_x=wraddress;
 Next_state=State;
 addr_max_x=addr_max;
-wraddress_x=wraddress;
 case(State)
 Halted:
 if(~sdram_Wait)
 begin
 Next_state=Init_data;
-addr_max_x=addr_max+1580;
+addr_max_x=addr_max+200;
 end
 
 Init_data:
@@ -104,16 +97,13 @@ if(sdram_ac)
 Next_state=Init_data2;
 
 Init_data2:
-Next_state=Init_data3;
-
-Init_data3:
 begin
-if(Write_done)
-Next_state=Playrr;
+wraddress_x=wraddress+1;
+if(sdram_addr==addr_max)
+Next_state=Play;
 else 
 begin
 Next_state=Init_data;
-wraddress_x=wraddress+1;
 end
 end
 
@@ -125,42 +115,28 @@ Play2:
 if(~sdram_Wait)
 begin
 Next_state=Fill;
-if(wrusedw>200)
-addr_max_x=addr_max+1550;
-else
-addr_max_x=addr_max+1615;
+addr_max_x=addr_max+200-wrusedw;
 end
+
 
 Fill:
 if(sdram_ac)
 Next_state=Fill2;
 
 Fill2:
-Next_state=Fill3;
-
-Fill3:
 begin
-if(Write_done)
-Next_state=Playrr;
-else 
-begin
-Next_state=Fill;
 wraddress_x=wraddress+1;
-end
-
-end
-
-Playrr:
-begin
+if(sdram_addr==addr_max)
 Next_state=Play;
-wraddress_x=wraddress+1;
+else
+Next_state=Fill;
 end
+
 endcase
 end
 
 always_comb
 begin
-Flag_i=0;
 Play_flag=1;
 busy=0;
 wrreq=0;
@@ -185,14 +161,7 @@ Play_flag=0;
 busy=1;
 wrreq=1;
 sdram_addr_x=sdram_addr+1;
-end
-
-Init_data3:
-begin
-Play_flag=0;
-busy=1;
-wrreq=1;
-if(sdram_addr>=addr_max)
+if(sdram_addr==addr_max)
 Write_done=1;
 end
 
@@ -205,33 +174,19 @@ end
 
 Fill:
 begin
-Flag_i=1;
 busy=1;
 sdram_rd=1;
 end
 
 Fill2:
 begin
-Flag_i=1;
 busy=1;
 wrreq=1;
 sdram_addr_x=sdram_addr+1;
-end
-
-Fill3:
-begin
-Flag_i=1;
-busy=1;
-wrreq=1;
-if(sdram_addr>=addr_max)
+if(sdram_addr==addr_max)
 Write_done=1;
 end
 
-Playrr:
-begin
-wrreq=1;
-Write_done=1;
-end
 endcase
 end
 
@@ -261,8 +216,8 @@ counter<=0;
 end
 else
 begin
-counter<=counter_x;
 rdaddress<=rdaddress_x;
+counter<=counter_x;
 end
 end
 
@@ -272,6 +227,8 @@ rdaddress_x=rdaddress;
 Next_statep=Statep;
 case (Statep)
 Stop:
+begin
+rdaddress_x=0;
 if(Play_flag)
 begin
 if(LRClk)
@@ -279,29 +236,26 @@ Next_statep=PlayH;
 end
 else
 Next_statep=Statep;
+end
 
 
 PlayH:
 if (Play_flag)
 begin
-if(counter==28)
+if(counter==252)
 Next_statep=Plays;
 end
 else
 Next_statep=Stop;
 
 Plays:
-if (Play_flag)
-begin
-if(counter==31)
 begin
 rdaddress_x=rdaddress+1;
+if (Play_flag)
 Next_statep=PlayH;
-end
-end
 else
 Next_statep=Stop;
-
+end
 endcase
 end
 
@@ -317,12 +271,15 @@ endcase
 if(PreLR[1]==PreLR[0])
 counter_x=counter+1;
 else
-counter_x=1;
+begin
+counter_x[4:0]=1;
+counter_x[7:5]=counter[7:5];
+end
 
 if(counters[4]==1)
 Dout=0;
 else
-Dout=tempdata[15-counters[3:0]];
+Dout=tempdata[(15+(counters[7:5]<<4))-counters[3:0]];
 end
 
 always_ff @ (negedge SClk)
@@ -332,6 +289,12 @@ end
 
 
 endmodule
+
+
+
+
+
+
 
 
 

@@ -72,7 +72,7 @@ module rhythm (
 	logic [9:0] LEDRR;
 	logic SD_CS;
 	assign LEDR[9:6]=LEDRR[9:6];
-	assign LEDR[2:1]={rdempty,wrfull};
+	assign LEDR[4:1]=DFJK;
 
 //=======================================================
 //  Structural coding
@@ -101,22 +101,22 @@ module rhythm (
 	
 	//HEX drivers to convert numbers to HEX output
 		
-	HexDriver hex_driver5 (ar_addr[23:20], HEX5[6:0]);
+	HexDriver hex_driver5 ({2'b00,ar_addr[21:20]}, HEX5[6:0]);
 	assign HEX5[7] = 1'b1;
 	
 	HexDriver hex_driver4 (ar_addr[19:16], HEX4[6:0]);
 	assign HEX4[7] = 1'b1;
 	
-	HexDriver hex_driver3 (ar_wrdata[15:12], HEX3[6:0]);
+	HexDriver hex_driver3 (tempdata1[15:12], HEX3[6:0]);
 	assign HEX3[7] = 1'b1;
 	
-	HexDriver hex_driver2 ({1'b0,wrusedw[10:8]}, HEX2[6:0]);
+	HexDriver hex_driver2 (tempdata1[11:8], HEX2[6:0]);
 	assign HEX2[7] = 1'b1;
 	
-	HexDriver hex_driver1 (wrusedw[7:4], HEX1[6:0]);
+	HexDriver hex_driver1 (tempdata1[7:4], HEX1[6:0]);
 	assign HEX1[7] = 1'b1;
 	
-	HexDriver hex_driver0 (wrusedw[3:0], HEX0[6:0]);
+	HexDriver hex_driver0 (tempdata1[3:0], HEX0[6:0]);
 	assign HEX0[7] = 1'b1;
 	
 	//fill in the hundreds digit as well as the negative sign
@@ -177,25 +177,11 @@ assign ARDUINO_IO[14] = i2c_serial_sda_oe ? 1'b0 : 1'bz;
 		.i2c_sda_oe(i2c_serial_sda_oe),                     //                        .sda_oe
 		.i2c_scl_oe(i2c_serial_scl_oe), 
 		
-		//VGA
-//		.vga_port_red (VGA_R),
-//		.vga_port_green (VGA_G),
-//		.vga_port_blue (VGA_B),
-//		.vga_port_hs (VGA_HS),
-//		.vga_port_vs (VGA_VS)
+
 
 		// DFJK
 		.key_dfjk_export(DFJK),
 		
-		//init bridge
-//		.init_out_acknowledge(init_ac),           //                init_out.acknowledge
-//		.init_out_irq(0),                   //                        .irq
-//		.init_out_address(init_addr),               //                        .address
-//		.init_out_bus_enable(init_bus),            //                        .bus_enable
-//		.init_out_byte_enable(init_be),           //                        .byte_enable
-//		.init_out_rw(init_rw),                    //                        .rw
-//		.init_out_write_data(init_data),            //                        .write_data
-//		.init_out_read_data(0)             //                        .read_data
 		
 	 );
 
@@ -220,7 +206,7 @@ sdram_contorller sdram1(
 		.sdram_wire_dqm({DRAM_UDQM,DRAM_LDQM}),                //.dqm
 		.sdram_wire_ras_n(DRAM_RAS_N),              		   //.ras_n
 		.sdram_wire_we_n(DRAM_WE_N),                		   //.we_n
-		.bridge_address({ar_addr,1'b0}),     //     bridge.address
+		.bridge_address({ar_addr,4'b0000}),     //     bridge.address
 		.bridge_byte_enable(ar_be), //           .byte_enable
 		.bridge_read(ar_read),        //           .read
 		.bridge_write(ar_write),       //           .write
@@ -231,12 +217,12 @@ sdram_contorller sdram1(
 		.reset_reset_n(KEY[0])
 		);
 
-logic [24:0] ar_addr,init_addr;
-logic [1:0] ar_be,init_be;
+logic [21:0] ar_addr,init_addr;
+logic [15:0] ar_be;
 logic ar_read,ar_write,ar_ac;
-logic [15:0] ar_wrdata,ar_rddata,init_data;
+logic [127:0] ar_wrdata,ar_rddata,init_data;
 logic init_we,init_ac,init_done,init_cs_bo,init_sclk_o,init_mosi_o,init_miso_i,init_error;
-logic [15:0] init_wrdata;
+logic [127:0] init_wrdata;
 logic SPI0_CS_N_usb, SPI0_SCLK_usb, SPI0_MISO_usb, SPI0_MOSI_usb;
 
 sdcard_init sd_init(.clk50(MAX10_CLK1_50),
@@ -261,7 +247,7 @@ always_ff @(posedge pixel_clk)
 begin
 new_frame<=new_frame;
 
-if (DrawY==524&&DrawX==0)
+if (DrawY==523&&DrawX==790)
 new_frame<=1;
 else
 new_frame<=0;
@@ -288,11 +274,12 @@ I2S IIS
 .sdram_addr(I2S_sdram_addr),.*
 );
 
-logic I2S_sdram_Wait,I2S_sdram_ac,I2S_sdram_rd,I2S_Busy,I2S_Done,rdempty,wrfull;
-logic[15:0] I2S_sdram_data;
-logic[24:0] I2S_sdram_addr;
-logic [10:0] wrusedw;
-logic Dout;
+logic I2S_sdram_Wait,I2S_sdram_ac,I2S_sdram_rd,I2S_Busy,I2S_Done;
+logic [127:0] I2S_sdram_data;
+logic[21:0] I2S_sdram_addr;
+logic [127:0] tempdata1;
+logic [7:0] wrusedw;
+logic Dout,init_wait;
 
 assign ARDUINO_IO[2]=Dout;
 //assign ARDUINO_IO[2]=ARDUINO_IO[1];
@@ -307,6 +294,6 @@ lineb lb(.*,.clock(MAX10_CLK1_50),.sdram_data(lb_sdram_data),
 		.sdram_Wait(lb_sdram_Wait),.reset(Reset_h));
 
 logic frame_flip,lb_sdram_Wait,lb_sdram_ac,lb_sdram_rd,lb_Busy;
-logic[15:0] lb_sdram_data;
-logic[24:0] lb_sdram_addr;
+logic[127:0] lb_sdram_data;
+logic[21:0] lb_sdram_addr;
 endmodule

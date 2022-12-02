@@ -54,6 +54,8 @@ initial
 begin
 init_wait=1;
 end
+
+
 always_comb
 begin:State_transfer
 
