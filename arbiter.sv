@@ -27,9 +27,15 @@ input I2S_sdram_rd,I2S_Busy,I2S_Done,
 output[127:0] I2S_sdram_data,
 input [21:0] I2S_sdram_addr,
 
+//BK input
+output DFJK_sdram_wait,DFJK_sdram_ac,
+input DFJK_sdram_rd,DFJK_sdram_wr,DFJK_busy,DFJK_sdram_writedone,
+output [127:0]DFJK_sdram_rddata,
+input [127:0]DFJK_sdram_wrdata,
+input [21:0]DFJK_sdram_addr,
 
 //Line Buffer input
-input lb_sdram_rd,lb_Busy,
+input lb_sdram_rd,lb_Busy,lb_done,
 output lb_sdram_Wait,lb_sdram_ac,
 output [127:0] lb_sdram_data,
 input [21:0] lb_sdram_addr,
@@ -47,7 +53,7 @@ output SPI0_CS_N, SPI0_SCLK, SPI0_MOSI,SD_CS
 );
 
 enum logic[7:0] {Bootup,Init_sdram,Init_sdram_done,
-Init_memory,Init_memory_done,Line_buffer,Line_buffer_mid,PCM_done,
+Init_memory,Init_memory_done,Line_buffer,Line_buffer_mid,Line_buffer_pre,PCM_done,
 Background,Score,Key_track,Note,
 PCM,Halted} State,Next_state;
 
@@ -82,16 +88,38 @@ Init_sdram_done:
 		Next_state=Line_buffer;
 
 Line_buffer:
+	if (lb_done)
+	begin
+	if(~DFJK_sdram_writedone)
+	Next_state=Background;
+	else
+	Next_state=PCM;
+	end
+	else
 	if (~lb_Busy)
 	Next_state=Line_buffer_mid;
 
 	
 Line_buffer_mid:
-	if (DrawY==479)
-	Next_state=PCM;
-	else if (DrawX==799)
-	Next_state=Line_buffer;
 	
+	if(~DFJK_sdram_writedone)
+	Next_state=Background;
+	else if (DrawX==790)
+	Next_state=Line_buffer_pre;
+//	else
+//	Next_state=Background;
+	
+Line_buffer_pre:
+	if(~DFJK_busy)
+		Next_state=Line_buffer;
+
+Background:
+	if(DFJK_sdram_writedone)
+	Next_state=Line_buffer;
+	else if (DrawY<479&&DrawX==790)
+	Next_state=Line_buffer_pre;
+
+
 Halted:
 	if (new_frame)
 		Next_state=Line_buffer;
@@ -106,7 +134,9 @@ end
 
 always_comb
 begin:Arb
-
+DFJK_sdram_rddata=0;
+DFJK_sdram_wait=1;
+DFJK_sdram_ac=0;
 
 lb_sdram_Wait=1;
 lb_sdram_ac=0;
@@ -195,6 +225,25 @@ Line_buffer_mid:
 begin
 init_wait=0;
 ar_write=0;
+end
+Background:
+begin
+DFJK_sdram_wait=0;
+DFJK_sdram_ac=ar_ac;
+ar_read=DFJK_sdram_rd;
+ar_write=DFJK_sdram_wr;
+DFJK_sdram_rddata=ar_rddata;
+ar_wrdata=DFJK_sdram_wrdata;
+ar_addr=DFJK_sdram_addr;
+end
+Line_buffer_pre:
+begin
+DFJK_sdram_ac=ar_ac;
+ar_read=DFJK_sdram_rd;
+ar_write=DFJK_sdram_wr;
+DFJK_sdram_rddata=ar_rddata;
+ar_wrdata=DFJK_sdram_wrdata;
+ar_addr=DFJK_sdram_addr;
 end
 endcase
 end

@@ -15,7 +15,7 @@ module sdcard_init (
 	input  logic miso_i
 );
 
-parameter 			MAX_RAM_ADDRESS = 22'h300000;
+parameter 			MAX_RAM_ADDRESS = 22'h31EFFFF;
 parameter			SDHC 				 = 1'b1;
 
 logic 				sd_read_block;

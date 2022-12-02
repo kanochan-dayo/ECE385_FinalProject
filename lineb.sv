@@ -5,7 +5,7 @@ module lineb (
 		output [21:0]sdram_addr,
 		input sdram_ac,
 		output sdram_rd,
-		output busy,
+		output busy,done,
 		input clock,
 		blank,
 		reset,
@@ -20,7 +20,10 @@ module lineb (
 
 
  background_palette_rom er(.address(pixel_palette_index), .data_Out(RGB_ALL));
- line_buffer line_buf(.rdaddress(place_a),.clock(~clock),.q(pixel_palette_a),.wraddress(place_b),.data(sdram_data));
+ 
+ line_buffer line_buf(.rdaddress(place_a),.clock(~clock),.q(pixel_palette_a),
+ .wraddress(place_b),.data(sdram_data),.wren(wren));
+ 
  logic [23:0] RGB_ALL;
  logic [6:0] place_a,place_b;
  logic [9:0]WriteY,WriteX,WriteX_x;
@@ -32,7 +35,7 @@ module lineb (
  parameter [21:0]Address1=22'h100000;
  parameter [21:0]Address2=22'h200000;
  
- enum logic[2:0] {Halted,Read,Read1,Pause,Pause1,Pauserr} State,Next_state;
+ enum logic[2:0] {Halted,Read,Read1,Pause,Pause1,Done} State,Next_state;
  
  always_ff @(posedge clock)
  begin
@@ -59,7 +62,7 @@ begin
  Next_state=State;
  case(State)
  Halted:
- if (new_frame&&(~sdram_Wait))
+ if (~sdram_Wait)
  Next_state=Read;
  
  Read:
@@ -75,10 +78,18 @@ begin
  end
  
  Pause:
- if(DrawY==479)
- Next_state=Halted;
- else if(DrawX==799)
+ if(DrawY==470)
+ Next_state=Done;
+ else if(DrawX==790)
+ Next_state=Pause1;
+ 
+ Pause1:
+ if(DrawX==799)
  Next_state=Read;
+ 
+ Done:
+ if(new_frame)
+ Next_state=Halted;
  
  endcase
 end 
@@ -86,13 +97,16 @@ end
 
 always_comb
 begin
+done=0;
 sdram_rd=0;
 busy=0;
 wren=0;
 WriteX_x=WriteX;
 case(State)
  Halted:
+ begin
  WriteX_x=0;
+ end
  Read:
  begin
  busy=1;
@@ -107,6 +121,14 @@ case(State)
  
 Pause:
 WriteX_x=0;
+Pause1:
+begin
+WriteX_x=0;
+busy=1;
+
+end
+Done:
+done=1;
 
 endcase
  
@@ -162,7 +184,7 @@ sdram_addr=WriteX[9:4]+(WriteY*40)+Address2;
 	4'hF:
 	pixel_palette_index=pixel_palette_a[127:120];
 	endcase
-if (blank)
+if (blank&&~sdram_Wait)
  begin
 	VGA_R<=RGB_ALL[23:20];
 	VGA_G<=RGB_ALL[15:12];

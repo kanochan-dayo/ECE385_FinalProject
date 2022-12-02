@@ -5,7 +5,7 @@ output sdram_rd,
 input [127:0]sdram_data,
 output busy,Dout,Write_done,
 output [21:0] sdram_addr,
- output [7:0] wrusedw,output [127:0] tempdata1
+ output [7:0] wrusedw
 );
 
 
