@@ -11,19 +11,22 @@
 
 
 
-input_file = "256data.txt"
-output_file = "256palette.txt"
+# input_file = "./useful_python/256data.txt"
+output_file = "./useful_python/256palette.txt"
+output_file_rom = "./useful_python/256palette_rom.txt"
+redcolors = ["00","20","50","70","90","B0","E0","FF"]
+greencolors = ["00","20","50","70","90","B0","E0","FF"]
+bluecolors = ["00","50","B0","FF"]
 out=open(output_file, "w")
 out.write("palette_hex = [")
-with open(input_file) as f:
-    for line in f:
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            line = line[line.index('#')+1:line.index('#')+7]
-            line = line.upper()
-            out.write("'"+"0x"+line+"', " )
-            continue
-        except ValueError:
-            pass
+for red in redcolors:
+    for green in greencolors:
+        for blue in bluecolors:
+            out.write("'0x"+red+green+blue+"', ")
+out.write("]")
+out.close()
+out=open(output_file_rom, "w")
+for red in redcolors:
+    for green in greencolors:
+        for blue in bluecolors:
+            out.write("24'h"+red+green+blue+", \n")
