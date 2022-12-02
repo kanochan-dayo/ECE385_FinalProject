@@ -22,7 +22,7 @@ module lineb (
  background_palette_rom er(.address(pixel_palette_index), .data_Out(RGB_ALL));
  
  line_buffer line_buf(.rdaddress(place_a),.clock(~clock),.q(pixel_palette_a),
- .wraddress(place_b),.data(sdram_data),.wren(wren));
+ .wraddress(place_b),.data(sdram_data),.wren(wren),.*);
  
  logic [23:0] RGB_ALL;
  logic [6:0] place_a,place_b;

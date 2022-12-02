@@ -248,7 +248,7 @@ arbiter_sdram arbiter(.*,.clk(MAX10_CLK1_50),.reset(Reset_h));
 
 DrawDFJK_BK DFJK_BK(.new_frame(new_frame),.clk(MAX10_CLK1_50),.sdram_wait(DFJK_sdram_wait),.sdram_ac(DFJK_sdram_ac),
 .reset(Reset_h),.frame_flip(frame_flip),.DFJK(DFJK),.sdram_rd(DFJK_sdram_rd),.sdram_wr(DFJK_sdram_wr),
-.busy(DFJK_busy),.writedone(DFJK_writedone),.sdram_rddata(DFJK_sdram_rddata),.sdram_wrdata(DFJK_sdram_wrdata),
+.busy(DFJK_busy),.writedone(DFJK_sdram_writedone),.sdram_rddata(DFJK_sdram_rddata),.sdram_wrdata(DFJK_sdram_wrdata),
 .sdram_addr(DFJK_sdram_addr));
 
 
