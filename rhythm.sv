@@ -68,7 +68,7 @@ module rhythm (
 	logic [1:0] signs;
 	logic [1:0] hundreds;
 	logic [7:0] keycode;
-	logic [3:0] DFJK;
+	logic [3:0] DFJK,DFJK_x;
 	logic [9:0] LEDRR;
 	logic SD_CS;
 	assign LEDR[9:6]=LEDRR[9:6];
@@ -180,7 +180,7 @@ assign ARDUINO_IO[14] = i2c_serial_sda_oe ? 1'b0 : 1'bz;
 
 
 		// DFJK
-		.key_dfjk_export(DFJK),
+		.key_dfjk_export(DFJK_x),
 		
 		
 	 );
@@ -194,6 +194,11 @@ vga_controller vga_ctr(     .Clk(MAX10_CLK1_50),       // 50 MHz clock
 //
 logic [9:0] DrawX, DrawY;
 logic pixel_clk,blank,sync;
+
+always_ff @ (posedge new_frame)
+begin
+DFJK<=DFJK_x;
+end
 
 sdram_contorller sdram1(
 		.sdram_clk_clk(DRAM_CLK),            				   //clk_sdram.clk
@@ -241,13 +246,23 @@ sdcard_init sd_init(.clk50(MAX10_CLK1_50),
 	
 arbiter_sdram arbiter(.*,.clk(MAX10_CLK1_50),.reset(Reset_h));
 
+DrawDFJK_BK DFJK_BK(.new_frame(new_frame),.clk(MAX10_CLK1_50),.sdram_wait(DFJK_sdram_wait),.sdram_ac(DFJK_sdram_ac),
+.reset(Reset_h),.frame_flip(frame_flip),.DFJK(DFJK),.sdram_rd(DFJK_sdram_rd),.sdram_wr(DFJK_sdram_wr),
+.busy(DFJK_busy),.writedone(DFJK_sdram_writedone),.sdram_rddata(DFJK_sdram_rddata),.sdram_wrdata(DFJK_sdram_wrdata),
+.sdram_addr(DFJK_sdram_addr));
+
+
+logic DFJK_sdram_wait,DFJK_sdram_ac,DFJK_sdram_rd,DFJK_sdram_wr,DFJK_busy,DFJK_sdram_writedone;
+logic [127:0]DFJK_sdram_rddata,DFJK_sdram_wrdata;
+logic [21:0]DFJK_sdram_addr;
+
 logic new_frame;
 
 always_ff @(posedge pixel_clk)
 begin
 new_frame<=new_frame;
 
-if (DrawY==523&&DrawX==790)
+if (DrawY==523&&DrawX==785)
 new_frame<=1;
 else
 new_frame<=0;
@@ -291,9 +306,9 @@ lineb lb(.*,.clock(MAX10_CLK1_50),.sdram_data(lb_sdram_data),
 		.sdram_ac(lb_sdram_ac),
 		.sdram_rd(lb_sdram_rd),
 		.busy(lb_Busy),
-		.sdram_Wait(lb_sdram_Wait),.reset(Reset_h));
+		.sdram_Wait(lb_sdram_Wait),.reset(Reset_h),.done(lb_done));
 
-logic frame_flip,lb_sdram_Wait,lb_sdram_ac,lb_sdram_rd,lb_Busy;
+logic frame_flip,lb_sdram_Wait,lb_sdram_ac,lb_sdram_rd,lb_Busy,lb_done;
 logic[127:0] lb_sdram_data;
 logic[21:0] lb_sdram_addr;
 endmodule

@@ -5,7 +5,8 @@ output sdram_rd,
 input [127:0]sdram_data,
 output busy,Dout,Write_done,
 output [21:0] sdram_addr,
- output [7:0] wrusedw,output [127:0] tempdata1
+ output [7:0] wrusedw,
+ output [127:0]tempdata1
 );
 
 
@@ -33,7 +34,9 @@ fifo_a_ram adf(
 logic [8:0]  rdaddress,wraddress,rdaddress_x,wraddress_x;
 
 assign wrusedw=(rdaddress[8]==wraddress[8])?(wraddress[7:0]-rdaddress[7:0]):(256+wraddress[7:0]-rdaddress[7:0]);
-	
+
+parameter finish_addr=23'hFFF00;
+
 logic [127:0] tempdata;
 
 	always_ff @ (posedge rdreq)
@@ -50,7 +53,7 @@ logic [7:0] counter,counter_x,counters;
 logic [1:0] PreLR;
 logic Play_flag;
 
-enum logic [2:0] {Halted,Init_data,Init_data2,Play,Play2,Fill,Fill2} State,Next_state;
+enum logic [2:0] {Halted,Init_data,Init_data2,Play,Play2,Fill,Fill2,Stoped} State,Next_state;
 enum logic [2:0] {Stop,Plays,PlayH} Statep,Next_statep;
 
 initial
@@ -112,6 +115,9 @@ if (new_frame)
 Next_state=Play2;
 
 Play2:
+if(addr_max>finish_addr)
+Next_state=Stoped;
+else
 if(~sdram_Wait)
 begin
 Next_state=Fill;
@@ -187,6 +193,11 @@ if(sdram_addr==addr_max)
 Write_done=1;
 end
 
+Stoped:
+begin
+Write_done=1;
+Play_flag=0;
+end
 endcase
 end
 
