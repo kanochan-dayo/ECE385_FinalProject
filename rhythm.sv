@@ -211,7 +211,7 @@ sdram_contorller sdram1(
 		.sdram_wire_dqm({DRAM_UDQM,DRAM_LDQM}),                //.dqm
 		.sdram_wire_ras_n(DRAM_RAS_N),              		   //.ras_n
 		.sdram_wire_we_n(DRAM_WE_N),                		   //.we_n
-		.bridge_address({ar_addr-22'hE0000,4'b0000}),     //     bridge.address
+		.bridge_address({ar_addr,4'b0000}),     //     bridge.address
 		.bridge_byte_enable(ar_be), //           .byte_enable
 		.bridge_read(ar_read),        //           .read
 		.bridge_write(ar_write),       //           .write
@@ -262,7 +262,7 @@ always_ff @(posedge pixel_clk)
 begin
 new_frame<=new_frame;
 
-if (DrawY==523&&DrawX==790)
+if (DrawY==523&&DrawX==785)
 new_frame<=1;
 else
 new_frame<=0;

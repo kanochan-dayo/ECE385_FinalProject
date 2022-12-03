@@ -75,9 +75,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  29 .quartus_project_dir 0000001d  00000000  00000000  00084b5e  2**0
                   CONTENTS, READONLY
- 30 .jdi          00005217  00000000  00000000  00084b7b  2**0
+ 30 .jdi          00006588  00000000  00000000  00084b7b  2**0
                   CONTENTS, READONLY
- 31 .sopcinfo     0008206a  00000000  00000000  00089d92  2**0
+ 31 .sopcinfo     00086953  00000000  00000000  0008b103  2**0
                   CONTENTS, READONLY
 SYMBOL TABLE:
 00200000 l    d  .entry	00000000 .entry
@@ -1089,7 +1089,7 @@ int main(){
 	setLED(9);
   200280:	01000244 	movi	r4,9
   200284:	02008d80 	call	2008d8 <setLED>
-	for (int i=0;i<=15;i++){
+	for (int i=0;i<=6;i++){
   200288:	e03fff15 	stw	zero,-4(fp)
   20028c:	00000606 	br	2002a8 <main+0x3c>
 	usleep(2000000);
@@ -1101,12 +1101,12 @@ int main(){
 int main(){
 	setup_i2c();
 	setLED(9);
-	for (int i=0;i<=15;i++){
+	for (int i=0;i<=6;i++){
   20029c:	e0bfff17 	ldw	r2,-4(fp)
   2002a0:	10800044 	addi	r2,r2,1
   2002a4:	e0bfff15 	stw	r2,-4(fp)
   2002a8:	e0bfff17 	ldw	r2,-4(fp)
-  2002ac:	10800410 	cmplti	r2,r2,16
+  2002ac:	108001d0 	cmplti	r2,r2,7
   2002b0:	103ff71e 	bne	r2,zero,200290 <_gp+0xffdedf3c>
 	usleep(2000000);
 	}

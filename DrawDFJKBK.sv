@@ -8,12 +8,12 @@ output[21:0] sdram_addr
 );
 
 parameter rdaddr_offset=22'h300000;
-parameter rdaddr_shift_offset=13'h1E00;
+parameter rdaddr_shift_offset=22'h1E00;
 parameter wraddr_offset0=22'h100000;
 parameter wraddr_offset1=22'h200000;
-parameter wraddr_shift_offset=6'h18;
-parameter wraddr_max1=22'h200000+22'd19175;
-parameter wraddr_max0=22'h100000+22'd19175;
+parameter wraddr_shift_offset=22'h18;
+parameter wraddr_max1=22'h204AE7;
+parameter wraddr_max0=22'h104AE7;
 
 enum logic [3:0]{Halted,Read,Read1,Write,Write1,Pause,Done} State,Next_state;
 logic [21:0] sdram_rdaddr_x,sdram_wraddr_x,sdram_rdaddr,sdram_wraddr;
@@ -24,8 +24,9 @@ assign wraddr_max=frame_flip?wraddr_max1:wraddr_max0;
 
 always_comb
 begin
-sdram_addr=0;
 case(State)
+Halted:
+sdram_addr=sdram_rdaddr;
 Read:
 sdram_addr=sdram_rdaddr;
 Read1:
@@ -34,6 +35,16 @@ Write:
 sdram_addr=sdram_wraddr;
 Write1:
 sdram_addr=sdram_rdaddr;
+Pause:
+case(prestate)
+0:
+sdram_addr=sdram_wraddr;
+1:
+sdram_addr=sdram_rdaddr;
+endcase
+Done:
+sdram_addr=sdram_rdaddr;
+
 endcase
 end
 
@@ -78,6 +89,7 @@ Read:
 if(sdram_ac)
 Next_state=Read1;
 
+
 Read1:
 if (sdram_wait)
 Next_state=Pause;
@@ -89,7 +101,7 @@ if(sdram_ac)
 Next_state=Write1;
 
 Write1:
-if(sdram_wraddr_x==wraddr_max)
+if(sdram_wraddr==wraddr_max)
 Next_state=Done;
 else if (sdram_wait)
 Next_state=Pause;
@@ -127,7 +139,7 @@ case(State)
 Halted:
 begin
 sdram_wraddr_trace_x=0;
-sdram_rdaddr_x=rdaddr_offset+rdaddr_shift_offset*DFJK;
+sdram_rdaddr_x=rdaddr_offset+(rdaddr_shift_offset*DFJK);
 sdram_wraddr_x=frame_flip?wraddr_offset1:wraddr_offset0;
 end
 Read:
@@ -143,6 +155,7 @@ busy=1;
 sdram_rdaddr_x=sdram_rdaddr+1;
 prestate_x=0;
 end
+
 
 Write:
 begin
