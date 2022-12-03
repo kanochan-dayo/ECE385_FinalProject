@@ -85,16 +85,11 @@ Init_sdram:
 
 Init_sdram_done:
 	if (new_frame)
-		Next_state=Line_buffer;
+		Next_state=Line_buffer_pre;
 
 Line_buffer:
 	if (lb_done)
-	begin
-	if(~DFJK_sdram_writedone)
-	Next_state=Background;
-	else
 	Next_state=PCM;
-	end
 	else
 	if (~lb_Busy)
 	Next_state=Line_buffer_mid;
@@ -104,20 +99,18 @@ Line_buffer_mid:
 	
 	if(~DFJK_sdram_writedone)
 	Next_state=Background;
-	else if (DrawX==790)
+	else if (DrawX==785)
 	Next_state=Line_buffer_pre;
 //	else
 //	Next_state=Background;
 	
 Line_buffer_pre:
-	if(~DFJK_busy)
+	if(~DFJK_busy&&DrawX==799)
 		Next_state=Line_buffer;
 
 Background:
-	if(DFJK_sdram_writedone)
-	Next_state=Line_buffer;
-	else if (DrawY<479&&DrawX==790)
 	Next_state=Line_buffer_pre;
+
 
 
 Halted:
@@ -143,10 +136,10 @@ lb_sdram_ac=0;
 lb_sdram_data=0;
 
 init_wait=1;
-ar_addr=init_addr;
+ar_addr=0;
 ar_be=16'hFFFF;
 ar_read=0;
-ar_write=init_we;
+ar_write=0;
 init_ac=0;
 ar_wrdata=init_wrdata;
 SPI0_MISO_usb=SPI0_MISO;
@@ -169,10 +162,14 @@ begin
 	SPI0_SCLK=init_sclk_o;
 	SPI0_MOSI=init_mosi_o;
 	SD_CS=init_cs_bo;
+	ar_addr=init_addr;
+ar_write=init_we;
 end
 
 Init_sdram:
 begin
+	ar_addr=init_addr;
+ar_write=init_we;
 	init_wait=0;
 	init_ac=ar_ac;
 	init_miso_i=SPI0_MISO;

@@ -5,7 +5,8 @@ output sdram_rd,
 input [127:0]sdram_data,
 output busy,Dout,Write_done,
 output [21:0] sdram_addr,
- output [7:0] wrusedw
+ output [7:0] wrusedw,
+ output [127:0]tempdata1
 );
 
 
@@ -33,7 +34,9 @@ fifo_a_ram adf(
 logic [8:0]  rdaddress,wraddress,rdaddress_x,wraddress_x;
 
 assign wrusedw=(rdaddress[8]==wraddress[8])?(wraddress[7:0]-rdaddress[7:0]):(256+wraddress[7:0]-rdaddress[7:0]);
-	
+
+parameter finish_addr=23'hFF000;
+
 logic [127:0] tempdata;
 
 	always_ff @ (posedge rdreq)

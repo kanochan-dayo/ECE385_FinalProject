@@ -61,6 +61,7 @@ module lineb (
 begin
  Next_state=State;
  case(State)
+ 
  Halted:
  if (~sdram_Wait)
  Next_state=Read;
@@ -78,9 +79,9 @@ begin
  end
  
  Pause:
- if(DrawY==470)
+ if(DrawY==479)
  Next_state=Done;
- else if(DrawX==790)
+ else if(DrawX==785)
  Next_state=Pause1;
  
  Pause1:
@@ -105,6 +106,7 @@ WriteX_x=WriteX;
 case(State)
  Halted:
  begin
+ busy=1;
  WriteX_x=0;
  end
  Read:
@@ -125,7 +127,6 @@ Pause1:
 begin
 WriteX_x=0;
 busy=1;
-
 end
 Done:
 done=1;
@@ -184,7 +185,7 @@ sdram_addr=WriteX[9:4]+(WriteY*40)+Address2;
 	4'hF:
 	pixel_palette_index=pixel_palette_a[127:120];
 	endcase
-if (blank&&~sdram_Wait)
+if (blank)
  begin
 	VGA_R<=RGB_ALL[23:20];
 	VGA_G<=RGB_ALL[15:12];

@@ -9,7 +9,7 @@ output[21:0] sdram_addr
 
 parameter rdaddr_offset=22'h300000;
 parameter rdaddr_shift_offset=13'h1E00;
-parameter wraddr_offset0=21'h100000;
+parameter wraddr_offset0=22'h100000;
 parameter wraddr_offset1=22'h200000;
 parameter wraddr_shift_offset=6'h18;
 parameter wraddr_max1=22'h200000+22'd19175;
@@ -17,7 +17,7 @@ parameter wraddr_max0=22'h100000+22'd19175;
 
 enum logic [3:0]{Halted,Read,Read1,Write,Write1,Pause,Done} State,Next_state;
 logic [21:0] sdram_rdaddr_x,sdram_wraddr_x,sdram_rdaddr,sdram_wraddr;
-logic prestate,prestate_x,wrreq;
+logic prestate,prestate_x;
 logic [3:0]sdram_wraddr_trace_x,sdram_wraddr_trace;
 logic [21:0]wraddr_max;
 assign wraddr_max=frame_flip?wraddr_max1:wraddr_max0;
@@ -37,7 +37,7 @@ sdram_addr=sdram_rdaddr;
 endcase
 end
 
-always_ff @(posedge wrreq or posedge reset)
+always_ff @(negedge sdram_ac or posedge reset)
 begin
 if(reset)
 sdram_wrdata<=0;
@@ -49,6 +49,7 @@ always_ff @(posedge clk)
 begin
 if (reset)
 begin
+prestate<=0;
 sdram_rdaddr<=rdaddr_offset;
 sdram_wraddr<=wraddr_offset0;
 sdram_wraddr_trace<=0;
@@ -56,6 +57,7 @@ State<=Halted;
 end
 else
 begin
+prestate<=prestate_x;
 sdram_rdaddr<=sdram_rdaddr_x;
 sdram_wraddr<=sdram_wraddr_x;
 sdram_wraddr_trace<=sdram_wraddr_trace_x;
@@ -117,7 +119,6 @@ sdram_rd=0;
 sdram_wr=0;
 busy=0;
 writedone=0;
-wrreq=0;
 prestate_x=prestate;
 sdram_rdaddr_x=sdram_rdaddr;
 sdram_wraddr_x=sdram_wraddr;
@@ -135,11 +136,11 @@ busy=1;
 sdram_rd=1;
 prestate_x=0;
 end
+
 Read1:
 begin
 busy=1;
 sdram_rdaddr_x=sdram_rdaddr+1;
-wrreq=1;
 prestate_x=0;
 end
 
@@ -162,7 +163,12 @@ Pause:
 ;
 
 Done:
+begin
 writedone=1;
+sdram_wraddr_trace_x=0;
+sdram_rdaddr_x=rdaddr_offset+rdaddr_shift_offset*DFJK;
+sdram_wraddr_x=frame_flip?wraddr_offset1:wraddr_offset0;
+end
 endcase
 end
 
