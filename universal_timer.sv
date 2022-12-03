@@ -1,51 +1,62 @@
 module universal_timer (
 input start_sign,
-pause_sign,
+//pause_sign,
+new_frame,
 clk,
 reset,
 output stop_sign,
-output [9:0] un_time
+output [15:0] un_time
 );
 
-enum logic [1:0] {Halted,run,pause} state,next_state;
+enum logic [1:0] {Halted,run,pause,Done} State,Next_state;
 
 always_ff @ (posedge clk)
 begin
-	state<=next_state;
+	State<=Next_state;
 end
 
 always_comb
 begin
-	next_state=state;
-	case(state)
+	Next_state=State;
+	case(State)
 		Halted:
 			if(start_sign)
-				next_state=run;
+				Next_state=run;
 		run:
 			if (reset)
-				next_state=Halted;
-			else if (pause_sign)
-				next_state=pause;
-			else if (un_time==10'd114514)
-				next_state=Halted;
-		pause:
-			if (reset)
-				next_state=Halted;
-			else if(!pause_sign)
-				next_state=run;
+				Next_state=Halted;
+//			else if (pause_sign)
+//				Next_state=pause;
+			else if (un_time==16'd5357)
+				Next_state=Done;
+//		pause:
+//			if (reset)
+//				Next_state=Halted;
+//			else if(!pause_sign)
+//				Next_state=run;
 
 		endcase
 	end
 
-always_ff @ (posedge clk)
+always_comb
 begin
-	case(state)
+		stop_sign=0;
+		case(State)
+		Done:
+		stop_sign=1;
+		endcase
+end
+always_ff @ (posedge new_frame)
+begin
+	case(State)
 		Halted:
 			un_time=0;
 		run:
 			un_time<=un_time+1;
 		pause:
 			un_time<=un_time;
+		Done:
+			un_time<=0;
 	endcase
 end
 

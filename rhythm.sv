@@ -245,12 +245,20 @@ sdcard_init sd_init(.clk50(MAX10_CLK1_50),
 	
 	
 arbiter_sdram arbiter(.*,.clk(MAX10_CLK1_50),.reset(Reset_h));
+mem_init init_mem(
+.clk(MAX10_CLK1_50),.reset(Reset_h),.sdram_wait(mem_init_sdram_wait),.sdram_ac(mem_init_sdram_ac),
+.sdram_rd(mem_init_sdram_rd),.sdram_data(mem_init_sdram_data),.mem_data(mem_init_mem_data),
+.sdram_addr(mem_init_sdram_addr),.mem_addr(mem_init_addr),.mem_init_done(mem_init_done),.mem_wr(mem_init_wr));
+
+logic mem_init_sdram_wait,mem_init_sdram_ac,mem_init_sdram_rd,mem_init_wr,mem_init_done;
+logic [127:0]mem_init_sdram_data,mem_init_mem_data;
+logic [21:0]mem_init_sdram_addr;
+logic [8:0] mem_init_addr;
 
 DrawDFJK_BK DFJK_BK(.new_frame(new_frame),.clk(MAX10_CLK1_50),.sdram_wait(DFJK_sdram_wait),.sdram_ac(DFJK_sdram_ac),
 .reset(Reset_h),.frame_flip(frame_flip),.DFJK(DFJK),.sdram_rd(DFJK_sdram_rd),.sdram_wr(DFJK_sdram_wr),
 .busy(DFJK_busy),.writedone(DFJK_sdram_writedone),.sdram_rddata(DFJK_sdram_rddata),.sdram_wrdata(DFJK_sdram_wrdata),
 .sdram_addr(DFJK_sdram_addr));
-
 
 logic DFJK_sdram_wait,DFJK_sdram_ac,DFJK_sdram_rd,DFJK_sdram_wr,DFJK_busy,DFJK_sdram_writedone;
 logic [127:0]DFJK_sdram_rddata,DFJK_sdram_wrdata;
@@ -311,4 +319,17 @@ lineb lb(.*,.clock(MAX10_CLK1_50),.sdram_data(lb_sdram_data),
 logic frame_flip,lb_sdram_Wait,lb_sdram_ac,lb_sdram_rd,lb_Busy,lb_done;
 logic[127:0] lb_sdram_data;
 logic[21:0] lb_sdram_addr;
+
+universal_timer times(
+.start_sign(start_sign),
+//pause_sign,
+.new_frame(new_frame),
+.clk(MAX10_CLK1_50),
+.reset(Reset_h),
+.stop_sign(stopsign),
+.un_time(un_time)
+);
+
+logic start_sign,stop_sign;
+logic [15:0]un_time;
 endmodule
