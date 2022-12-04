@@ -326,7 +326,7 @@ universal_timer times(
 .new_frame(new_frame),
 .clk(MAX10_CLK1_50),
 .reset(Reset_h),
-.stop_sign(stopsign),
+.stop_sign(stop_sign),
 .un_time(un_time)
 );
 
