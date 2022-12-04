@@ -136,7 +136,11 @@ Next_state=Play;
 else
 Next_state=Fill;
 end
-
+Stop:
+begin
+wraddress_x=0;
+addr_max_x=0;
+end
 endcase
 end
 
@@ -196,7 +200,6 @@ Stoped:
 begin
 Write_done=1;
 Play_flag=0;
-wraddress_x=0;
 end
 endcase
 end
