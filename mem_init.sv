@@ -6,8 +6,8 @@ output [21:0] sdram_addr,
 output [8:0] mem_addr,
 output mem_init_done,mem_wr,sdram_rd);
 
-parameter sdram_offset=22'h310000;
-parameter mem_addr_max=9'h100;
+parameter sdram_offset=22'h31E000;
+parameter mem_addr_max=9'h0FF;
 
 
 

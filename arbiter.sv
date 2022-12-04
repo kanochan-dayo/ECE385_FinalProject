@@ -270,7 +270,10 @@ begin
 end
 
 Init_memory_done:
+begin
 init_wait=0;
+start_sign=1;
+end
 
 PCM:
 begin
