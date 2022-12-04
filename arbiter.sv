@@ -33,6 +33,13 @@ output I2S_sdram_Wait,I2S_sdram_ac,
 input I2S_sdram_rd,I2S_Busy,I2S_Done,
 output[127:0] I2S_sdram_data,
 input [21:0] I2S_sdram_addr,
+// DS input
+input [127:0] DS_sdram_data,
+input [21:0] DS_sdram_addr,
+input DS_sdram_wr,DS_busy,DS_done,
+input [15:0] DS_sdram_be,
+output DS_sdram_ac,DS_sdram_wait,
+
 
 //BK input
 output DFJK_sdram_wait,DFJK_sdram_ac,
@@ -116,12 +123,17 @@ Line_buffer:
 Line_buffer_done:
 	if(~DFJK_sdram_writedone)
 		Next_state=Background;
+	else if(~DS_done)
+		Next_state=Score;
 	else
 		Next_state=PCM;
+
 Line_buffer_mid:
 	
 	if(~DFJK_sdram_writedone)
 	Next_state=Background;
+	else if (~DS_done)
+	Next_state=Score;
 	else if (DrawX==785)
 	Next_state=Line_buffer_pre_bk;
 //	else
@@ -131,14 +143,27 @@ Line_buffer_pre_bk:
 	if(~DFJK_busy&&DrawX==799)
 		Next_state=Line_buffer;
 
+Line_buffer_pre_sp:
+	if(~DS_busy&&DrawX==799)
+		Next_state=Line_buffer;
+
 Background:
 if (lb_done)
 begin
 if(DFJK_sdram_writedone)
-	Next_state=PCM;
+	Next_state=Score;
 end
 else if (DrawX==785)
 	Next_state=Line_buffer_pre_bk;
+
+Score:
+	if (lb_done)
+	begin
+	if(DS_done)
+		Next_state=PCM;
+	end
+	else if (DrawX==770)
+	Next_state=Line_buffer_pre_sp;
 
 
 
@@ -159,6 +184,12 @@ end
 
 always_comb
 begin:Arb
+
+
+
+DS_sdram_ac=0;
+DS_sdram_wait=1;
+
 DFJK_sdram_rddata=0;
 DFJK_sdram_wait=1;
 DFJK_sdram_ac=0;
@@ -282,6 +313,28 @@ DFJK_sdram_rddata=ar_rddata;
 ar_wrdata=DFJK_sdram_wrdata;
 ar_addr=DFJK_sdram_addr;
 end
+Score:
+begin
+init_wait=0;
+DS_sdram_wait=0;
+DS_sdram_ac=ar_ac;
+ar_write=DS_sdram_wr;
+ar_wrdata=DS_sdram_wrdata;
+ar_addr=DS_sdram_addr;
+ar_be=DS_sdram_be;
+end
+
+Line_buffer_pre_sp:
+begin
+init_wait=0;
+DS_sdram_wait=1;
+DS_sdram_ac=ar_ac;
+ar_write=DS_sdram_wr;
+ar_wrdata=DS_sdram_wrdata;
+ar_addr=DS_sdram_addr;
+ar_be=DS_sdram_be;
+end
+
 Line_buffer_pre_bk:
 begin
 init_wait=0;
@@ -292,6 +345,7 @@ DFJK_sdram_rddata=ar_rddata;
 ar_wrdata=DFJK_sdram_wrdata;
 ar_addr=DFJK_sdram_addr;
 end
+
 endcase
 end
 
