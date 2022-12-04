@@ -744,6 +744,7 @@ end
 Pause:
 ;
 Pauselong:
+is_long=1;
 ;
 endcase
 end

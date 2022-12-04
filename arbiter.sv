@@ -140,11 +140,11 @@ Line_buffer_mid:
 //	Next_state=Background;
 	
 Line_buffer_pre_bk:
-	if(~DFJK_busy&&DrawX==799)
+	if(DrawX==799)
 		Next_state=Line_buffer;
 
 Line_buffer_pre_sp:
-	if(~DS_busy&&DrawX==799)
+	if(DrawX==799)
 		Next_state=Line_buffer;
 
 Background:
@@ -320,7 +320,6 @@ end
 Line_buffer_pre_sp:
 begin
 init_wait=0;
-DS_sdram_wait=1;
 DS_sdram_ac=ar_ac;
 ar_write=DS_sdram_wr;
 ar_wrdata=DS_sdram_data;
