@@ -1,5 +1,5 @@
 module Draw_sprites(
-input clk,reset,sdram_wait,sdram_ac,ram_wr,new_frame,
+input clk,reset,sdram_wait,sdram_ac,ram_wr,new_frame,frame_flip,
 input [15:0] un_time,
 input [3:0]DFJK,
 input [9:0] ram_wraddr,
@@ -28,10 +28,7 @@ assign sdram_be[13]=(sdram_data[111:104]!=transparent);
 assign sdram_be[14]=(sdram_data[119:112]!=transparent);
 assign sdram_be[15]=(sdram_data[127:120]!=transparent);
 
-parameter mv_speed=5;
 
-parameter d_k_ram_offset=0;
-parameter f_j_ram_offset=36;
 
 key_d d();
 key_f f();
@@ -40,29 +37,35 @@ key_k k();
 logic [7:0] d_addr,f_addr,j_addr,k_addr;
 logic [7:0] d_addr_x,f_addr_x,j_addr_x,k_addr_x;
 
-logic [127:0] d_data,f_data,j_data,k_data,ram_data_out;
-logic [3:0] DFJK4321,DFJK4321_x;
-logic [8:0] ram_rdaddr;
+logic [15:0] d0_key,d1_key,d2_key,d3_key,f0_key,f1_key,f2_key,f3_key,j0_key,j1_key,j2_key,j3_key,k0_key,k1_key,k2_key,k3_key;
+
+logic [1:0] precise_d,precise_f,precise_j,precise_k;
+logic [1:0] precise_d_x,precise_f_x,precise_j_x,precise_k_x;
 logic [3:0] DFJK_prestate[1:0];
 
-enum logic[2:0] {Key,Score,Combo}Draw_type,Draw_type_x;
-
-enum logic [3:0]{Halted,Read,Write,Write1,Pause,Done} State,Next_state;
-
-Sprite_ram ram(
-	.clock(clk),
-	.data(ram_data),
-	.rdaddress(ram_rdaddr),
-	.wraddress(ram_wraddr),
-	.wren(ram_wr),
-	.q(ram_data_out));
-
-logic d_next,f_next,j_next,k_next;
-logic d_changed,f_changed,j_changed,k_changed;
+assign DFJK_valid[0]=(mv_speed*(d0_key[13:0]-un_time)<=(offset_y+24)); //24 is the height of the sprite
+assign DFJK_valid[1]=(mv_speed*(d1_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[2]=(mv_speed*(d2_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[3]=(mv_speed*(d3_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[4]=(mv_speed*(f0_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[5]=(mv_speed*(f1_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[6]=(mv_speed*(f2_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[7]=(mv_speed*(f3_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[8]=(mv_speed*(j0_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[9]=(mv_speed*(j1_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[10]=(mv_speed*(j2_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[11]=(mv_speed*(j3_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[12]=(mv_speed*(k0_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[13]=(mv_speed*(k1_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[14]=(mv_speed*(k2_key[13:0]-un_time)<=(offset_y+24));
+assign DFJK_valid[15]=(mv_speed*(k3_key[13:0]-un_time)<=(offset_y+24));
 assign d_changed=(DFJK_prestate[0][3]!=DFJK_prestate[1][3])?1'b1:1'b0;
 assign f_changed=(DFJK_prestate[0][2]!=DFJK_prestate[1][2])?1'b1:1'b0;
 assign j_changed=(DFJK_prestate[0][1]!=DFJK_prestate[1][1])?1'b1:1'b0;
 assign k_changed=(DFJK_prestate[0][0]!=DFJK_prestate[1][0])?1'b1:1'b0;
+
+logic d_next,f_next,j_next,k_next;
+logic d_changed,f_changed,j_changed,k_changed;
 
 always_ff @(posedge new_frame or posedge reset)
  begin 
@@ -74,10 +77,6 @@ always_ff @(posedge new_frame or posedge reset)
         k_addr<=k_addr_x;
         DFJK_prestate[0]<=DFJK;
         DFJK_prestate[1]<=DFJK_prestate[0];
-        d_next<=d_next_x;
-        f_next<=f_next_x;
-        j_next<=j_next_x;
-        k_next<=k_next_x;
         precise_d<=precise_d_x;
         precise_f<=precise_f_x;
         precise_j<=precise_j_x;
@@ -91,10 +90,6 @@ always_ff @(posedge new_frame or posedge reset)
         k_addr<=0;
         DFJK_prestate[0]<=DFJK;
         DFJK_prestate[1]<=DFJK;
-        d_next<=0;
-        f_next<=0;
-        j_next<=0;
-        k_next<=0;
         precise_d<=0;
         precise_f<=0;
         precise_j<=0;
@@ -138,6 +133,7 @@ begin
         else
             precise_d_x=2'b01;
     end
+
     if(f0_key[13:0]==un_time) 
         precise_f_x=2'b11;
     else if(f_changed==0)
@@ -165,6 +161,7 @@ begin
         else
             precise_f_x=2'b01;
     end
+
     if(j0_key[13:0]==un_time) 
         precise_j_x=2'b11;
     else if(j_changed==0)
@@ -192,6 +189,7 @@ begin
         else
             precise_j_x=2'b01;
     end
+
     if(k0_key[13:0]==un_time) 
         precise_k_x=2'b11;
     else if(k_changed==0)
@@ -220,234 +218,6 @@ begin
             precise_k_x=2'b01;
     end
 end
-// logic d_next_x,f_next_x,j_next_x,k_next_x;
-
-// always_comb begin 
-//     d_next_x=d_next;
-//     f_next_x=f_next;
-//     j_next_x=j_next;
-//     k_next_x=k_next;
-//     precise_d_x=precise_d;
-//     precise_f_x=precise_f;
-//     precise_j_x=precise_j;
-//     precise_k_x=precise_k;
-    // if(d0_key[13:0]==un_time) 
-    // begin
-    //     d_next_x=1;
-    //     precise_d_x=2'b11;
-    // end
-    // else if(d_changed==0)
-    // begin
-    //     d_next_x=0;
-    //     precise_d_x=2'b00;
-    // end
-    // else
-    // begin
-    //     if(d0_key[15:14]==2'b10)
-    //     begin
-    //             d_next_x=1;
-    //             if (d0_key[13:0]-un_time>15)
-    //             begin
-    //                 precise_d_x=2'b11;
-    //             end
-    //             else if (d0_key[13:0]-un_time>7)
-    //             begin
-    //                 precise_d_x=2'b10;
-    //             end
-    //             else
-    //             begin
-    //                 precise_d_x=2'b01;
-    //             end
-    //     end
-    //     else if(DFJK[3]==0)
-    //     begin
-    //         d_next_x=0;
-    //         precise_d_x=2'b00;
-    //     end
-    //     else if(d0_key[13:0]-un_time>27)
-    //     begin
-    //         d_next_x=0;
-    //         precise_d_x=2'b00;
-    //     end
-    //     else if(d0_key[13:0]-un_time>15)
-    //     begin
-    //         d_next_x=1;
-    //         precise_d_x=2'b11;
-    //     end
-    //     else if(d0_key[13:0]-un_time>7)
-    //     begin
-    //         d_next_x=1;
-    //         precise_d_x=2'b10;
-    //     end
-    //     else
-    //     begin
-    //         d_next_x=1;
-    //         precise_d_x=2'b01;
-    //     end
-    // end
-    // if(f0_key[13:0]==un_time)
-    // begin
-    //     f_next_x=1;
-    //     precise_f_x=2'b11;
-    // end
-    // else if(f_changed==0)
-    // begin
-    //     f_next_x=0;
-    //     precise_f_x=2'b00;
-    // end
-//     else
-//     begin
-//         if(f0_key[15:14]==2'b10)
-//         begin
-//                 f_next_x=1;
-//                 if (f0_key[13:0]-un_time>15)
-//                 begin
-//                     precise_f_x=2'b11;
-//                 end
-//                 else if (f0_key[13:0]-un_time>7)
-//                 begin
-//                     precise_f_x=2'b10;
-//                 end
-//                 else
-//                 begin
-//                     precise_f_x=2'b01;
-//                 end
-//         end
-//         else if(DFJK[2]==0)
-//         begin
-//             f_next_x=0;
-//             precise_f_x=2'b00;
-//         end
-//         else if(f0_key[13:0]-un_time>27)
-//         begin
-//             f_next_x=0;
-//             precise_f_x=2'b00;
-//         end
-//         else if(f0_key[13:0]-un_time>15)
-//         begin
-//             f_next_x=1;
-//             precise_f_x=2'b11;
-//         end
-//         else if(f0_key[13:0]-un_time>7)
-//         begin
-//             f_next_x=1;
-//             precise_f_x=2'b10;
-//         end
-//         else
-//         begin
-//             f_next_x=1;
-//             precise_f_x=2'b01;
-//         end
-//     end
-//     if(j0_key[13:0]==un_time)
-//     begin
-//         j_next_x=1;
-//         precise_j_x=2'b11;
-//     end
-//     else if(j_changed==0)
-//     begin
-//         j_next_x=0;
-//         precise_j_x=2'b00;
-//     end
-//     else
-//     begin
-//         if(j0_key[15:14]==2'b10)
-//         begin
-//                 j_next_x=1;
-//                 if (j0_key[13:0]-un_time>15)
-//                 begin
-//                     precise_j_x=2'b11;
-//                 end
-//                 else if (j0_key[13:0]-un_time>7)
-//                 begin
-//                     precise_j_x=2'b10;
-//                 end
-//                 else
-//                 begin
-//                     precise_j_x=2'b01;
-//                 end
-//         end
-//         else if(DFJK[1]==0)
-//         begin
-//             j_next_x=0;
-//             precise_j_x=2'b00;
-//         end
-//         else if(j0_key[13:0]-un_time>27)
-//         begin
-//             j_next_x=0;
-//             precise_j_x=2'b00;
-//         end
-//         else if(j0_key[13:0]-un_time>15)
-//         begin
-//             j_next_x=1;
-//             precise_j_x=2'b11;
-//         end
-//         else if(j0_key[13:0]-un_time>7)
-//         begin
-//             j_next_x=1;
-//             precise_j_x=2'b10;
-//         end
-//         else
-//         begin
-//             j_next_x=1;
-//             precise_j_x=2'b01;
-//         end
-//     end
-//     if(k0_key[13:0]==un_time)
-//     begin
-//         k_next_x=1;
-//         precise_k_x=2'b11;
-//     end
-//     else if(k_changed==0)
-//     begin
-//         k_next_x=0;
-//         precise_k_x=2'b00;
-//     end
-//     else
-//     begin
-//         if(k0_key[15:14]==2'b10)
-//         begin
-//                 k_next_x=1;
-//                 if (k0_key[13:0]-un_time>15)
-//                 begin
-//                     precise_k_x=2'b11;
-//                 end
-//                 else if (k0_key[13:0]-un_time>7)
-//                 begin
-//                     precise_k_x=2'b10;
-//                 end
-//                 else
-//                 begin
-//                     precise_k_x=2'b01;
-//                 end
-//         end
-//         else if(DFJK[0]==0)
-//         begin
-//             k_next_x=0;
-//             precise_k_x=2'b00;
-//         end
-//         else if(k0_key[13:0]-un_time>27)
-//         begin
-//             k_next_x=0;
-//             precise_k_x=2'b00;
-//         end
-//         else if(k0_key[13:0]-un_time>15)
-//         begin
-//             k_next_x=1;
-//             precise_k_x=2'b11;
-//         end
-//         else if(k0_key[13:0]-un_time>7)
-//         begin
-//             k_next_x=1;
-//             precise_k_x=2'b10;
-//         end
-//         else
-//         begin
-//             k_next_x=1;
-//             precise_k_x=2'b01;
-//         end
-//     end
-// end
 
 always_comb 
 begin
@@ -473,9 +243,307 @@ begin
     end
 end
 
-logic [15:0] d0_key,d1_key,d2_key,d3_key,f0_key,f1_key,f2_key,f3_key,j0_key,j1_key,j2_key,j3_key,k0_key,k1_key,k2_key,k3_key;
-logic [7:0] d_sdram_addr,f_sdram_addr,j_sdram_addr,k_sdram_addr;
 
-logic [1:0] precise_d,precise_f,precise_j,precise_k;
-logic [1:0] precise_d_x,precise_f_x,precise_j_x,precise_k_x;
+
+logic [127:0] d_data,f_data,j_data,k_data,ram_data_out;
+logic [3:0] DFJK4321,DFJK4321_x;
+logic [8:0] ram_rdaddr;
+logic [21:0] sdram_addr_x;
+parameter wraddr_key_shift_offset=22'h25;
+parameter mv_speed=5;
+parameter d_k_ram_offset=0;
+parameter f_j_ram_offset=36;
+parameter key_offset_y=356;
+parameter wraddr_offset0=22'h100000;
+parameter wraddr_offset1=22'h200000;
+parameter d_track_offset=22'h1;
+parameter f_track_offset=22'h4;
+parameter j_track_offset=22'h7;
+parameter k_track_offset=22'ha;
+
+int Pos_X,Pos_Y;
+int Dist_X,Dist_Y;
+
+always_comb
+begin
+    Pos_X=-1;
+    Pos_Y=-1;
+    Dist_X=0;
+    Dist_Y=0;
+    case(Draw_type)
+    Key:
+        case(DFJK4321)
+        4'b0000:
+        begin
+            Pos_X=16;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(d0_key[13:0]-un_time)+offset_y
+        end
+        4'b0001:
+        begin
+            Pos_X=16;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(d1_key[13:0]-un_time)+offset_y
+        end
+        4'b0010:
+        begin
+            Pos_X=16;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(d2_key[13:0]-un_time)+offset_y
+        end
+        4'b0011:
+        begin
+            Pos_X=16;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(d3_key[13:0]-un_time)+offset_y
+        end
+        4'b0100:
+        begin
+            Pos_X=64;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(f0_key[13:0]-un_time)+offset_y
+        end
+        4'b0101:
+        begin
+            Pos_X=64;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(f1_key[13:0]-un_time)+offset_y
+        end
+        4'b0110:
+        begin
+            Pos_X=64;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(f2_key[13:0]-un_time)+offset_y
+        end
+        4'b0111:
+        begin
+            Pos_X=64;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(f3_key[13:0]-un_time)+offset_y
+        end
+        4'b1000:
+        begin
+            Pos_X=112;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(j0_key[13:0]-un_time)+offset_y
+        end
+        4'b1001:
+        begin
+            Pos_X=112;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(j1_key[13:0]-un_time)+offset_y
+        end
+        4'b1010:
+        begin
+            Pos_X=112;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(j2_key[13:0]-un_time)+offset_y
+        end
+        4'b1011:
+        begin
+            Pos_X=112;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(j3_key[13:0]-un_time)+offset_y
+        end
+        4'b1100:
+        begin
+            Pos_X=160;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(k0_key[13:0]-un_time)+offset_y
+        end
+        4'b1101:
+        begin
+            Pos_X=160;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(k1_key[13:0]-un_time)+offset_y
+        end
+        4'b1110:
+        begin
+            Pos_X=160;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(k2_key[13:0]-un_time)+offset_y
+        end
+        4'b1111:
+        begin
+            Pos_X=160;
+            Dist_X=48;
+            Dist_Y=24;
+            Pos_Y=-mv_speed*(k3_key[13:0]-un_time)+offset_y
+        end
+endcase
+end
+enum logic[2:0] {Key,Score,Combo}Draw_type,Draw_type_x;
+
+enum logic [3:0]{Halted,Read,Read1,Write,Write1,Examine,To_next,Pause,Done} State,Next_state;
+
+Sprite_ram ram(
+	.clock(clk),
+	.data(ram_data),
+	.rdaddress(ram_rdaddr),
+	.wraddress(ram_wraddr),
+	.wren(ram_wr),
+	.q(ram_data_out));
+
+
+always_ff @(posedge clk)
+begin
+    if(reset)
+    begin
+        DFJK4321<=4'b0000;
+        State<=Halted;
+        Draw_type<=Key;
+        ram_rdaddr<=0;
+        sdram_addr<=0;
+    end
+    else
+    begin
+        State<=Next_state;
+        DFJK4321<=DFJK4321_x;
+        Draw_type<=Draw_type_x;
+        ram_rdaddr<=ram_rdaddr_x;
+        sdram_addr<=sdram_addr_x;
+    end
+end
+
+logic rd_req;
+logic [21:0] sdram_addr_max;
+logic [8:0]ram_rdaddr_x;
+logic [15:0] DFJK_valid;
+
+always_ff @(posedge rd_req or posedge reset)
+begin
+    if(reset)
+        sdram_data<=0;
+    else
+        sdram_data<=ram_data_out;
+end
+
+
+
+always_comb
+begin
+    Next_state=State;
+    case(State)
+    Halted:
+    if(~sdram_wait)
+        Next_state=Examine;
+    Examine:
+    if(DFJK_valid[DFJK4321])
+        Next_state=Read;
+    else
+        Next_state=To_next;
+    To_next:
+    if(DFJK4321==4'b1111)
+        Next_state=Done;
+    else
+        Next_state=Examine;
+    Read:
+        Next_state=Read1;
+    Read1:
+        Next_state=Write;
+    Write:
+        if(sdram_ac)
+            Next_state=Write1;
+    Write1:
+    if(sdram_addr_max==sdram_addr)
+        Next_state=To_next;
+    else if(sdram_wait)
+        Next_state=Pause;
+    else
+        Next_state=Read;
+    Done:
+        if(new_frame)
+            Next_state=Halted;
+    Pause:
+        if(~sdram_wait)
+            Next_state=Read;
+    endcase
+end
+
+always_comb
+begin
+ram_rdaddr_x=ram_rdaddr;
+done=0;
+sdram_wr=0;
+sdram_addr_x=sdram_addr;
+DFJK4321_x=DFJK4321;
+busy=0;
+case(State)
+Halted:
+begin
+    sdram_addr_x=frame_flip?wraddr_offset1+(Pos_Y)*40+(Pos_X<<4):wraddr_offset0+(Pos_Y)*40+(Pos_X<<4);
+    ram_rdaddr_x=0;
+    sdram_addr_x=0;
+    DFJK4321_x=4'b0000;
+    rd_req=0;
+end
+Examine:
+begin
+    busy=1;
+    case(Draw_type)
+    Key:
+    if(DFJK4321[3]==DFJK4321[2])
+    ram_rdaddr_x=d_k_ram_offset;
+    else
+    ram_rdaddr_x=f_j_ram_offset;
+    endcase
+    sdram_addr_x=frame_flip?wraddr_offset1+(Pos_Y)*40+(Pos_X<<4):wraddr_offset0+(Pos_Y)*40+(Pos_X<<4);
+end
+To_next:
+begin
+    busy=1;
+    DFJK4321_x=DFJK4321+1;
+end
+Read:
+busy=1;
+;
+Read1:
+begin
+    busy=1;
+    rd_req=1;
+    ram_rdaddr_x=ram_rdaddr+1;
+end
+Write:
+begin
+    busy=1;
+    sdram_wr=1;
+end
+Write1:
+begin
+    busy=1;
+    sdram_addr_x=sdram_addr+1;
+end
+Done:
+begin
+    done=1;
+end
+Pause:
+;
+end
+
+always_comb 
+begin
+if(frame_flip)
+    sdram_addr_max=wraddr_offset1+(Pos_Y+Dist_Y)*40+((Pos_X+Dist_X)<<4);
+else
+    sdram_addr_max=wraddr_offset0+(Pos_Y+Dist_Y)*40+((Pos_X+Dist_X)<<4);
+end
+   
+
+
 endmodule
