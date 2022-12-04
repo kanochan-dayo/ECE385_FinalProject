@@ -152,7 +152,7 @@ if (DrawX==785)
 	Next_state=Line_buffer_pre_bk;
 
 Score:
-if (DrawX==770)
+if (DrawX==765)
 	Next_state=Line_buffer_pre_sp;
 
 

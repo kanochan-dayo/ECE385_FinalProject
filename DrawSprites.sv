@@ -95,6 +95,23 @@ logic [15:0] d0_key,d1_key,d2_key,d3_key,f0_key,f1_key,f2_key,f3_key,j0_key,j1_k
 logic [1:0] precise_d,precise_f,precise_j,precise_k;
 logic [1:0] precise_d_x,precise_f_x,precise_j_x,precise_k_x;
 logic [3:0] DFJK_prestate[1:0];
+logic [1:0] Key_type[15:0];
+assign Key_type[0]=d0_key[15:14];
+assign Key_type[1]=d1_key[15:14];
+assign Key_type[2]=d2_key[15:14];
+assign Key_type[3]=d3_key[15:14];
+assign Key_type[4]=f0_key[15:14];
+assign Key_type[5]=f1_key[15:14];
+assign Key_type[6]=f2_key[15:14];
+assign Key_type[7]=f3_key[15:14];
+assign Key_type[8]=j0_key[15:14];
+assign Key_type[9]=j1_key[15:14];
+assign Key_type[10]=j2_key[15:14];
+assign Key_type[11]=j3_key[15:14];
+assign Key_type[12]=k0_key[15:14];
+assign Key_type[13]=k1_key[15:14];
+assign Key_type[14]=k2_key[15:14];
+assign Key_type[15]=k3_key[15:14];
 
 assign DFJK_valid[0]=vaild_temp[0]>=0;
 assign DFJK_valid[1]=vaild_temp[1]>=0;
@@ -177,15 +194,13 @@ always_ff @(posedge new_frame or posedge reset)
 end
 always_comb 
 begin
-    precise_d_x=precise_d;
-    precise_f_x=precise_f;
-    precise_j_x=precise_j;
-    precise_k_x=precise_k;
-    d_next=precise_d[0]|precise_d[1];
-    f_next=precise_f[0]|precise_f[1];
-    j_next=precise_j[0]|precise_j[1];
-    k_next=precise_k[0]|precise_k[1];
+    d_next=precise_d_x[0]|precise_d_x[1];
+    f_next=precise_f_x[0]|precise_f_x[1];
+    j_next=precise_j_x[0]|precise_j_x[1];
+    k_next=precise_k_x[0]|precise_k_x[1];
     if(d0_key[13:0]==un_time) 
+        precise_d_x=2'b11;
+    else if(d_changed==0&&d0_key[15:14]==2'b10 &&DFJK[3]==0)
         precise_d_x=2'b11;
     else if(d_changed==0)
         precise_d_x=2'b00;
@@ -215,6 +230,8 @@ begin
 
     if(f0_key[13:0]==un_time) 
         precise_f_x=2'b11;
+    else if(f_changed==0&&f0_key[15:14]==2'b10 &&DFJK[2]==0)
+        precise_f_x=2'b11;
     else if(f_changed==0)
         precise_f_x=2'b00;
     else
@@ -243,6 +260,8 @@ begin
 
     if(j0_key[13:0]==un_time) 
         precise_j_x=2'b11;
+    else if(j_changed==0&&j0_key[15:14]==2'b10 &&DFJK[1]==0)
+        precise_j_x=2'b11;
     else if(j_changed==0)
         precise_j_x=2'b00;
     else
@@ -270,6 +289,8 @@ begin
     end
 
     if(k0_key[13:0]==un_time) 
+        precise_k_x=2'b11;
+    else if(k_changed==0&&k0_key[15:14]==2'b10 &&DFJK[0]==0)
         precise_k_x=2'b11;
     else if(k_changed==0)
         precise_k_x=2'b00;
@@ -306,19 +327,19 @@ begin
     k_addr_x=k_addr;
     if(d_next==1)
     begin
-        d_addr_x=d_addr_x+1;
+        d_addr_x=d_addr+1;
     end
     if(f_next==1)
     begin
-        f_addr_x=f_addr_x+1;
+        f_addr_x=f_addr+1;
     end
     if(j_next==1)
     begin
-        j_addr_x=j_addr_x+1;
+        j_addr_x=j_addr+1;
     end
     if(k_next==1)
     begin
-        k_addr_x=k_addr_x+1;
+        k_addr_x=k_addr+1;
     end
 end
 
@@ -462,7 +483,8 @@ end
 
 enum logic[2:0] {Key,Score,Combo}Draw_type,Draw_type_x;
 
-enum logic [3:0]{Halted,Read,Read1,Write,Write1,Examine,To_next,Pause,Done} State,Next_state;
+enum logic [3:0]{Halted,Read,Read1,Write,Write1,Examine,Examinelong,
+Readlong,Writelong,Writelong1,To_next,Pause,Pauselong,Done} State,Next_state;
 
 Sprite_ram ram(
 	.clock(clk),
@@ -493,17 +515,25 @@ begin
     end
 end
 
-logic rd_req;
+logic rd_req,is_long;
 logic [21:0] sdram_addr_max;
 logic [8:0]ram_rdaddr_x;
 logic [15:0] DFJK_valid;
+
+parameter Red_long=128'hC5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5;
+parameter Blue_long=128'h53535353535353535353535353535353;
 
 always_ff @(posedge rd_req or posedge reset)
 begin
     if(reset)
         sdram_data<=0;
-    else
+    else if(~is_long)
         sdram_data<=ram_data_out;
+    else
+    if(DFJK4321[3]!=DFJK4321[2])
+        sdram_data<=Red_long;
+    else
+        sdram_data<=Blue_long;
 end
 
 
@@ -514,7 +544,39 @@ begin
     case(State)
     Halted:
     if(~sdram_wait)
+    begin
+        if(Key_type[DFJK4321]==2'b10)
+        Next_state=Examinelong;
+        else
         Next_state=Examine;
+    end
+    Examinelong:
+    begin
+        if(DFJK4321[1:0]==2'b00)
+        Next_state=Readlong;
+        else 
+        begin
+            if(DFJK_valid[DFJK4321-1])
+            Next_state=Readlong;
+            else
+            Next_state=To_next;
+        end
+    end
+    Readlong:
+        Next_state=Writelong;
+    Writelong:
+        if(sdram_ac)
+        Next_state=Writelong1;
+    
+    Writelong1:
+    if(sdram_addr_max==sdram_addr)
+         Next_state=Examine;
+    else if (sdram_wait)
+        Next_state=Pauselong;
+    else
+        Next_state=Writelong;
+
+
     Examine:
     if(DFJK_valid[DFJK4321])
         Next_state=Read;
@@ -523,8 +585,11 @@ begin
     To_next:
     if(DFJK4321==4'b1111)
         Next_state=Done;
+    else if(Key_type[DFJK4321+1]==2'b10)
+        Next_state=Examinelong;
     else
         Next_state=Examine;
+
     Read:
         Next_state=Read1;
     Read1:
@@ -545,6 +610,9 @@ begin
     Pause:
         if(~sdram_wait)
             Next_state=Read;
+    Pauselong:
+        if(~sdram_wait)
+            Next_state=Writelong;
     endcase
 end
 
@@ -558,6 +626,11 @@ sdram_addr_x=sdram_addr;
 DFJK4321_x=DFJK4321;
 busy=0;
 rd_req=0;
+is_long=0;
+if(frame_flip)
+    sdram_addr_max=wraddr_offset1+(Pos_Y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+else
+    sdram_addr_max=wraddr_offset0+(Pos_Y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
 case(State)
 Halted:
 begin
@@ -577,11 +650,69 @@ begin
     endcase
     sdram_addr_x=frame_flip?wraddr_offset1+(Pos_Y)*40+(Pos_X/16):wraddr_offset0+(Pos_Y)*40+(Pos_X/16);
 end
+Examinelong:
+begin
+    is_long=1;
+    busy=1;
+    if(~DFJK_valid[DFJK4321])
+        begin
+            sdram_addr_x=frame_flip?wraddr_offset1+(Pos_X/16):wraddr_offset0+(Pos_X/16);
+            if(DFJK4321[1:0]!=2'b00)
+                sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
+            else
+                sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+        end
+    else
+        begin
+            sdram_addr_x=frame_flip?wraddr_offset1+(Pos_Y)*40+(Pos_X/16):wraddr_offset0+(Pos_Y)*40+(Pos_X/16);
+            if(DFJK4321[1:0]!=2'b00)
+                sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
+            else
+                sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+        end
+end
+Readlong:
+begin
+    is_long=1;
+    rd_req=1;
+    busy=1;
+    if(DFJK4321[1:0]!=2'b00)
+        sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
+    else
+        sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+end
+
+Writelong:
+begin
+    is_long=1;
+    sdram_wr=1;
+    busy=1;
+    if(DFJK4321[1:0]!=2'b00)
+        sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
+    else
+        sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+end
+Writelong1:
+begin
+    is_long=1;
+    busy=1;
+    if(DFJK4321[1:0]!=2'b00)
+        sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
+    else
+        sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+	 case(frame_flip)
+	 1:
+        sdram_addr_x=(sdram_addr-wraddr_offset1-(Pos_X/16))%40==2?sdram_addr+wraddr_key_shift_offset+1:sdram_addr+1;
+	 0:
+	    sdram_addr_x=(sdram_addr-wraddr_offset0-(Pos_X/16))%40==2?sdram_addr+wraddr_key_shift_offset+1:sdram_addr+1;
+	 endcase
+end
 To_next:
 begin
     busy=1;
     DFJK4321_x=DFJK4321+1;
 end
+
 Read:
 busy=1;
 
@@ -612,17 +743,12 @@ begin
 end
 Pause:
 ;
+Pauselong:
+;
 endcase
 end
 
-always_comb 
-begin
-if(frame_flip)
-    sdram_addr_max=wraddr_offset1+(Pos_Y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
-else
-    sdram_addr_max=wraddr_offset0+(Pos_Y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
-end
-   
+
 
 
 endmodule

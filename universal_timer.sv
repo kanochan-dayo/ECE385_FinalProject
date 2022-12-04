@@ -12,6 +12,9 @@ enum logic [1:0] {Halted,run,pause,Done} State,Next_state;
 
 always_ff @ (posedge clk)
 begin
+	if(reset)
+	State<=Halted;
+	else
 	State<=Next_state;
 end
 
