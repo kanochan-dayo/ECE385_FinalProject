@@ -103,7 +103,7 @@ Init_sdram:
 		Next_state=Init_sdram_done;
 
 Init_sdram_done:
-Next_state=Init_memory;
+	Next_state=Init_memory;
 
 Init_memory:
 	if (mem_init_done)
@@ -148,21 +148,11 @@ Line_buffer_pre_sp:
 		Next_state=Line_buffer;
 
 Background:
-if (lb_done)
-begin
-if(DFJK_sdram_writedone)
-	Next_state=Score;
-end
-else if (DrawX==785)
+if (DrawX==785)
 	Next_state=Line_buffer_pre_bk;
 
 Score:
-	if (lb_done)
-	begin
-	if(DS_done)
-		Next_state=PCM;
-	end
-	else if (DrawX==770)
+if (DrawX==770)
 	Next_state=Line_buffer_pre_sp;
 
 

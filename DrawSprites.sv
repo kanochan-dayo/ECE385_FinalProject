@@ -1,50 +1,50 @@
 module Draw_sprites(
-input clk,reset,sdram_wait,sdram_ac1,ram_wr,new_frame,frame_flip,
+input clk,reset,sdram_wait,sdram_ac,ram_wr,new_frame,frame_flip,
 input [15:0] un_time,
 input [3:0]DFJK,
 input [9:0] ram_wraddr,
 input [127:0]ram_data,
 output [127:0]sdram_data,
-output [21:0]sdram_addr1,
-output sdram_wr1,busy,done,
+output [21:0]sdram_addr,
+output sdram_wr,busy,done,
 output [15:0]sdram_be
 );
 parameter transparent=8'hFF;
-logic sdram_ac,sdram_wr;
-logic [21:0]sdram_addr;
+// logic sdram_ac,sdram_wr;
+// logic [21:0]sdram_addr;
 
-always_comb
-begin
-case(frame_flip)
-1'b1:
-if((sdram_addr)>=wraddr_offset1)
-begin
-    sdram_addr1=sdram_addr;
-    sdram_wr1=sdram_wr;
-    sdram_ac=sdram_ac1;
-end
-    else
-begin
-    sdram_addr1=wraddr_offset1;
-    sdram_wr1=1'b0;
-    sdram_ac=1'b1;
-end
-1'b0:
-if((sdram_addr)>=wraddr_offset0)
-begin
-    sdram_addr1=sdram_addr;
-    sdram_wr1=sdram_wr;
-    sdram_ac=sdram_ac1;
-end
-    else
-begin
-    sdram_addr1=wraddr_offset0;
-    sdram_wr1=1'b0;
-    sdram_ac=1'b1;
-end
+// always_comb
+// begin
+// case(frame_flip)
+// 1'b1:
+// if((sdram_addr)>=wraddr_offset1)
+// begin
+//     sdram_addr1=sdram_addr;
+//     sdram_wr1=sdram_wr;
+//     sdram_ac=sdram_ac1;
+// end
+//     else
+// begin
+//     sdram_addr1=wraddr_offset1;
+//     sdram_wr1=1'b0;
+//     sdram_ac=1'b1;
+// end
+// 1'b0:
+// if((sdram_addr)>=wraddr_offset0)
+// begin
+//     sdram_addr1=sdram_addr;
+//     sdram_wr1=sdram_wr;
+//     sdram_ac=sdram_ac1;
+// end
+//     else
+// begin
+//     sdram_addr1=wraddr_offset0;
+//     sdram_wr1=1'b0;
+//     sdram_ac=1'b1;
+// end
 
-endcase
-end
+// endcase
+// end
 
 
 assign sdram_be[0]=(sdram_data[7:0]!=transparent);
@@ -96,41 +96,44 @@ logic [1:0] precise_d,precise_f,precise_j,precise_k;
 logic [1:0] precise_d_x,precise_f_x,precise_j_x,precise_k_x;
 logic [3:0] DFJK_prestate[1:0];
 
-assign DFJK_valid[0]=vaild_temp[15]>=0;
-assign DFJK_valid[1]=vaild_temp[14]>=0;
-assign DFJK_valid[2]=vaild_temp[13]>=0;
-assign DFJK_valid[3]=vaild_temp[12]>=0;
-assign DFJK_valid[4]=vaild_temp[11]>=0;
-assign DFJK_valid[5]=vaild_temp[10]>=0;
-assign DFJK_valid[6]=vaild_temp[9]>=0;
-assign DFJK_valid[7]=vaild_temp[8]>=0;
-assign DFJK_valid[8]=vaild_temp[7]>=0;
-assign DFJK_valid[9]=vaild_temp[6]>=0;
-assign DFJK_valid[10]=vaild_temp[5]>=0;
-assign DFJK_valid[11]=vaild_temp[4]>=0;
-assign DFJK_valid[12]=vaild_temp[3]>=0;
-assign DFJK_valid[13]=vaild_temp[2]>=0;
-assign DFJK_valid[14]=vaild_temp[1]>=0;
-assign DFJK_valid[15]=vaild_temp[0]>=0;
+assign DFJK_valid[0]=vaild_temp[0]>=0;
+assign DFJK_valid[1]=vaild_temp[1]>=0;
+assign DFJK_valid[2]=vaild_temp[2]>=0;
+assign DFJK_valid[3]=vaild_temp[3]>=0;
+assign DFJK_valid[4]=vaild_temp[4]>=0;
+assign DFJK_valid[5]=vaild_temp[5]>=0;
+assign DFJK_valid[6]=vaild_temp[6]>=0;
+assign DFJK_valid[7]=vaild_temp[7]>=0;
+assign DFJK_valid[8]=vaild_temp[8]>=0;
+assign DFJK_valid[9]=vaild_temp[9]>=0;
+assign DFJK_valid[10]=vaild_temp[10]>=0;
+assign DFJK_valid[11]=vaild_temp[11]>=0;
+assign DFJK_valid[12]=vaild_temp[12]>=0;
+assign DFJK_valid[13]=vaild_temp[13]>=0;
+assign DFJK_valid[14]=vaild_temp[14]>=0;
+assign DFJK_valid[15]=vaild_temp[15]>=0;
 
 
-longint vaild_temp[15:0];
-assign vaild_temp[0]=12-mv_speed*(k3_key[13:0]-un_time)+offset_y;
-assign vaild_temp[1]=12-mv_speed*(k2_key[13:0]-un_time)+offset_y;
-assign vaild_temp[2]=12-mv_speed*(k1_key[13:0]-un_time)+offset_y;
-assign vaild_temp[3]=12-mv_speed*(k0_key[13:0]-un_time)+offset_y;
-assign vaild_temp[4]=12-mv_speed*(j3_key[13:0]-un_time)+offset_y;
-assign vaild_temp[5]=12-mv_speed*(j2_key[13:0]-un_time)+offset_y;
-assign vaild_temp[6]=12-mv_speed*(j1_key[13:0]-un_time)+offset_y;
-assign vaild_temp[7]=12-mv_speed*(j0_key[13:0]-un_time)+offset_y;
-assign vaild_temp[8]=12-mv_speed*(f3_key[13:0]-un_time)+offset_y;
-assign vaild_temp[9]=12-mv_speed*(f2_key[13:0]-un_time)+offset_y;
-assign vaild_temp[10]=12-mv_speed*(f1_key[13:0]-un_time)+offset_y;
-assign vaild_temp[11]=12-mv_speed*(f0_key[13:0]-un_time)+offset_y;
-assign vaild_temp[12]=12-mv_speed*(d3_key[13:0]-un_time)+offset_y;
-assign vaild_temp[13]=12-mv_speed*(d2_key[13:0]-un_time)+offset_y;
-assign vaild_temp[14]=12-mv_speed*(d1_key[13:0]-un_time)+offset_y;
-assign vaild_temp[15]=12-mv_speed*(d0_key[13:0]-un_time)+offset_y;
+
+int vaild_temp[15:0];
+assign vaild_temp[0]=-mv_speed*(d0_key[13:0]-un_time)+offset_y;
+assign vaild_temp[1]=-mv_speed*(d1_key[13:0]-un_time)+offset_y;
+assign vaild_temp[2]=-mv_speed*(d2_key[13:0]-un_time)+offset_y;
+assign vaild_temp[3]=-mv_speed*(d3_key[13:0]-un_time)+offset_y;
+assign vaild_temp[4]=-mv_speed*(f0_key[13:0]-un_time)+offset_y;
+assign vaild_temp[5]=-mv_speed*(f1_key[13:0]-un_time)+offset_y;
+assign vaild_temp[6]=-mv_speed*(f2_key[13:0]-un_time)+offset_y;
+assign vaild_temp[7]=-mv_speed*(f3_key[13:0]-un_time)+offset_y;
+assign vaild_temp[8]=-mv_speed*(j0_key[13:0]-un_time)+offset_y;
+assign vaild_temp[9]=-mv_speed*(j1_key[13:0]-un_time)+offset_y;
+assign vaild_temp[10]=-mv_speed*(j2_key[13:0]-un_time)+offset_y;
+assign vaild_temp[11]=-mv_speed*(j3_key[13:0]-un_time)+offset_y;
+assign vaild_temp[12]=-mv_speed*(k0_key[13:0]-un_time)+offset_y;
+assign vaild_temp[13]=-mv_speed*(k1_key[13:0]-un_time)+offset_y;
+assign vaild_temp[14]=-mv_speed*(k2_key[13:0]-un_time)+offset_y;
+assign vaild_temp[15]=-mv_speed*(k3_key[13:0]-un_time)+offset_y;
+
+
 
 
 
@@ -326,7 +329,7 @@ logic [3:0] DFJK4321,DFJK4321_x;
 logic [8:0] ram_rdaddr;
 logic [21:0] sdram_addr_x;
 parameter wraddr_key_shift_offset=22'h25;
-parameter mv_speed=8;
+parameter mv_speed=12;
 parameter d_k_ram_offset=0;
 parameter f_j_ram_offset=36;
 parameter offset_y=356;
@@ -349,122 +352,114 @@ begin
     Dist_Y=0;
     case(Draw_type)
     Key:
+    begin
+        Pos_Y=vaild_temp[DFJK4321];
         case(DFJK4321)
-        4'b0000:
-        begin
-            Pos_X=16;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(d0_key[13:0]-un_time)+offset_y;
-        end
-        4'b0001:
-        begin
-            Pos_X=16;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(d1_key[13:0]-un_time)+offset_y;
-        end
-        4'b0010:
-        begin
-            Pos_X=16;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(d2_key[13:0]-un_time)+offset_y;
-        end
-        4'b0011:
-        begin
-            Pos_X=16;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(d3_key[13:0]-un_time)+offset_y;
-        end
-        4'b0100:
-        begin
-            Pos_X=64;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(f0_key[13:0]-un_time)+offset_y;
-        end
-        4'b0101:
-        begin
-            Pos_X=64;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(f1_key[13:0]-un_time)+offset_y;
-        end
-        4'b0110:
-        begin
-            Pos_X=64;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(f2_key[13:0]-un_time)+offset_y;
-        end
-        4'b0111:
-        begin
-            Pos_X=64;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(f3_key[13:0]-un_time)+offset_y;
-        end
-        4'b1000:
-        begin
-            Pos_X=112;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(j0_key[13:0]-un_time)+offset_y;
-        end
-        4'b1001:
-        begin
-            Pos_X=112;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(j1_key[13:0]-un_time)+offset_y;
-        end
-        4'b1010:
-        begin
-            Pos_X=112;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(j2_key[13:0]-un_time)+offset_y;
-        end
-        4'b1011:
-        begin
-            Pos_X=112;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(j3_key[13:0]-un_time)+offset_y;
-        end
-        4'b1100:
-        begin
-            Pos_X=160;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(k0_key[13:0]-un_time)+offset_y;
-        end
-        4'b1101:
-        begin
-            Pos_X=160;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(k1_key[13:0]-un_time)+offset_y;
-        end
-        4'b1110:
-        begin
-            Pos_X=160;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(k2_key[13:0]-un_time)+offset_y;
-        end
-        4'b1111:
-        begin
-            Pos_X=160;
-            Dist_X=48;
-            Dist_Y=12;
-            Pos_Y=-mv_speed*(k3_key[13:0]-un_time)+offset_y;
-        end
-endcase
+            4'b0000:
+            begin
+                Pos_X=16;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b0001:
+            begin
+                Pos_X=16;
+                Dist_X=48;
+                Dist_Y=12;
+
+            end
+            4'b0010:
+            begin
+                Pos_X=16;
+                Dist_X=48;
+                Dist_Y=12;
+
+            end
+            4'b0011:
+            begin
+                Pos_X=16;
+                Dist_X=48;
+                Dist_Y=12;
+
+            end
+            4'b0100:
+            begin
+                Pos_X=64;
+                Dist_X=48;
+                Dist_Y=12;
+
+            end
+            4'b0101:
+            begin
+                Pos_X=64;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b0110:
+            begin
+                Pos_X=64;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b0111:
+            begin
+                Pos_X=64;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b1000:
+            begin
+                Pos_X=112;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b1001:
+            begin
+                Pos_X=112;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b1010:
+            begin
+                Pos_X=112;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b1011:
+            begin
+                Pos_X=112;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b1100:
+            begin
+                Pos_X=160;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b1101:
+            begin
+                Pos_X=160;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b1110:
+            begin
+                Pos_X=160;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+            4'b1111:
+            begin
+                Pos_X=160;
+                Dist_X=48;
+                Dist_Y=12;
+            end
+        endcase
+    end
 endcase
 end
+
 enum logic[2:0] {Key,Score,Combo}Draw_type,Draw_type_x;
 
 enum logic [3:0]{Halted,Read,Read1,Write,Write1,Examine,To_next,Pause,Done} State,Next_state;

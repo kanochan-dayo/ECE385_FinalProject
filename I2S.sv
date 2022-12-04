@@ -196,6 +196,7 @@ Stoped:
 begin
 Write_done=1;
 Play_flag=0;
+wraddress_x=0;
 end
 endcase
 end
