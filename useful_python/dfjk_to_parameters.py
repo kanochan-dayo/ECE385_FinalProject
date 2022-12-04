@@ -36,7 +36,7 @@ with open(imput_file) as f:
             number=number.zfill(14)
             d_pre = line[1:3]
             out=open(output_files[0], "a")
-            out.write("16'b"+line[1:3]+number+",        \\\\ Line"+line+"at index "+str(line_num)+"\n")
+            out.write("16'b"+line[1:3]+number+",        // Line"+line+"at index "+str(line_num)+"\n")
             out.close()
             continue
         if Key_type == "F":
@@ -54,7 +54,7 @@ with open(imput_file) as f:
             number=number.zfill(14)
             f_pre = line[1:3]
             out=open(output_files[1], "a")
-            out.write("16'b"+line[1:3]+number+",        \\\\ Line"+line+"at index "+str(line_num)+"\n")
+            out.write("16'b"+line[1:3]+number+",        // Line"+line+"at index "+str(line_num)+"\n")
             out.close()
             continue
         if Key_type == "J":
@@ -72,7 +72,7 @@ with open(imput_file) as f:
             number=number.zfill(14)
             j_pre = line[1:3]
             out=open(output_files[2], "a")
-            out.write("16'b"+line[1:3]+number+",        \\\\ Line"+line+"at index "+str(line_num)+"\n")
+            out.write("16'b"+line[1:3]+number+",        // Line"+line+"at index "+str(line_num)+"\n")
             out.close()
             continue
         if Key_type == "K":
@@ -90,7 +90,7 @@ with open(imput_file) as f:
             number=number.zfill(14)
             k_pre = line[1:3]
             out=open(output_files[3], "a")
-            out.write("16'b"+line[1:3]+number+",        \\\\ Line"+line+"at index "+str(line_num)+"\n")
+            out.write("16'b"+line[1:3]+number+",        // Line"+line+"at index "+str(line_num)+"\n")
             out.close()
             continue
         

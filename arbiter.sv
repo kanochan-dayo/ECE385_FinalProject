@@ -319,7 +319,7 @@ init_wait=0;
 DS_sdram_wait=0;
 DS_sdram_ac=ar_ac;
 ar_write=DS_sdram_wr;
-ar_wrdata=DS_sdram_wrdata;
+ar_wrdata=DS_sdram_data;
 ar_addr=DS_sdram_addr;
 ar_be=DS_sdram_be;
 end
@@ -330,7 +330,7 @@ init_wait=0;
 DS_sdram_wait=1;
 DS_sdram_ac=ar_ac;
 ar_write=DS_sdram_wr;
-ar_wrdata=DS_sdram_wrdata;
+ar_wrdata=DS_sdram_data;
 ar_addr=DS_sdram_addr;
 ar_be=DS_sdram_be;
 end
