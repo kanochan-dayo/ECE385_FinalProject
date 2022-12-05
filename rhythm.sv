@@ -283,7 +283,7 @@ always_ff @(posedge pixel_clk)
 begin
 new_frame<=new_frame;
 
-if (DrawY==523&&DrawX==765)
+if (DrawY==523&&DrawX==760)
 new_frame<=1;
 else
 new_frame<=0;

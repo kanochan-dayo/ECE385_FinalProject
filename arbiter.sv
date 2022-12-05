@@ -134,7 +134,7 @@ Line_buffer_mid:
 	Next_state=Background;
 	else if (~DS_done)
 	Next_state=Score;
-	else if (DrawX==785)
+	else if (DrawX==765)
 	Next_state=Line_buffer_pre_bk;
 //	else
 //	Next_state=Background;
@@ -148,7 +148,7 @@ Line_buffer_pre_sp:
 		Next_state=Line_buffer;
 
 Background:
-if (DrawX==785)
+if (DrawX==765)
 	Next_state=Line_buffer_pre_bk;
 
 Score:

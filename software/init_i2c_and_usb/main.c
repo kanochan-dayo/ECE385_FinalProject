@@ -2,8 +2,9 @@
 
 int main(){
 	setup_i2c();
+	setLED(10);
 	setLED(9);
-	for (int i=0;i<=6;i++){
+	for (int i=0;i<=5;i++){
 	usleep(2000000);
 	}
 

@@ -208,9 +208,9 @@ begin
     begin
         if(d0_key[15:14]==2'b10)
         begin
-                if (d0_key[13:0]-un_time>15)
+                if (d0_key[13:0]-un_time>22)
                     precise_d_x=2'b11;
-                else if (d0_key[13:0]-un_time>7)
+                else if (d0_key[13:0]-un_time>14)
                     precise_d_x=2'b10;
                 else
                     precise_d_x=2'b01;
@@ -218,11 +218,11 @@ begin
         else if(DFJK[3]==0)
             precise_d_x=2'b00;
 
-        else if(d0_key[13:0]-un_time>27)
+        else if(d0_key[13:0]-un_time>34)
             precise_d_x=2'b00;
-        else if(d0_key[13:0]-un_time>15)
+        else if(d0_key[13:0]-un_time>22)
             precise_d_x=2'b11;
-        else if(d0_key[13:0]-un_time>7)
+        else if(d0_key[13:0]-un_time>14)
             precise_d_x=2'b10;
         else
             precise_d_x=2'b01;
@@ -238,9 +238,9 @@ begin
     begin
         if(f0_key[15:14]==2'b10)
         begin
-                if (f0_key[13:0]-un_time>15)
+                if (f0_key[13:0]-un_time>22)
                     precise_f_x=2'b11;
-                else if (f0_key[13:0]-un_time>7)
+                else if (f0_key[13:0]-un_time>14)
                     precise_f_x=2'b10;
                 else
                     precise_f_x=2'b01;
@@ -248,11 +248,11 @@ begin
         else if(DFJK[2]==0)
             precise_f_x=2'b00;
 
-        else if(f0_key[13:0]-un_time>27)
+        else if(f0_key[13:0]-un_time>34)
             precise_f_x=2'b00;
-        else if(f0_key[13:0]-un_time>15)
+        else if(f0_key[13:0]-un_time>22)
             precise_f_x=2'b11;
-        else if(f0_key[13:0]-un_time>7)
+        else if(f0_key[13:0]-un_time>14)
             precise_f_x=2'b10;
         else
             precise_f_x=2'b01;
@@ -268,9 +268,9 @@ begin
     begin
         if(j0_key[15:14]==2'b10)
         begin
-                if (j0_key[13:0]-un_time>15)
+                if (j0_key[13:0]-un_time>22)
                     precise_j_x=2'b11;
-                else if (j0_key[13:0]-un_time>7)
+                else if (j0_key[13:0]-un_time>14)
                     precise_j_x=2'b10;
                 else
                     precise_j_x=2'b01;
@@ -278,11 +278,11 @@ begin
         else if(DFJK[1]==0)
             precise_j_x=2'b00;
 
-        else if(j0_key[13:0]-un_time>27)
+        else if(j0_key[13:0]-un_time>34)
             precise_j_x=2'b00;
-        else if(j0_key[13:0]-un_time>15)
+        else if(j0_key[13:0]-un_time>22)
             precise_j_x=2'b11;
-        else if(j0_key[13:0]-un_time>7)
+        else if(j0_key[13:0]-un_time>14)
             precise_j_x=2'b10;
         else
             precise_j_x=2'b01;
@@ -298,9 +298,9 @@ begin
     begin
         if(k0_key[15:14]==2'b10)
         begin
-                if (k0_key[13:0]-un_time>15)
+                if (k0_key[13:0]-un_time>22)
                     precise_k_x=2'b11;
-                else if (k0_key[13:0]-un_time>7)
+                else if (k0_key[13:0]-un_time>14)
                     precise_k_x=2'b10;
                 else
                     precise_k_x=2'b01;
@@ -308,11 +308,11 @@ begin
         else if(DFJK[0]==0)
             precise_k_x=2'b00;
 
-        else if(k0_key[13:0]-un_time>27)
+        else if(k0_key[13:0]-un_time>34)
             precise_k_x=2'b00;
-        else if(k0_key[13:0]-un_time>15)
+        else if(k0_key[13:0]-un_time>22)
             precise_k_x=2'b11;
-        else if(k0_key[13:0]-un_time>7)
+        else if(k0_key[13:0]-un_time>14)
             precise_k_x=2'b10;
         else
             precise_k_x=2'b01;
@@ -350,10 +350,10 @@ logic [3:0] DFJK4321,DFJK4321_x;
 logic [8:0] ram_rdaddr;
 logic [21:0] sdram_addr_x;
 parameter wraddr_key_shift_offset=22'h25;
-parameter mv_speed=12;
+parameter mv_speed=14;
 parameter d_k_ram_offset=0;
 parameter f_j_ram_offset=36;
-parameter offset_y=356;
+parameter offset_y=356+7*mv_speed;
 parameter wraddr_offset0=22'h100000;
 parameter wraddr_offset1=22'h200000;
 parameter d_track_offset=22'h1;
@@ -552,6 +552,10 @@ begin
     end
     Examinelong:
     begin
+	 if(sdram_addr_max<=sdram_addr_x)
+	 Next_state=To_next;
+	 else
+	 begin
         if(DFJK4321[1:0]==2'b00)
         Next_state=Readlong;
         else 
@@ -561,6 +565,7 @@ begin
             else
             Next_state=To_next;
         end
+		end
     end
     Readlong:
         Next_state=Writelong;
@@ -569,7 +574,7 @@ begin
         Next_state=Writelong1;
     
     Writelong1:
-    if(sdram_addr_max==sdram_addr)
+    if(sdram_addr_max<=sdram_addr)
          Next_state=Examine;
     else if (sdram_wait)
         Next_state=Pauselong;
@@ -598,7 +603,7 @@ begin
         if(sdram_ac)
             Next_state=Write1;
     Write1:
-    if(sdram_addr_max==sdram_addr)
+    if(sdram_addr_max<=sdram_addr)
         Next_state=To_next;
     else if(sdram_wait)
         Next_state=Pause;
@@ -660,7 +665,7 @@ begin
             if(DFJK4321[1:0]!=2'b00)
                 sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
             else
-                sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+                sdram_addr_max=frame_flip?wraddr_offset1+(offset_y-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1;
         end
     else
         begin
@@ -668,7 +673,7 @@ begin
             if(DFJK4321[1:0]!=2'b00)
                 sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
             else
-                sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+                sdram_addr_max=frame_flip?wraddr_offset1+(offset_y-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1;
         end
 end
 Readlong:
@@ -679,7 +684,7 @@ begin
     if(DFJK4321[1:0]!=2'b00)
         sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
     else
-        sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+        sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1;
 end
 
 Writelong:
@@ -690,7 +695,7 @@ begin
     if(DFJK4321[1:0]!=2'b00)
         sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
     else
-        sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+        sdram_addr_max=frame_flip?wraddr_offset1+(offset_y-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1;
 end
 Writelong1:
 begin
@@ -699,7 +704,7 @@ begin
     if(DFJK4321[1:0]!=2'b00)
         sdram_addr_max=frame_flip?wraddr_offset1+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(vaild_temp[DFJK4321-1])*40+((Pos_X+Dist_X)/16)-1;
     else
-        sdram_addr_max=frame_flip?wraddr_offset1+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y+Dist_Y)*40+((Pos_X+Dist_X)/16)-1;
+        sdram_addr_max=frame_flip?wraddr_offset1+(offset_y-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1:wraddr_offset0+(offset_y-mv_speed*7)*40+((Pos_X+Dist_X)/16)-1;
 	 case(frame_flip)
 	 1:
         sdram_addr_x=(sdram_addr-wraddr_offset1-(Pos_X/16))%40==2?sdram_addr+wraddr_key_shift_offset+1:sdram_addr+1;
@@ -745,7 +750,7 @@ Pause:
 ;
 Pauselong:
 is_long=1;
-;
+
 endcase
 end
 
