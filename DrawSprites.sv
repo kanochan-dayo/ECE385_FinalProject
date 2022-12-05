@@ -7,62 +7,79 @@ input [127:0]ram_data,
 output [127:0]sdram_data,
 output [21:0]sdram_addr,
 output sdram_wr,busy,done,
-output [15:0]sdram_be
+output [12:0] score,
+output [3:0] combo,
+output [1:0] precise
 );
 parameter transparent=8'hFF;
-// logic sdram_ac,sdram_wr;
-// logic [21:0]sdram_addr;
 
-// always_comb
-// begin
-// case(frame_flip)
-// 1'b1:
-// if((sdram_addr)>=wraddr_offset1)
-// begin
-//     sdram_addr1=sdram_addr;
-//     sdram_wr1=sdram_wr;
-//     sdram_ac=sdram_ac1;
-// end
-//     else
-// begin
-//     sdram_addr1=wraddr_offset1;
-//     sdram_wr1=1'b0;
-//     sdram_ac=1'b1;
-// end
-// 1'b0:
-// if((sdram_addr)>=wraddr_offset0)
-// begin
-//     sdram_addr1=sdram_addr;
-//     sdram_wr1=sdram_wr;
-//     sdram_ac=sdram_ac1;
-// end
-//     else
-// begin
-//     sdram_addr1=wraddr_offset0;
-//     sdram_wr1=1'b0;
-//     sdram_ac=1'b1;
-// end
+always_comb
+begin
+if(precise_d_x==2'b11||precise_f_x==2'b11||precise_j_x==2'b11||precise_k_x==2'b11)
+precise=2'b11;
+else if(precise_d_x==2'b10||precise_f_x==2'b10||precise_j_x==2'b10||precise_k_x==2'b10)
+precise=2'b10;
+else if(precise_d_x==2'b01||precise_f_x==2'b01||precise_j_x==2'b01||precise_k_x==2'b01)
+precise=2'b01;
+else
+precise=2'b00;
+end
 
-// endcase
-// end
+logic [10:0] score_d,score_f,score_j,score_k;
+logic  combo_d,combo_f,combo_j,combo_k;
+always_comb
+begin
+    if(precise[1]==1)
+    combo=4'hf;
+    else if(precise==2'b00)
+    combo=4'h0;
+    else
+    combo=combo_d+combo_f+combo_j+combo_k;
+
+    case(precise_d_x)
+    2'b01:combo_d=1;
+    default:combo_d=0;
+    endcase
+    case(precise_f_x)
+    2'b01:combo_f=1;
+    default:combo_f=0;
+    endcase
+    case(precise_j_x)
+    2'b01:combo_j=1;
+    default:combo_j=0;
+    endcase
+    case(precise_k_x)
+    2'b01:combo_k=1;
+    default:combo_k=0;
+    endcase
+    score=score_d+score_f+score_j+score_k;
+    case(precise_d_x)
+    2'b00:score_d=0;
+    2'b10:score_d=950;
+    2'b01:score_d=1900;
+    2'b11:score_d=0;
+    endcase
+    case(precise_f_x)
+    2'b00:score_f=0;
+    2'b10:score_f=950;
+    2'b01:score_f=1900;
+    2'b11:score_f=0;
+    endcase
+    case(precise_j_x)
+    2'b00:score_j=0;
+    2'b10:score_j=950;
+    2'b01:score_j=1900;
+    2'b11:score_j=0;
+    endcase
+    case(precise_k_x)
+    2'b00:score_k=0;
+    2'b10:score_k=950;
+    2'b01:score_k=1900;
+    2'b11:score_k=0;
+    endcase
+end
 
 
-assign sdram_be[0]=(sdram_data[7:0]!=transparent);
-assign sdram_be[1]=(sdram_data[15:8]!=transparent);
-assign sdram_be[2]=(sdram_data[23:16]!=transparent);
-assign sdram_be[3]=(sdram_data[31:24]!=transparent);
-assign sdram_be[4]=(sdram_data[39:32]!=transparent);
-assign sdram_be[5]=(sdram_data[47:40]!=transparent);
-assign sdram_be[6]=(sdram_data[55:48]!=transparent);
-assign sdram_be[7]=(sdram_data[63:56]!=transparent);
-assign sdram_be[8]=(sdram_data[71:64]!=transparent);
-assign sdram_be[9]=(sdram_data[79:72]!=transparent);
-assign sdram_be[10]=(sdram_data[87:80]!=transparent);
-assign sdram_be[11]=(sdram_data[95:88]!=transparent);
-assign sdram_be[12]=(sdram_data[103:96]!=transparent);
-assign sdram_be[13]=(sdram_data[111:104]!=transparent);
-assign sdram_be[14]=(sdram_data[119:112]!=transparent);
-assign sdram_be[15]=(sdram_data[127:120]!=transparent);
 
 
 
@@ -92,7 +109,6 @@ logic [7:0] d_addr_x,f_addr_x,j_addr_x,k_addr_x;
 
 logic [15:0] d0_key,d1_key,d2_key,d3_key,f0_key,f1_key,f2_key,f3_key,j0_key,j1_key,j2_key,j3_key,k0_key,k1_key,k2_key,k3_key;
 
-logic [1:0] precise_d,precise_f,precise_j,precise_k;
 logic [1:0] precise_d_x,precise_f_x,precise_j_x,precise_k_x;
 logic [3:0] DFJK_prestate[1:0];
 logic [1:0] Key_type[15:0];
@@ -173,10 +189,6 @@ always_ff @(posedge new_frame or posedge reset)
         k_addr<=0;
         DFJK_prestate[0]<=DFJK;
         DFJK_prestate[1]<=DFJK;
-        precise_d<=0;
-        precise_f<=0;
-        precise_j<=0;
-        precise_k<=0;
     end
 	     else
     begin
@@ -186,10 +198,6 @@ always_ff @(posedge new_frame or posedge reset)
         k_addr<=k_addr_x;
         DFJK_prestate[0]<=DFJK;
         DFJK_prestate[1]<=DFJK_prestate[0];
-        precise_d<=precise_d_x;
-        precise_f<=precise_f_x;
-        precise_j<=precise_j_x;
-        precise_k<=precise_k_x;
     end
 end
 always_comb 
@@ -371,9 +379,6 @@ begin
     Pos_Y=-1;
     Dist_X=0;
     Dist_Y=0;
-    case(Draw_type)
-    Key:
-    begin
         Pos_Y=vaild_temp[DFJK4321];
         case(DFJK4321)
             4'b0000:
@@ -477,11 +482,10 @@ begin
                 Dist_Y=12;
             end
         endcase
-    end
-endcase
+
 end
 
-enum logic[2:0] {Key,Score,Combo}Draw_type,Draw_type_x;
+
 
 enum logic [3:0]{Halted,Read,Read1,Write,Write1,Examine,Examinelong,
 Readlong,Writelong,Writelong1,To_next,Pause,Pauselong,Done} State,Next_state;
@@ -501,7 +505,6 @@ begin
     begin
         DFJK4321<=4'b0000;
         State<=Halted;
-        Draw_type<=Key;
         ram_rdaddr<=0;
         sdram_addr<=0;
     end
@@ -509,7 +512,6 @@ begin
     begin
         State<=Next_state;
         DFJK4321<=DFJK4321_x;
-        Draw_type<=Draw_type_x;
         ram_rdaddr<=ram_rdaddr_x;
         sdram_addr<=sdram_addr_x;
     end
@@ -623,7 +625,6 @@ end
 
 always_comb
 begin
-Draw_type_x=Draw_type;
 ram_rdaddr_x=ram_rdaddr;
 done=0;
 sdram_wr=0;
@@ -646,13 +647,10 @@ end
 Examine:
 begin
     busy=1;
-    case(Draw_type)
-    Key:
     if(DFJK4321[3]==DFJK4321[2])
     ram_rdaddr_x=d_k_ram_offset;
     else
     ram_rdaddr_x=f_j_ram_offset;
-    endcase
     sdram_addr_x=frame_flip?wraddr_offset1+(Pos_Y)*40+(Pos_X/16):wraddr_offset0+(Pos_Y)*40+(Pos_X/16);
 end
 Examinelong:
@@ -753,8 +751,6 @@ is_long=1;
 
 endcase
 end
-
-
 
 
 endmodule

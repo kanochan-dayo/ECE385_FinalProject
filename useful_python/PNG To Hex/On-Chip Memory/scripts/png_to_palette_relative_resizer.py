@@ -2,41 +2,43 @@ from PIL import Image
 from collections import Counter
 from scipy.spatial import KDTree
 import numpy as np
+import os
+from tqdm import tqdm
 def hex_to_rgb(num):
     h = str(num)
     return int(h[0:4], 16), int(('0x' + h[4:6]), 16), int(('0x' + h[6:8]), 16)
 def rgb_to_hex(num):
     h = str(num)
     return int(h[0:4], 16), int(('0x' + h[4:6]), 16), int(('0x' + h[6:8]), 16)
-filename = input("What's the image name? ")
+# filename = input("What's the image name? ")
 # new_w, new_h = map(int, input("What's the new height x width? Like 28 28. ").split(' '))
 palette_hex = ['0x000000', '0x000050', '0x0000B0', '0x0000FF', '0x002000', '0x002050', '0x0020B0', '0x0020FF', '0x005000', '0x005050', '0x0050B0', '0x0050FF', '0x007000', '0x007050', '0x0070B0', '0x0070FF', '0x009000', '0x009050', '0x0090B0', '0x0090FF', '0x00B000', '0x00B050', '0x00B0B0', '0x00B0FF', '0x00E000', '0x00E050', '0x00E0B0', '0x00E0FF', '0x00FF00', '0x00FF50', '0x00FFB0', '0x00FFFF', '0x200000', '0x200050', '0x2000B0', '0x2000FF', '0x202000', '0x202050', '0x2020B0', '0x2020FF', '0x205000', '0x205050', '0x2050B0', '0x2050FF', '0x207000', '0x207050', '0x2070B0', '0x2070FF', '0x209000', '0x209050', '0x2090B0', '0x2090FF', '0x20B000', '0x20B050', '0x20B0B0', '0x20B0FF', '0x20E000', '0x20E050', '0x20E0B0', '0x20E0FF', '0x20FF00', '0x20FF50', '0x20FFB0', '0x20FFFF', '0x500000', '0x500050', '0x5000B0', '0x5000FF', '0x502000', '0x502050', '0x5020B0', '0x5020FF', '0x505000', '0x505050', '0x5050B0', '0x5050FF', '0x507000', '0x507050', '0x5070B0', '0x5070FF', '0x509000', '0x509050', '0x5090B0', '0x5090FF', '0x50B000', '0x50B050', '0x50B0B0', '0x50B0FF', '0x50E000', '0x50E050', '0x50E0B0', '0x50E0FF', '0x50FF00', '0x50FF50', '0x50FFB0', '0x50FFFF', '0x700000', '0x700050', '0x7000B0', '0x7000FF', '0x702000', '0x702050', '0x7020B0', '0x7020FF', '0x705000', '0x705050', '0x7050B0', '0x7050FF', '0x707000', '0x707050', '0x7070B0', '0x7070FF', '0x709000', '0x709050', '0x7090B0', '0x7090FF', '0x70B000', '0x70B050', '0x70B0B0', '0x70B0FF', '0x70E000', '0x70E050', '0x70E0B0', '0x70E0FF', '0x70FF00', '0x70FF50', '0x70FFB0', '0x70FFFF', '0x900000', '0x900050', '0x9000B0', '0x9000FF', '0x902000', '0x902050', '0x9020B0', '0x9020FF', '0x905000', '0x905050', '0x9050B0', '0x9050FF', '0x907000', '0x907050', '0x9070B0', '0x9070FF', '0x909000', '0x909050', '0x9090B0', '0x9090FF', '0x90B000', '0x90B050', '0x90B0B0', '0x90B0FF', '0x90E000', '0x90E050', '0x90E0B0', '0x90E0FF', '0x90FF00', '0x90FF50', '0x90FFB0', '0x90FFFF', '0xB00000', '0xB00050', '0xB000B0', '0xB000FF', '0xB02000', '0xB02050', '0xB020B0', '0xB020FF', '0xB05000', '0xB05050', '0xB050B0', '0xB050FF', '0xB07000', '0xB07050', '0xB070B0', '0xB070FF', '0xB09000', '0xB09050', '0xB090B0', '0xB090FF', '0xB0B000', '0xB0B050', '0xB0B0B0', '0xB0B0FF', '0xB0E000', '0xB0E050', '0xB0E0B0', '0xB0E0FF', '0xB0FF00', '0xB0FF50', '0xB0FFB0', '0xB0FFFF', '0xE00000', '0xE00050', '0xE000B0', '0xE000FF', '0xE02000', '0xE02050', '0xE020B0', '0xE020FF', '0xE05000', '0xE05050', '0xE050B0', '0xE050FF', '0xE07000', '0xE07050', '0xE070B0', '0xE070FF', '0xE09000', '0xE09050', '0xE090B0', '0xE090FF', '0xE0B000', '0xE0B050', '0xE0B0B0', '0xE0B0FF', '0xE0E000', '0xE0E050', '0xE0E0B0', '0xE0E0FF', '0xE0FF00', '0xE0FF50', '0xE0FFB0', '0xE0FFFF', '0xFF0000', '0xFF0050', '0xFF00B0', '0xFF00FF', '0xFF2000', '0xFF2050', '0xFF20B0', '0xFF20FF', '0xFF5000', '0xFF5050', '0xFF50B0', '0xFF50FF', '0xFF7000', '0xFF7050', '0xFF70B0', '0xFF70FF', '0xFF9000', '0xFF9050', '0xFF90B0', '0xFF90FF', '0xFFB000', '0xFFB050', '0xFFB0B0', '0xFFB0FF', '0xFFE000', '0xFFE050', '0xFFE0B0', '0xFFE0FF', '0xFFFF00', '0xFFFF50', '0xFFFFB0', '0xFFFFFF']
 palette_rgb = [hex_to_rgb(color) for color in palette_hex]
 
 pixel_tree = KDTree(palette_rgb)
-im = Image.open("./sprite_originals/" + filename+ ".png") #Can be many different formats.
-im = im.convert("RGBA")
-# im = im.resize((new_w, new_h),Image.ANTIALIAS) # regular resize
-pix = im.load()
-pix_freqs = Counter([pix[x, y] for x in range(im.size[0]) for y in range(im.size[1])])
-pix_freqs_sorted = sorted(pix_freqs.items(), key=lambda x: x[1])
-pix_freqs_sorted.reverse()
-# print(pix)
-outImg = Image.new('RGB', im.size, color='white')
-outFile = open("./sprite_bytes/" + filename + '.txt', 'w')
-i = 0
-for y in range(im.size[1]):
-    for x in range(im.size[0]):
-        pixel = im.getpixel((x,y))
-        # print(pixel)
-        if(pixel[3] < 200):
-            outImg.putpixel((x,y), palette_rgb[0])
-            outFile.write("%x\n" % (0))
-            # print(i)
-        else:
-            index = pixel_tree.query(pixel[:3])[1]
-            outImg.putpixel((x,y), palette_rgb[index])
-            outFile.write("%x\n" % (index))
-        i += 1
-outFile.close()
-outImg.save("./sprite_converted/" + filename + ".png")
+
+imlist = os.listdir("./sprite_originals")
+for filename in tqdm(imlist):
+    filename = filename.split('.')[0]
+    im = Image.open("./sprite_originals/" + filename+".png") #Can be many different formats.
+    im = im.convert("RGBA")
+    pix = im.load()
+    pix_freqs = Counter([pix[x, y] for x in range(im.size[0]) for y in range(im.size[1])])
+    pix_freqs_sorted = sorted(pix_freqs.items(), key=lambda x: x[1])
+    pix_freqs_sorted.reverse()
+    outImg = Image.new('RGB', im.size, color='white')
+    outFile = open("./sprite_bytes/" + filename + '.txt', 'w')
+    i = 0
+    for y in range(im.size[1]):
+        for x in range(im.size[0]):
+            pixel = im.getpixel((x,y))
+            if(pixel[3] < 200):
+                outImg.putpixel((x,y), palette_rgb[0])
+                outFile.write("%x\n" % (0))
+            else:
+                index = pixel_tree.query(pixel[:3])[1]
+                outImg.putpixel((x,y), palette_rgb[index])
+                outFile.write("%x\n" % (index))
+            i += 1
+    outFile.close()
+    outImg.save("./sprite_converted/" + filename+".png")

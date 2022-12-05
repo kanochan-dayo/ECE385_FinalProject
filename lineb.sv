@@ -11,6 +11,7 @@ module lineb (
 		reset,
 		new_frame,
 		sdram_Wait,
+		stop_sign,
 		output frame_flip,
       output   [ 3: 0]   VGA_R,
       output   [ 3: 0]   VGA_G,
@@ -185,7 +186,7 @@ sdram_addr=WriteX[9:4]+(WriteY*40)+Address2;
 	4'hF:
 	pixel_palette_index=pixel_palette_a[127:120];
 	endcase
-if (blank)
+if (blank&&(~stop_sign))
  begin
 	VGA_R<=RGB_ALL[23:20];
 	VGA_G<=RGB_ALL[15:12];
