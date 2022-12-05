@@ -196,17 +196,17 @@ void MAX3421E_init(void) {
 	MAXreg_wr( rHIRQ, bmCONDETIRQ); //clear connection detect interrupt                 
 	MAXreg_wr( rCPUCTL, 0x01);                            //enable interrupt pin
 	BYTE testbyte=0x12;
-	printf("\n%x\n",MAXreg_rd(testbyte));
+//	printf("\n%x\n",MAXreg_rd(testbyte));
 }
 
 /* MAX3421 state change task and interrupt handler */
 void MAX3421E_Task(void) {
 	if ( IORD_ALTERA_AVALON_PIO_DATA(USB_IRQ_BASE) == 0) {
-		printf("MAX interrupt\n\r");
+//		printf("MAX interrupt\n\r");
 		MaxIntHandler();
 	}
 	if ( IORD_ALTERA_AVALON_PIO_DATA(USB_GPX_BASE) == 1) {
-		printf("GPX interrupt\n\r");
+//		printf("GPX interrupt\n\r");
 		MaxGpxHandler();
 	}
 }

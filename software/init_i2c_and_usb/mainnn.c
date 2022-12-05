@@ -76,9 +76,9 @@ int usb_set() {
 	BYTE device;
 	BYTE dfjk;
 	WORD temp_keycode=0;
-	printf("initializing MAX3421E...\n");
+//	printf("initializing MAX3421E...\n");
 	MAX3421E_init();
-	printf("initializing USB...\n");
+//	printf("initializing USB...\n");
 	USB_init();
 	while (1) {
 		MAX3421E_Task();
@@ -168,16 +168,16 @@ int usb_set() {
 //			}
 //		} else if (GetUsbTaskState() == USB_STATE_ERROR) {
 			if (!errorflag) {
-				errorflag = 1;
-				clearLED(9);
-				printf("USB Error State\n");
+//				errorflag = 1;
+//				clearLED(9);
+//				printf("USB Error State\n");
 				//print out string descriptor here
 			}
 		} else //not in USB running state
 		{
 
-			printf("USB task state: ");
-			printf("%x\n", GetUsbTaskState());
+//			printf("USB task state: ");
+//			printf("%x\n", GetUsbTaskState());
 			if (runningdebugflag) {	//previously running, reset USB hardware just to clear out any funky state, HS/FS etc
 				runningdebugflag = 0;
 				MAX3421E_init();
