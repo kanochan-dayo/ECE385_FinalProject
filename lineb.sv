@@ -81,7 +81,7 @@ begin
  Pause:
  if(DrawY==479)
  Next_state=Done;
- else if(DrawX==785)
+ else if(DrawX==760)
  Next_state=Pause1;
  
  Pause1:

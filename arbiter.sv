@@ -2,11 +2,11 @@ module arbiter_sdram (
 //general input
 input clk,reset,new_frame,
 input [9:0] DrawY,DrawX,
+input stop_sign,
 
 //sdram_init_input
 input [21:0]init_addr,
 input init_we,
-
 input [127:0] init_wrdata,
 output init_ac,   //acknowledge from RAM to move to next word
 input init_error, //error initializing
@@ -17,6 +17,13 @@ input init_mosi_o,
 output init_miso_i,
 init_wait,
 
+//mem_init_input
+output mem_init_sdram_wait,mem_init_sdram_ac,
+input mem_init_sdram_rd,mem_init_done,
+output [127:0]mem_init_sdram_data,
+input [21:0]mem_init_sdram_addr,
+
+
 //usb_input
 input SPI0_CS_N_usb, SPI0_SCLK_usb, SPI0_MOSI_usb,
 output SPI0_MISO_usb,
@@ -26,6 +33,13 @@ output I2S_sdram_Wait,I2S_sdram_ac,
 input I2S_sdram_rd,I2S_Busy,I2S_Done,
 output[127:0] I2S_sdram_data,
 input [21:0] I2S_sdram_addr,
+// DS input
+input [127:0] DS_sdram_data,
+input [21:0] DS_sdram_addr,
+input DS_sdram_wr,DS_busy,DS_done,
+input [15:0] DS_sdram_be,
+output DS_sdram_ac,DS_sdram_wait,
+
 
 //BK input
 output DFJK_sdram_wait,DFJK_sdram_ac,
@@ -49,13 +63,18 @@ output [127:0] ar_wrdata,
 input [127:0] ar_rddata,
 
 input SPI0_MISO,
-output SPI0_CS_N, SPI0_SCLK, SPI0_MOSI,SD_CS
+output SPI0_CS_N, SPI0_SCLK, SPI0_MOSI,SD_CS,start_sign
 );
 
-enum logic[7:0] {Bootup,Init_sdram,Init_sdram_done,
-Init_memory,Init_memory_done,Line_buffer,Line_buffer_mid,Line_buffer_pre,Line_buffer_done,PCM_done,
-Background,Score,Key_track,Note,
-PCM,Halted} State,Next_state;
+enum logic[7:0] 
+{
+	Bootup, Init_sdram, Init_sdram_done,
+	Init_memory, Init_memory_done,
+	Line_buffer_pre_bk, Line_buffer_pre_sp, Line_buffer, Line_buffer_mid, Line_buffer_done,
+	Background, 
+	Score, Note, PCM, PCM_done,
+	Halted, Done
+} State, Next_state;
 
 always_ff @ (posedge clk)
 begin
@@ -84,8 +103,15 @@ Init_sdram:
 		Next_state=Init_sdram_done;
 
 Init_sdram_done:
+	Next_state=Init_memory;
+
+Init_memory:
+	if (mem_init_done)
+		Next_state=Init_memory_done;
+	
+Init_memory_done:
 	if (new_frame)
-		Next_state=Line_buffer_pre;
+		Next_state=Line_buffer_pre_bk;
 
 Line_buffer:
 	if (lb_done)
@@ -97,35 +123,46 @@ Line_buffer:
 Line_buffer_done:
 	if(~DFJK_sdram_writedone)
 		Next_state=Background;
+	else if(~DS_done)
+		Next_state=Score;
 	else
 		Next_state=PCM;
+
 Line_buffer_mid:
 	
 	if(~DFJK_sdram_writedone)
 	Next_state=Background;
-	else if (DrawX==785)
-	Next_state=Line_buffer_pre;
+	else if (~DS_done)
+	Next_state=Score;
+	else if (DrawX==765)
+	Next_state=Line_buffer_pre_bk;
 //	else
 //	Next_state=Background;
 	
-Line_buffer_pre:
-	if(~DFJK_busy&&DrawX==799)
+Line_buffer_pre_bk:
+	if(DrawX==799)
+		Next_state=Line_buffer;
+
+Line_buffer_pre_sp:
+	if(DrawX==799)
 		Next_state=Line_buffer;
 
 Background:
-if (lb_done)
-begin
-if(DFJK_sdram_writedone)
-	Next_state=PCM;
-end
-else if (DrawX==785)
-	Next_state=Line_buffer_pre;
+if (DrawX==765)
+	Next_state=Line_buffer_pre_bk;
+
+Score:
+if (DrawX==765)
+	Next_state=Line_buffer_pre_sp;
 
 
 
 Halted:
-	if (new_frame)
-		Next_state=Line_buffer_pre;
+	if (stop_sign)
+		Next_state=Done;
+	else if (new_frame)
+		Next_state=Line_buffer_pre_bk;
+		
 PCM:
 	if (I2S_Done)
 	Next_state=PCM_done;
@@ -137,10 +174,16 @@ end
 
 always_comb
 begin:Arb
+
+
+
+DS_sdram_ac=0;
+DS_sdram_wait=1;
+
 DFJK_sdram_rddata=0;
 DFJK_sdram_wait=1;
 DFJK_sdram_ac=0;
-
+start_sign=0;
 lb_sdram_Wait=1;
 lb_sdram_ac=0;
 lb_sdram_data=0;
@@ -161,6 +204,10 @@ SD_CS=init_cs_bo;
 I2S_sdram_Wait=1;
 I2S_sdram_ac=0;
 I2S_sdram_data=ar_rddata;
+
+mem_init_sdram_wait=1;
+mem_init_sdram_ac=0;
+mem_init_sdram_data=0;
 
 case(State)
 Bootup:
@@ -195,11 +242,27 @@ end
 Init_sdram_done:
 begin
 	init_wait=0;
-	lb_sdram_Wait=0;
-	ar_addr=lb_sdram_addr;
-	ar_read=lb_sdram_rd;
-	lb_sdram_data=ar_rddata;
-	lb_sdram_ac=ar_ac;
+	mem_init_sdram_wait=1;
+	mem_init_sdram_ac=ar_ac;
+	mem_init_sdram_data=ar_rddata;
+	ar_addr=mem_init_sdram_addr;
+	ar_read=mem_init_sdram_rd;
+end
+
+Init_memory:
+begin
+	init_wait=0;
+	mem_init_sdram_wait=0;
+	mem_init_sdram_ac=ar_ac;
+	mem_init_sdram_data=ar_rddata;
+	ar_addr=mem_init_sdram_addr;
+	ar_read=mem_init_sdram_rd;
+end
+
+Init_memory_done:
+begin
+init_wait=0;
+start_sign=1;
 end
 
 PCM:
@@ -243,7 +306,28 @@ DFJK_sdram_rddata=ar_rddata;
 ar_wrdata=DFJK_sdram_wrdata;
 ar_addr=DFJK_sdram_addr;
 end
-Line_buffer_pre:
+Score:
+begin
+init_wait=0;
+DS_sdram_wait=0;
+DS_sdram_ac=ar_ac;
+ar_write=DS_sdram_wr;
+ar_wrdata=DS_sdram_data;
+ar_addr=DS_sdram_addr;
+ar_be=DS_sdram_be;
+end
+
+Line_buffer_pre_sp:
+begin
+init_wait=0;
+DS_sdram_ac=ar_ac;
+ar_write=DS_sdram_wr;
+ar_wrdata=DS_sdram_data;
+ar_addr=DS_sdram_addr;
+ar_be=DS_sdram_be;
+end
+
+Line_buffer_pre_bk:
 begin
 init_wait=0;
 DFJK_sdram_ac=ar_ac;
@@ -253,6 +337,7 @@ DFJK_sdram_rddata=ar_rddata;
 ar_wrdata=DFJK_sdram_wrdata;
 ar_addr=DFJK_sdram_addr;
 end
+
 endcase
 end
 
