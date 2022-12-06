@@ -37,8 +37,14 @@ input [21:0] I2S_sdram_addr,
 input [127:0] DS_sdram_data,
 input [21:0] DS_sdram_addr,
 input DS_sdram_wr,DS_busy,DS_done,
-input [15:0] DS_sdram_be,
 output DS_sdram_ac,DS_sdram_wait,
+
+//Dnum input
+input [127:0] Dnum_sdram_data,
+input [21:0] Dnum_sdram_addr,
+input Dnum_sdram_wr,Dnum_busy,Dnum_done,
+input [15:0] Dnum_sdram_be,
+output Dnum_sdram_ac,Dnum_sdram_wait,
 
 
 //BK input
@@ -70,7 +76,7 @@ enum logic[7:0]
 {
 	Bootup, Init_sdram, Init_sdram_done,
 	Init_memory, Init_memory_done,
-	Line_buffer_pre_bk, Line_buffer_pre_sp, Line_buffer, Line_buffer_mid, Line_buffer_done,
+	Line_buffer_pre_bk, Line_buffer_pre_sp, Line_buffer_pre_nt, Line_buffer, Line_buffer_mid, Line_buffer_done,
 	Background, 
 	Score, Note, PCM, PCM_done,
 	Halted, Done
@@ -125,6 +131,8 @@ Line_buffer_done:
 		Next_state=Background;
 	else if(~DS_done)
 		Next_state=Score;
+	else if(~Dnum_done)
+		Next_state=Note;
 	else
 		Next_state=PCM;
 
@@ -134,6 +142,8 @@ Line_buffer_mid:
 	Next_state=Background;
 	else if (~DS_done)
 	Next_state=Score;
+	else if (~Dnum_done)
+	Next_state=Note;
 	else if (DrawX==765)
 	Next_state=Line_buffer_pre_bk;
 //	else
@@ -146,6 +156,9 @@ Line_buffer_pre_bk:
 Line_buffer_pre_sp:
 	if(DrawX==799)
 		Next_state=Line_buffer;
+Line_buffer_pre_nt:
+	if(DrawX==799)
+		Next_state=Line_buffer;
 
 Background:
 if (DrawX==765)
@@ -154,6 +167,10 @@ if (DrawX==765)
 Score:
 if (DrawX==765)
 	Next_state=Line_buffer_pre_sp;
+
+Note:
+if (DrawX==765)
+	Next_state=Line_buffer_pre_nt;
 
 
 
@@ -175,7 +192,8 @@ end
 always_comb
 begin:Arb
 
-
+Dnum_sdram_ac=0;
+Dnum_sdram_wait=1;
 
 DS_sdram_ac=0;
 DS_sdram_wait=1;
@@ -314,7 +332,27 @@ DS_sdram_ac=ar_ac;
 ar_write=DS_sdram_wr;
 ar_wrdata=DS_sdram_data;
 ar_addr=DS_sdram_addr;
-ar_be=DS_sdram_be;
+end
+
+Note:
+begin
+init_wait=0;
+Dnum_sdram_wait=0;
+Dnum_sdram_ac=ar_ac;
+ar_write=Dnum_sdram_wr;
+ar_wrdata=Dnum_sdram_data;
+ar_addr=Dnum_sdram_addr;
+ar_be=Dnum_sdram_be;
+end
+
+Line_buffer_pre_nt:
+begin
+init_wait=0;
+Dnum_sdram_ac=ar_ac;
+ar_write=Dnum_sdram_wr;
+ar_wrdata=Dnum_sdram_data;
+ar_addr=Dnum_sdram_addr;
+ar_be=Dnum_sdram_be;
 end
 
 Line_buffer_pre_sp:
@@ -324,7 +362,6 @@ DS_sdram_ac=ar_ac;
 ar_write=DS_sdram_wr;
 ar_wrdata=DS_sdram_data;
 ar_addr=DS_sdram_addr;
-ar_be=DS_sdram_be;
 end
 
 Line_buffer_pre_bk:

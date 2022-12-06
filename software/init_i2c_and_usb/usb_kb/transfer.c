@@ -313,14 +313,14 @@ void USB_Task( void )
                         	USB_STRING_DESCRIPTOR strDesc;
                 			rcode = XferGetStrDescr( 0, 0, 2, buf.iManufacturer, LANG_EN_US, (BYTE *)&strDesc);
                 			rcode = XferGetStrDescr( 0, 0, strDesc.bLength, buf.iManufacturer, LANG_EN_US, (BYTE *)&strDesc);
-                			printf ("Mfgr string(%i): %s\n", buf.iManufacturer, ConvUTF8ToStr(strDesc.bString, (strDesc.bLength>>1)-1));
+//                			printf ("Mfgr string(%i): %s\n", buf.iManufacturer, ConvUTF8ToStr(strDesc.bString, (strDesc.bLength>>1)-1));
                 		}
                 		if (buf.iProduct != 0)
                 		{
                         	USB_STRING_DESCRIPTOR strDesc;
                         	rcode = XferGetStrDescr( 0, 0, 2, buf.iProduct, LANG_EN_US, (BYTE *)&strDesc);
                 			rcode = XferGetStrDescr( 0, 0, strDesc.bLength, buf.iProduct, LANG_EN_US, (BYTE *)&strDesc);
-                			printf ("Product string(%i): %s\n", buf.iProduct, ConvUTF8ToStr(strDesc.bString, (strDesc.bLength>>1)-1));
+//                			printf ("Product string(%i): %s\n", buf.iProduct, ConvUTF8ToStr(strDesc.bString, (strDesc.bLength>>1)-1));
                 		}
                         usb_task_state = USB_STATE_ADDRESSING;
 

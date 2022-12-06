@@ -250,18 +250,34 @@ mem_init init_mem(
 .sdram_rd(mem_init_sdram_rd),.sdram_data(mem_init_sdram_data),.mem_data(mem_init_mem_data),
 .sdram_addr(mem_init_sdram_addr),.mem_addr(mem_init_addr),.mem_init_done(mem_init_done),.mem_wr(mem_init_wr));
 
+logic [127:0] Dnum_sdram_data;
+logic Dnum_sdram_ac,Dnum_sdram_wr,Dnum_sdram_wait;
+logic [21:0] Dnum_sdram_addr;
+logic Dnum_busy,Dnum_done;
+logic [15:0] Dnum_sdram_be;
+
+Draw_score_combo Dnum(
+.clk(MAX10_CLK1_50),.reset(Reset_h),.sdram_data(Dnum_sdram_data),.sdram_ac(Dnum_sdram_ac),
+.sdram_wr(Dnum_sdram_wr),.sdram_wait(Dnum_sdram_wait),.sdram_addr(Dnum_sdram_addr),
+.busy(Dnum_busy),.done(Dnum_done),.sdram_be(Dnum_sdram_be),.frame_flip(frame_flip),.score(score),.combo(combo),.precise(precise),
+.new_frame(new_frame),.ram_wraddr(mem_init_addr),.ram_data(mem_init_mem_data),.ram_wr(mem_init_wr));
+
 logic [127:0] DS_sdram_data;
 logic DS_sdram_ac,DS_sdram_wr,DS_sdram_wait;
 logic [21:0] DS_sdram_addr;
 logic DS_busy,DS_done;
-logic [15:0] DS_sdram_be;
+
+logic [12:0] score;
+logic [3:0] combo;
+logic [1:0] precise;
 
 Draw_sprites sp(
 .clk(MAX10_CLK1_50),.reset(Reset_h),.sdram_wait(DS_sdram_wait),.sdram_ac(DS_sdram_ac),
 .sdram_wr(DS_sdram_wr),.sdram_data(DS_sdram_data),.ram_data(mem_init_mem_data),
-.sdram_addr(DS_sdram_addr),.ram_wraddr(mem_init_addr),.sdram_be(DS_sdram_be),
+.sdram_addr(DS_sdram_addr),.ram_wraddr(mem_init_addr),
 .new_frame(new_frame),.DFJK(DFJK),.frame_flip(frame_flip),.un_time(un_time),.busy(DS_busy),
-.done(DS_done),.ram_wr(mem_init_wr));
+.done(DS_done),.ram_wr(mem_init_wr),.score(score),.combo(combo),.precise(precise));
+
 
 logic mem_init_sdram_wait,mem_init_sdram_ac,mem_init_sdram_rd,mem_init_wr,mem_init_done;
 logic [127:0]mem_init_sdram_data,mem_init_mem_data;
