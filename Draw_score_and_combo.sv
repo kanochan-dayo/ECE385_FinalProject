@@ -39,7 +39,7 @@ parameter [0:9][8:0] combo_ram_addr_start={
 
 parameter combo_default_ram_start=170;
 parameter combo_default_sdram_start=3325;
-parameter combo_default_sdram_end=4408;
+parameter combo_default_sdram_end=4368;
 parameter combo_origin_ram_start=278;
 
 parameter [4:0][11:0] combo_sdram_addr_start={
