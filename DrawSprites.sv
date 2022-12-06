@@ -2,14 +2,14 @@ module Draw_sprites(
 input clk,reset,sdram_wait,sdram_ac,ram_wr,new_frame,frame_flip,
 input [15:0] un_time,
 input [3:0]DFJK,
-input [9:0] ram_wraddr,
+input [7:0] ram_wraddr,
 input [127:0]ram_data,
 output [127:0]sdram_data,
 output [21:0]sdram_addr,
 output sdram_wr,busy,done,
 output [12:0] score,
 output [3:0] combo,
-output [1:0] precise,
+output [1:0] precises,
 output [15:0] sdram_be
 );
 always_comb
@@ -32,6 +32,27 @@ begin
 end
 end
 
+logic [15:0] precise_flash_time;
+always_ff @ (posedge new_frame)
+begin
+if (precise!=0)
+begin
+precises<=precise;
+precise_flash_time<=un_time;
+end
+else if(un_time-precise_flash_time>30)
+begin
+precise_flash_time<=un_time;
+precises<=0;
+end
+else
+begin
+precise_flash_time<=precise_flash_time;
+precises<=precises;
+end
+end
+
+logic [1:0] precise;
 always_comb
 begin
 if(precise_d_x==2'b11||precise_f_x==2'b11||precise_j_x==2'b11||precise_k_x==2'b11)
@@ -538,7 +559,7 @@ end
 
 logic rd_req,is_long;
 logic [21:0] sdram_addr_max;
-logic [8:0]ram_rdaddr_x;
+logic [7:0]ram_rdaddr_x;
 logic [15:0] DFJK_valid;
 
 parameter Red_long=128'hC5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5;

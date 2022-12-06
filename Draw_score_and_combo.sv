@@ -58,7 +58,11 @@ parameter [5:0][14:0]score_sdram_addr_end={
 parameter wraddr_offset0=22'h100000;
 parameter wraddr_offset1=22'h200000;
 
-Sprite_ram ram1(
+parameter [0:3][9:0]precise_ram_start={10'd0,10'd534,10'd586,10'd638};
+parameter precise_sdram_start=9805;
+parameter precise_sdram_addr_end=10323;
+
+score_ram ram1(
 	.clock(clk),
 	.data(ram_data),
 	.rdaddress(ram_rdaddr),
@@ -69,6 +73,8 @@ Sprite_ram ram1(
 logic[9:0] combo_now;
 logic[19:0] score_now;
 logic rd_req;
+
+
 
 always_ff @(posedge rd_req or posedge reset)
 begin
@@ -111,11 +117,11 @@ end
 
 logic [3:0] score_index,score_index_x;
 logic [2:0] combo_index,combo_index_x;
-logic [8:0]ram_rdaddr_x;
+logic [9:0]ram_rdaddr_x;
 logic [127:0]ram_data_out;
 logic [21:0] sdram_addr_x;
-enum logic [3:0]{Halted,Read_s,Read_s1,Write_s,Write_s1,
-Read_c,Read_c1,Writec_s,Write_c,Write_c1,To_next_s,S2C,To_next_c,Pause_s,Pause_c,Done} State,Next_state;
+enum logic [4:0]{Halted,Read_s,Read_s1,Write_s,Write_s1,Read_p,Read_p1,Write_p,Write_p1,Pause_p,C2P,
+Read_c,Read_c1,Write_c,Write_c1,To_next_s,S2C,To_next_c,Pause_s,Pause_c,Done} State,Next_state;
 
 
 always_ff @(posedge clk or posedge reset)begin
@@ -146,21 +152,28 @@ begin
         Next_state=Read_s1;
     Read_c:
         Next_state=Read_c1;
+    Read_p:
+        Next_state=Read_p1;
     Read_s1:
         Next_state=Write_s;
     Read_c1:
         Next_state=Write_c;
+    Read_p1:
+        Next_state=Write_p;
     Write_s:
         if(sdram_ac)
             Next_state=Write_s1;
     Write_c:
         if(sdram_ac)
             Next_state=Write_c1;
+    Write_p:
+        if(sdram_ac)
+            Next_state=Write_p1;
     Write_c1:
         if(combo_now==0)
         begin
             if(sdram_addr-(frame_flip?wraddr_offset1:wraddr_offset0)==combo_default_sdram_end)
-                Next_state=Done;
+                Next_state=C2P;
             else if(sdram_wait)
                 Next_state=Pause_c;
             else
@@ -182,6 +195,13 @@ begin
             Next_state=Pause_s;
         else
             Next_state=Read_s;
+    Write_p1:
+        if((sdram_addr-(frame_flip?wraddr_offset1:wraddr_offset0))==precise_sdram_addr_end)
+            Next_state=Done;
+        else if(sdram_wait)
+            Next_state=Pause_p;
+        else
+            Next_state=Read_p;
     To_next_s:
         if(score_index==3'b101)
             Next_state=S2C;
@@ -191,11 +211,18 @@ begin
             Next_state=Read_s;
     To_next_c:
         if(combo_index==3'b100)
-            Next_state=Done;
+            Next_state=C2P;
         else if(sdram_wait)
             Next_state=Pause_c;
         else
             Next_state=Read_c;
+    C2P:
+        if(precise==0)
+            Next_state=Done;
+        else if(sdram_wait)
+            Next_state=Pause_p;
+        else
+            Next_state=Read_p;
     S2C:
         if(sdram_wait)
             Next_state=Pause_c;
@@ -204,9 +231,12 @@ begin
     Pause_s:
         if(~sdram_wait)
             Next_state=Read_s;
-	 Pause_c:
+	Pause_c:
         if(~sdram_wait)
             Next_state=Read_c;
+    Pause_p:
+        if(~sdram_wait)
+            Next_state=Read_p;
     Done:
         if(new_frame)
             Next_state=Halted;
@@ -241,6 +271,10 @@ begin
     begin
         busy=1'b1;
     end
+    Read_p:
+    begin
+        busy=1'b1;
+    end
     Read_s1:
     begin
         busy=1'b1;
@@ -253,12 +287,23 @@ begin
         rd_req=1'b1;
         ram_rdaddr_x=ram_rdaddr+1;
     end
+    Read_p1:
+    begin
+        busy=1'b1;
+        rd_req=1'b1;
+        ram_rdaddr_x=ram_rdaddr+1;
+    end
     Write_s:
     begin
         busy=1'b1;
         sdram_wr=1'b1;
     end
     Write_c:
+    begin
+        busy=1'b1;
+        sdram_wr=1'b1;
+    end
+    Write_p:
     begin
         busy=1'b1;
         sdram_wr=1'b1;
@@ -291,6 +336,14 @@ begin
             sdram_addr_x=sdram_addr+40;
         end
     end
+    Write_p1:
+    begin
+        busy=1'b1;
+        if((sdram_addr-(frame_flip?wraddr_offset1:wraddr_offset0))%40==8)
+            sdram_addr_x=sdram_addr+37;
+        else
+            sdram_addr_x=sdram_addr+1;
+    end
     To_next_s:
     begin
         busy=1'b1;
@@ -313,6 +366,8 @@ begin
     ;
     Pause_c:
     ;
+    Pause_p:
+    ;
     S2C:
     begin
 		  busy=1;
@@ -330,6 +385,14 @@ begin
             combo_index_x=0;
             sdram_addr_x=frame_flip?wraddr_offset1+combo_sdram_addr_start[combo_index]:wraddr_offset0+combo_sdram_addr_start[combo_index];
         end
+    end
+    C2P:
+    begin
+            busy=1;
+            ram_rdaddr_x=precise_ram_start[precise];
+            score_index_x=0;
+            combo_index_x=0;
+            sdram_addr_x=frame_flip?wraddr_offset1+precise_sdram_start:wraddr_offset0+precise_sdram_start;
     end
     endcase
 end
