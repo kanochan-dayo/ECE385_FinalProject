@@ -9,9 +9,28 @@ output [21:0]sdram_addr,
 output sdram_wr,busy,done,
 output [12:0] score,
 output [3:0] combo,
-output [1:0] precise
+output [1:0] precise,
+output [15:0] sdram_be
 );
-parameter transparent=8'hFF;
+always_comb
+begin
+	if(frame_flip)
+	begin
+		if(sdram_addr-wraddr_offset1>=(356+17)*40)
+			sdram_be=0;
+		else
+			sdram_be=16'hFFFF;
+	end
+else
+begin
+
+		if(sdram_addr-wraddr_offset0>=(356+17)*40)
+			sdram_be=0;
+		else
+			sdram_be=16'hFFFF;
+
+end
+end
 
 always_comb
 begin

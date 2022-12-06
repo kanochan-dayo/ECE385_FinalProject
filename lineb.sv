@@ -86,7 +86,7 @@ begin
  Next_state=Pause1;
  
  Pause1:
- if(DrawX==799)
+ if(DrawX==0)
  Next_state=Read;
  
  Done:

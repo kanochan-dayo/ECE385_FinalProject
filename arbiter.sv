@@ -33,10 +33,12 @@ output I2S_sdram_Wait,I2S_sdram_ac,
 input I2S_sdram_rd,I2S_Busy,I2S_Done,
 output[127:0] I2S_sdram_data,
 input [21:0] I2S_sdram_addr,
+
 // DS input
 input [127:0] DS_sdram_data,
 input [21:0] DS_sdram_addr,
 input DS_sdram_wr,DS_busy,DS_done,
+input [15:0] DS_be,
 output DS_sdram_ac,DS_sdram_wait,
 
 //Dnum input
@@ -332,6 +334,7 @@ DS_sdram_ac=ar_ac;
 ar_write=DS_sdram_wr;
 ar_wrdata=DS_sdram_data;
 ar_addr=DS_sdram_addr;
+ar_be=DS_be;
 end
 
 Note:
@@ -362,6 +365,7 @@ DS_sdram_ac=ar_ac;
 ar_write=DS_sdram_wr;
 ar_wrdata=DS_sdram_data;
 ar_addr=DS_sdram_addr;
+ar_be=DS_be;
 end
 
 Line_buffer_pre_bk:
