@@ -11,3 +11,4 @@
 **/obj/**
 !eclipse/*
 **/sdram_contorller/**
+*.html
