@@ -4,17 +4,18 @@ input [127:0] sdram_data,
 output [127:0] mem_data,
 output [21:0] sdram_addr,
 output [8:0] mem_addr,
-output mem_init_done,mem_wr,sdram_rd);
+output mem_init_done,mem_wr,mem_wr1,sdram_rd);
 
 parameter sdram_offset=22'h31E000;
-parameter mem_addr_max=9'h0FF;
+parameter mem_addr_max1=9'h047;
+parameter mem_addr_max2=9'h1CE;
 
 
 
 enum logic [2:0]{Halted,Read,Read1,Write1,Done} State,Next_state;
 logic [21:0] sdram_addr_x;
 logic [8:0]mem_addr_x;
-
+logic flag,flag_x;
 
 always_ff @(negedge sdram_ac or posedge reset)
 begin
@@ -32,12 +33,14 @@ begin
 		sdram_addr<=sdram_offset;
 		mem_addr<=0;
 		State<=Halted;
+		flag<=0;
 	end
 	else
 	begin
 		sdram_addr<=sdram_addr_x;
 		mem_addr<=mem_addr_x;
 		State<=Next_state;
+		flag<=flag_x;
 	end
 end
 
@@ -61,7 +64,7 @@ Read1:
 Next_state=Write1;
 
 Write1:
-if(mem_addr==mem_addr_max)
+if(mem_addr==mem_addr_max2)
 Next_state=Done;
 else
 Next_state=Read;
@@ -76,10 +79,11 @@ always_comb
 begin
 sdram_rd=0;
 mem_wr=0;
+mem_wr1=0;
 mem_init_done=0;
 sdram_addr_x=sdram_addr;
 mem_addr_x=mem_addr;
-
+flag_x=flag;
 case(State)
 Halted:
 begin
@@ -99,8 +103,17 @@ end
 
 Write1:
 begin
-mem_wr=1;
-mem_addr_x=mem_addr+1;
+if(flag==0)
+	mem_wr=1;
+else
+	mem_wr1=1;
+if(mem_addr==mem_addr_max1&&flag==0)
+begin
+	flag_x=1;
+	mem_addr_x=0;
+end
+else
+	mem_addr_x=mem_addr+1;
 end
 
 Done:
@@ -108,6 +121,7 @@ begin
 mem_init_done=1;
 sdram_addr_x=sdram_offset;
 mem_addr_x=0;
+flag_x=0;
 end
 endcase
 end

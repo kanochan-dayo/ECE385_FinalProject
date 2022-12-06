@@ -22,7 +22,7 @@ module lineb (
 
  background_palette_rom er(.address(pixel_palette_index), .data_Out(RGB_ALL));
  
- line_buffer line_buf(.rdaddress(place_a),.clock(~clock),.q(pixel_palette_a),
+ line_buffer line_buf(.rdaddress(place_a),.clock(~clock),.q(pixel_palette_b),
  .wraddress(place_b),.data(sdram_data),.wren(wren),.*);
  
  logic [23:0] RGB_ALL;
@@ -32,6 +32,11 @@ module lineb (
  logic [127:0] pixel_palette_a,pixel_palette_b;
  logic flip,wren;
  logic [3:0] number;
+ 
+ always_ff @ (negedge DrawX[3])
+ begin
+ pixel_palette_a<=pixel_palette_b;
+ end
  
  parameter [21:0]Address1=22'h100000;
  parameter [21:0]Address2=22'h200000;
@@ -86,7 +91,7 @@ begin
  Next_state=Pause1;
  
  Pause1:
- if(DrawX==799)
+ if(DrawX==0)
  Next_state=Read;
  
  Done:
@@ -147,8 +152,8 @@ else
 sdram_addr=WriteX[9:4]+(WriteY*40)+Address2;
 
 	flip=WriteY[0];
-	place_a[5:0] = DrawX[9:4];
-	place_a[6]=flip;
+	place_a[5:0] = (DrawX[9:4]<=41)?DrawX[9:4]+1:0;
+	place_a[6]=DrawX[9:4]<=41?flip:~flip;
 	place_b[6]=~flip;
 	place_b[5:0] = WriteX[9:4];
 	number=DrawX[3:0];

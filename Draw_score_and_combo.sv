@@ -30,7 +30,23 @@ assign sdram_be[14]=(sdram_data[119:112]!=transparent);
 assign sdram_be[15]=(sdram_data[127:120]!=transparent);
 
 parameter [0:9][7:0]score_ram_addr_start={
-    8'd72,8'd89,8'd106,8'd123,8'd140,8'd157,8'd174,8'd191,8'd208,8'd225
+    8'd0,8'd17,8'd34,8'd51,8'd68,8'd85,8'd102,8'd119,8'd136,8'd153
+};
+
+parameter [0:9][8:0] combo_ram_addr_start={
+    9'd302,9'd318,9'd334,9'd350,9'd366,9'd382,9'd398,9'd414,9'd430,9'd446
+};
+
+parameter combo_default_ram_start=170;
+parameter combo_default_sdram_start=3325;
+parameter combo_default_sdram_end=4368;
+parameter combo_origin_ram_start=278;
+
+parameter [4:0][11:0] combo_sdram_addr_start={
+    12'd3325,12'd3765,12'd3766,12'd3767,12'd3768
+};
+parameter [4:0][12:0] combo_sdram_addr_end={
+    13'd3568,13'd4405,13'd4406,13'd4407,13'd4408
 };
 
 parameter [5:0][14:0]score_sdram_addr_start={
@@ -66,7 +82,6 @@ always_ff @(posedge new_frame or posedge reset)begin
     if(reset)begin
         combo_now<=0;
         score_now<=0;
-
     end
     else begin
         if (precise[1]==1'b1)
@@ -79,7 +94,7 @@ always_ff @(posedge new_frame or posedge reset)begin
 end
 
 logic [3:0]score_digit[5:0];
-logic [3:0]combo_digit[2:0];
+logic [3:0]combo_digit[3:0];
 always_comb
 begin
     score_digit[0]=score_now[3:0]%10;
@@ -91,16 +106,17 @@ begin
     combo_digit[0]=combo_now[3:0]%10;
     combo_digit[1]=(combo_now[6:0]/10)%10;
     combo_digit[2]=(combo_now[9:0]/100)%10;
+    combo_digit[3]=0;
 end
 
 logic [3:0] score_index,score_index_x;
-logic [1:0] combo_index,combo_index_x;
+logic [2:0] combo_index,combo_index_x;
 logic [8:0]ram_rdaddr_x;
 logic [127:0]ram_data_out;
 logic [21:0] sdram_addr_x;
 enum logic [3:0]{Halted,Read_s,Read_s1,Write_s,Write_s1,
-Read_c,Read_c1,Writec_s,Write_c1,To_next_s,To_next_c,Pause_s,Pause_c,Done} State,Next_state;
-enum logic[2:0] {Score,Combo,Static}Draw_type,Draw_type_x;
+Read_c,Read_c1,Writec_s,Write_c,Write_c1,To_next_s,S2C,To_next_c,Pause_s,Pause_c,Done} State,Next_state;
+
 
 always_ff @(posedge clk or posedge reset)begin
     if(reset)begin
@@ -109,7 +125,6 @@ always_ff @(posedge clk or posedge reset)begin
         ram_rdaddr<=0;
         sdram_addr<=0;
         State<=Halted;
-		  Draw_type<=Score;
     end
     else begin
         sdram_addr<=sdram_addr_x;
@@ -117,7 +132,6 @@ always_ff @(posedge clk or posedge reset)begin
         score_index<=score_index_x;
         combo_index<=combo_index_x;
         State<=Next_state;
-		  Draw_type<=Draw_type_x;
     end
 end
 
@@ -130,11 +144,37 @@ begin
             Next_state=Read_s;
     Read_s:
         Next_state=Read_s1;
+    Read_c:
+        Next_state=Read_c1;
     Read_s1:
         Next_state=Write_s;
+    Read_c1:
+        Next_state=Write_c;
     Write_s:
         if(sdram_ac)
             Next_state=Write_s1;
+    Write_c:
+        if(sdram_ac)
+            Next_state=Write_c1;
+    Write_c1:
+        if(combo_now==0)
+        begin
+            if(sdram_addr-(frame_flip?wraddr_offset1:wraddr_offset0)==combo_default_sdram_end)
+                Next_state=Done;
+            else if(sdram_wait)
+                Next_state=Pause_c;
+            else
+                Next_state=Read_c;
+        end
+        else
+        begin
+            if(sdram_addr-(frame_flip?wraddr_offset1:wraddr_offset0)==combo_sdram_addr_end[combo_index])
+                Next_state=To_next_c;
+            else if(sdram_wait)
+                Next_state=Pause_c;
+            else
+                Next_state=Read_c;
+        end
     Write_s1:
         if((sdram_addr-(frame_flip?wraddr_offset1:wraddr_offset0))==score_sdram_addr_end[score_index])
             Next_state=To_next_s;
@@ -144,14 +184,29 @@ begin
             Next_state=Read_s;
     To_next_s:
         if(score_index==3'b101)
-            Next_state=Done;
+            Next_state=S2C;
         else if(sdram_wait)
             Next_state=Pause_s;
         else
             Next_state=Read_s;
+    To_next_c:
+        if(combo_index==3'b100)
+            Next_state=Done;
+        else if(sdram_wait)
+            Next_state=Pause_c;
+        else
+            Next_state=Read_c;
+    S2C:
+        if(sdram_wait)
+            Next_state=Pause_c;
+        else
+            Next_state=Read_c;
     Pause_s:
         if(~sdram_wait)
             Next_state=Read_s;
+	 Pause_c:
+        if(~sdram_wait)
+            Next_state=Read_c;
     Done:
         if(new_frame)
             Next_state=Halted;
@@ -168,22 +223,31 @@ begin
     sdram_addr_x=sdram_addr;
     score_index_x=score_index;
     combo_index_x=combo_index;
-    Draw_type_x=Draw_type;
     sdram_wr=1'b0;
     done=1'b0;
     case(State)
     Halted:
     begin
         ram_rdaddr_x=score_ram_addr_start[score_digit[score_index]];
-        Draw_type_x=Score;
         score_index_x=0;
+        combo_index_x=0;
         sdram_addr_x=frame_flip?wraddr_offset1+score_sdram_addr_start[score_index]:wraddr_offset0+score_sdram_addr_start[score_index];
     end
     Read_s:
     begin
         busy=1'b1;
     end
+    Read_c:
+    begin
+        busy=1'b1;
+    end
     Read_s1:
+    begin
+        busy=1'b1;
+        rd_req=1'b1;
+        ram_rdaddr_x=ram_rdaddr+1;
+    end
+    Read_c1:
     begin
         busy=1'b1;
         rd_req=1'b1;
@@ -194,10 +258,38 @@ begin
         busy=1'b1;
         sdram_wr=1'b1;
     end
+    Write_c:
+    begin
+        busy=1'b1;
+        sdram_wr=1'b1;
+    end
     Write_s1:
     begin
         busy=1'b1;
         sdram_addr_x=sdram_addr+40;
+    end
+    Write_c1:
+    begin
+        busy=1'b1;
+        if(combo_now==0)
+            begin
+                if((sdram_addr-(frame_flip?wraddr_offset1:wraddr_offset0))%40==8)
+                    sdram_addr_x=sdram_addr+37;
+                else
+                    sdram_addr_x=sdram_addr+1;
+            end
+        else
+        begin
+            if(combo_index==3'b100)
+            begin
+                if((sdram_addr-(frame_flip?wraddr_offset1:wraddr_offset0))%40==8)
+                    sdram_addr_x=sdram_addr+37;
+                else
+                    sdram_addr_x=sdram_addr+1;
+            end
+            else
+            sdram_addr_x=sdram_addr+40;
+        end
     end
     To_next_s:
     begin
@@ -206,12 +298,39 @@ begin
         score_index_x=score_index+1;
         sdram_addr_x=frame_flip?wraddr_offset1+score_sdram_addr_start[score_index+1]:wraddr_offset0+score_sdram_addr_start[score_index+1];
     end
+    To_next_c:
+    begin
+        busy=1'b1;
+        ram_rdaddr_x=combo_ram_addr_start[combo_digit[combo_index+1]];
+        combo_index_x=combo_index+1;
+        sdram_addr_x=frame_flip?wraddr_offset1+combo_sdram_addr_start[combo_index+1]:wraddr_offset0+combo_sdram_addr_start[combo_index+1];
+    end
     Done:
     begin
         done=1'b1;
     end
     Pause_s:
     ;
+    Pause_c:
+    ;
+    S2C:
+    begin
+		  busy=1;
+        if(combo_now==0)
+        begin
+            ram_rdaddr_x=combo_default_ram_start;
+            combo_index_x=0;
+            score_index_x=0;
+            sdram_addr_x=frame_flip?wraddr_offset1+combo_default_sdram_start:wraddr_offset0+combo_default_sdram_start;
+        end
+        else
+        begin
+            ram_rdaddr_x=combo_ram_addr_start[combo_digit[combo_index]];
+            score_index_x=0;
+            combo_index_x=0;
+            sdram_addr_x=frame_flip?wraddr_offset1+combo_sdram_addr_start[combo_index]:wraddr_offset0+combo_sdram_addr_start[combo_index];
+        end
+    end
     endcase
 end
 
