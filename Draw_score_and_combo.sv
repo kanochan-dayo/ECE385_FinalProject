@@ -354,6 +354,9 @@ begin
     To_next_c:
     begin
         busy=1'b1;
+		  if(combo_index==3'b011)
+		  ram_rdaddr_x=combo_origin_ram_start;
+		  else
         ram_rdaddr_x=combo_ram_addr_start[combo_digit[combo_index+1]];
         combo_index_x=combo_index+1;
         sdram_addr_x=frame_flip?wraddr_offset1+combo_sdram_addr_start[combo_index+1]:wraddr_offset0+combo_sdram_addr_start[combo_index+1];

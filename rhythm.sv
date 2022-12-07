@@ -200,6 +200,28 @@ begin
 DFJK<=DFJK_x;
 end
 
+assign d_changed=(DFJK_prestate[0][3]!=DFJK_prestate[1][3])?1'b1:1'b0;
+assign f_changed=(DFJK_prestate[0][2]!=DFJK_prestate[1][2])?1'b1:1'b0;
+assign j_changed=(DFJK_prestate[0][1]!=DFJK_prestate[1][1])?1'b1:1'b0;
+assign k_changed=(DFJK_prestate[0][0]!=DFJK_prestate[1][0])?1'b1:1'b0;
+
+logic d_changed,f_changed,j_changed,k_changed;
+
+always_ff @(posedge new_frame)
+ begin 
+    if(Reset_h)
+	 begin
+        DFJK_prestate[0]<=DFJK_x;
+        DFJK_prestate[1]<=DFJK_x;
+    end
+	     else
+    begin
+        DFJK_prestate[0]<=DFJK_x;
+        DFJK_prestate[1]<=DFJK_prestate[0];
+    end
+end
+logic [3:0] DFJK_prestate[1:0];
+
 sdram_contorller sdram1(
 		.sdram_clk_clk(DRAM_CLK),            				   //clk_sdram.clk
 	   .sdram_wire_addr(DRAM_ADDR),               			   //sdram_wire.addr
@@ -272,7 +294,7 @@ logic [12:0] score;
 logic [3:0] combo;
 logic [1:0] precise;
 
-Draw_sprites sp(
+Draw_sprites sp(.*,
 .clk(MAX10_CLK1_50),.reset(Reset_h),.sdram_wait(DS_sdram_wait),.sdram_ac(DS_sdram_ac),
 .sdram_wr(DS_sdram_wr),.sdram_data(DS_sdram_data),.ram_data(mem_init_mem_data),
 .sdram_addr(DS_sdram_addr),.ram_wraddr(mem_init_addr[7:0]),
