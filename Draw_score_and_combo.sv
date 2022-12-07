@@ -103,15 +103,15 @@ logic [3:0]score_digit[5:0];
 logic [3:0]combo_digit[3:0];
 always_comb
 begin
-    score_digit[0]=score_now[3:0]%10;
-    score_digit[1]=(score_now[6:0]/10)%10;
-    score_digit[2]=(score_now[9:0]/100)%10;
-    score_digit[3]=(score_now[13:0]/1000)%10;
-    score_digit[4]=(score_now[16:0]/10000)%10;
-    score_digit[5]=(score_now[19:0]/100000)%10;
-    combo_digit[0]=combo_now[3:0]%10;
-    combo_digit[1]=(combo_now[6:0]/10)%10;
-    combo_digit[2]=(combo_now[9:0]/100)%10;
+    score_digit[0]=score_now%10;
+    score_digit[1]=(score_now/10)%10;
+    score_digit[2]=(score_now/100)%10;
+    score_digit[3]=(score_now/1000)%10;
+    score_digit[4]=(score_now/10000)%10;
+    score_digit[5]=(score_now/100000)%10;
+    combo_digit[0]=combo_now%10;
+    combo_digit[1]=(combo_now/10)%10;
+    combo_digit[2]=(combo_now/100)%10;
     combo_digit[3]=0;
 end
 
