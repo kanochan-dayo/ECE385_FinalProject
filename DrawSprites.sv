@@ -69,9 +69,7 @@ logic [10:0] score_d,score_f,score_j,score_k;
 logic  combo_d,combo_f,combo_j,combo_k;
 always_comb
 begin
-    if(precise[1]==1)
-    combo=4'hf;
-    else if(precise==2'b00)
+    if(precise[1]==1||precise==2'b00)
     combo=4'h0;
     else
     combo=combo_d+combo_f+combo_j+combo_k;
@@ -256,12 +254,7 @@ begin
     begin
         if(d0_key[15:14]==2'b10)
         begin
-                if (d0_key[13:0]-un_time>22)
-                    precise_d_x=2'b11;
-                else if (d0_key[13:0]-un_time>14)
-                    precise_d_x=2'b10;
-                else
-                    precise_d_x=2'b01;
+             precise_d_x=2'b00;
         end
         else if(DFJK[3]==0)
             precise_d_x=2'b00;
@@ -286,12 +279,7 @@ begin
     begin
         if(f0_key[15:14]==2'b10)
         begin
-                if (f0_key[13:0]-un_time>22)
-                    precise_f_x=2'b11;
-                else if (f0_key[13:0]-un_time>14)
-                    precise_f_x=2'b10;
-                else
-                    precise_f_x=2'b01;
+                    precise_f_x=2'b00;
         end
         else if(DFJK[2]==0)
             precise_f_x=2'b00;
@@ -316,12 +304,7 @@ begin
     begin
         if(j0_key[15:14]==2'b10)
         begin
-                if (j0_key[13:0]-un_time>22)
-                    precise_j_x=2'b11;
-                else if (j0_key[13:0]-un_time>14)
-                    precise_j_x=2'b10;
-                else
-                    precise_j_x=2'b01;
+                    precise_j_x=2'b0;
         end
         else if(DFJK[1]==0)
             precise_j_x=2'b00;
@@ -346,12 +329,7 @@ begin
     begin
         if(k0_key[15:14]==2'b10)
         begin
-                if (k0_key[13:0]-un_time>22)
-                    precise_k_x=2'b11;
-                else if (k0_key[13:0]-un_time>14)
-                    precise_k_x=2'b10;
-                else
-                    precise_k_x=2'b01;
+				precise_k_x=2'b00;
         end
         else if(DFJK[0]==0)
             precise_k_x=2'b00;

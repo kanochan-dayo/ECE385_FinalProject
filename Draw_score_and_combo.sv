@@ -58,9 +58,9 @@ parameter [5:0][14:0]score_sdram_addr_end={
 parameter wraddr_offset0=22'h100000;
 parameter wraddr_offset1=22'h200000;
 
-parameter [0:3][9:0]precise_ram_start={10'd0,10'd534,10'd586,10'd638};
+parameter [0:3][9:0]precise_ram_start={10'd0,10'd462,10'd514,10'd566};
 parameter precise_sdram_start=9805;
-parameter precise_sdram_addr_end=10323;
+parameter precise_sdram_addr_end=10328;
 
 score_ram ram1(
 	.clock(clk),
@@ -118,6 +118,7 @@ end
 logic [3:0] score_index,score_index_x;
 logic [2:0] combo_index,combo_index_x;
 logic [9:0]ram_rdaddr_x;
+logic [9:0]ram_rdaddr;
 logic [127:0]ram_data_out;
 logic [21:0] sdram_addr_x;
 enum logic [4:0]{Halted,Read_s,Read_s1,Write_s,Write_s1,Read_p,Read_p1,Write_p,Write_p1,Pause_p,C2P,
@@ -243,7 +244,6 @@ begin
     endcase
 end
 
-logic [8:0]ram_rdaddr;
 
 always_comb
 begin
