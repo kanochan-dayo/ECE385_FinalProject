@@ -1,15 +1,15 @@
 module Draw_sprites(
-input clk,reset,sdram_wait,sdram_ac,ram_wr,new_frame,frame_flip,
+input clk,reset,sdram_wait,sdram_ac,ram_wr,new_frame,frame_flip,d_changed,f_changed,j_changed,k_changed,
 input [15:0] un_time,
 input [3:0]DFJK,
-input [9:0] ram_wraddr,
+input [7:0] ram_wraddr,
 input [127:0]ram_data,
 output [127:0]sdram_data,
 output [21:0]sdram_addr,
 output sdram_wr,busy,done,
 output [12:0] score,
 output [3:0] combo,
-output [1:0] precise,
+output [1:0] precises,
 output [15:0] sdram_be
 );
 always_comb
@@ -32,6 +32,27 @@ begin
 end
 end
 
+logic [15:0] precise_flash_time;
+always_ff @ (posedge new_frame)
+begin
+if (precise!=0)
+begin
+precises<=precise;
+precise_flash_time<=un_time;
+end
+else if(un_time-precise_flash_time>30)
+begin
+precise_flash_time<=un_time;
+precises<=0;
+end
+else
+begin
+precise_flash_time<=precise_flash_time;
+precises<=precises;
+end
+end
+
+logic [1:0] precise;
 always_comb
 begin
 if(precise_d_x==2'b11||precise_f_x==2'b11||precise_j_x==2'b11||precise_k_x==2'b11)
@@ -48,9 +69,7 @@ logic [10:0] score_d,score_f,score_j,score_k;
 logic  combo_d,combo_f,combo_j,combo_k;
 always_comb
 begin
-    if(precise[1]==1)
-    combo=4'hf;
-    else if(precise==2'b00)
+    if(precise[1]==1||precise==2'b00)
     combo=4'h0;
     else
     combo=combo_d+combo_f+combo_j+combo_k;
@@ -129,7 +148,7 @@ logic [7:0] d_addr_x,f_addr_x,j_addr_x,k_addr_x;
 logic [15:0] d0_key,d1_key,d2_key,d3_key,f0_key,f1_key,f2_key,f3_key,j0_key,j1_key,j2_key,j3_key,k0_key,k1_key,k2_key,k3_key;
 
 logic [1:0] precise_d_x,precise_f_x,precise_j_x,precise_k_x;
-logic [3:0] DFJK_prestate[1:0];
+
 logic [1:0] Key_type[15:0];
 assign Key_type[0]=d0_key[15:14];
 assign Key_type[1]=d1_key[15:14];
@@ -190,13 +209,10 @@ assign vaild_temp[15]=-mv_speed*(k3_key[13:0]-un_time)+offset_y;
 
 
 
-assign d_changed=(DFJK_prestate[0][3]!=DFJK_prestate[1][3])?1'b1:1'b0;
-assign f_changed=(DFJK_prestate[0][2]!=DFJK_prestate[1][2])?1'b1:1'b0;
-assign j_changed=(DFJK_prestate[0][1]!=DFJK_prestate[1][1])?1'b1:1'b0;
-assign k_changed=(DFJK_prestate[0][0]!=DFJK_prestate[1][0])?1'b1:1'b0;
+
 
 logic d_next,f_next,j_next,k_next;
-logic d_changed,f_changed,j_changed,k_changed;
+
 
 always_ff @(posedge new_frame or posedge reset)
  begin 
@@ -206,8 +222,6 @@ always_ff @(posedge new_frame or posedge reset)
         f_addr<=0;
         j_addr<=0;
         k_addr<=0;
-        DFJK_prestate[0]<=DFJK;
-        DFJK_prestate[1]<=DFJK;
     end
 	     else
     begin
@@ -215,10 +229,11 @@ always_ff @(posedge new_frame or posedge reset)
         f_addr<=f_addr_x;
         j_addr<=j_addr_x;
         k_addr<=k_addr_x;
-        DFJK_prestate[0]<=DFJK;
-        DFJK_prestate[1]<=DFJK_prestate[0];
     end
 end
+
+
+
 always_comb 
 begin
     d_next=precise_d_x[0]|precise_d_x[1];
@@ -235,21 +250,16 @@ begin
     begin
         if(d0_key[15:14]==2'b10)
         begin
-                if (d0_key[13:0]-un_time>22)
-                    precise_d_x=2'b11;
-                else if (d0_key[13:0]-un_time>14)
-                    precise_d_x=2'b10;
-                else
-                    precise_d_x=2'b01;
+             precise_d_x=2'b01;
         end
         else if(DFJK[3]==0)
             precise_d_x=2'b00;
 
-        else if(d0_key[13:0]-un_time>34)
+        else if(d0_key[13:0]-un_time>26)
             precise_d_x=2'b00;
         else if(d0_key[13:0]-un_time>22)
             precise_d_x=2'b11;
-        else if(d0_key[13:0]-un_time>14)
+        else if(d0_key[13:0]-un_time>18)
             precise_d_x=2'b10;
         else
             precise_d_x=2'b01;
@@ -265,21 +275,16 @@ begin
     begin
         if(f0_key[15:14]==2'b10)
         begin
-                if (f0_key[13:0]-un_time>22)
-                    precise_f_x=2'b11;
-                else if (f0_key[13:0]-un_time>14)
-                    precise_f_x=2'b10;
-                else
-                    precise_f_x=2'b01;
+             precise_f_x=2'b01;
         end
         else if(DFJK[2]==0)
             precise_f_x=2'b00;
 
-        else if(f0_key[13:0]-un_time>34)
+        else if(f0_key[13:0]-un_time>26)
             precise_f_x=2'b00;
         else if(f0_key[13:0]-un_time>22)
             precise_f_x=2'b11;
-        else if(f0_key[13:0]-un_time>14)
+        else if(f0_key[13:0]-un_time>18)
             precise_f_x=2'b10;
         else
             precise_f_x=2'b01;
@@ -295,21 +300,16 @@ begin
     begin
         if(j0_key[15:14]==2'b10)
         begin
-                if (j0_key[13:0]-un_time>22)
-                    precise_j_x=2'b11;
-                else if (j0_key[13:0]-un_time>14)
-                    precise_j_x=2'b10;
-                else
-                    precise_j_x=2'b01;
+            precise_j_x=2'b01;
         end
         else if(DFJK[1]==0)
             precise_j_x=2'b00;
 
-        else if(j0_key[13:0]-un_time>34)
+        else if(j0_key[13:0]-un_time>26)
             precise_j_x=2'b00;
         else if(j0_key[13:0]-un_time>22)
             precise_j_x=2'b11;
-        else if(j0_key[13:0]-un_time>14)
+        else if(j0_key[13:0]-un_time>18)
             precise_j_x=2'b10;
         else
             precise_j_x=2'b01;
@@ -325,21 +325,16 @@ begin
     begin
         if(k0_key[15:14]==2'b10)
         begin
-                if (k0_key[13:0]-un_time>22)
-                    precise_k_x=2'b11;
-                else if (k0_key[13:0]-un_time>14)
-                    precise_k_x=2'b10;
-                else
-                    precise_k_x=2'b01;
+				precise_k_x=2'b01;
         end
         else if(DFJK[0]==0)
             precise_k_x=2'b00;
 
-        else if(k0_key[13:0]-un_time>34)
+        else if(k0_key[13:0]-un_time>26)
             precise_k_x=2'b00;
         else if(k0_key[13:0]-un_time>22)
             precise_k_x=2'b11;
-        else if(k0_key[13:0]-un_time>14)
+        else if(k0_key[13:0]-un_time>18)
             precise_k_x=2'b10;
         else
             precise_k_x=2'b01;
@@ -538,7 +533,7 @@ end
 
 logic rd_req,is_long;
 logic [21:0] sdram_addr_max;
-logic [8:0]ram_rdaddr_x;
+logic [7:0]ram_rdaddr_x;
 logic [15:0] DFJK_valid;
 
 parameter Red_long=128'hC5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5;

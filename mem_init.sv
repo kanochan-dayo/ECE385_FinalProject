@@ -3,18 +3,18 @@ input clk,reset,sdram_wait,sdram_ac,
 input [127:0] sdram_data,
 output [127:0] mem_data,
 output [21:0] sdram_addr,
-output [8:0] mem_addr,
+output [9:0] mem_addr,
 output mem_init_done,mem_wr,mem_wr1,sdram_rd);
 
 parameter sdram_offset=22'h31E000;
 parameter mem_addr_max1=9'h047;
-parameter mem_addr_max2=9'h1CE;
+parameter mem_addr_max2=10'h26A;
 
 
 
 enum logic [2:0]{Halted,Read,Read1,Write1,Done} State,Next_state;
 logic [21:0] sdram_addr_x;
-logic [8:0]mem_addr_x;
+logic [9:0]mem_addr_x;
 logic flag,flag_x;
 
 always_ff @(negedge sdram_ac or posedge reset)
