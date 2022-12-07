@@ -185,7 +185,8 @@ assign ARDUINO_IO[14] = i2c_serial_sda_oe ? 1'b0 : 1'bz;
 		
 	 );
 
-vga_controller vga_ctr(     .Clk(MAX10_CLK1_50),       // 50 MHz clock
+vga_controller vga_ctr(     
+.Clk(MAX10_CLK1_50),       // 50 MHz clock
 .Reset(Reset_h),     // reset signal
 .hs(VGA_HS),       
 .vs(VGA_VS),      										 
@@ -194,6 +195,8 @@ vga_controller vga_ctr(     .Clk(MAX10_CLK1_50),       // 50 MHz clock
 //
 logic [9:0] DrawX, DrawY;
 logic pixel_clk,blank,sync;
+
+
 
 always_ff @ (posedge new_frame)
 begin

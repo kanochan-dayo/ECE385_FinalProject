@@ -22,11 +22,12 @@
 //-------------------------------------------------------------------------
 
 
-module  vga_controller ( input        Clk,       // 50 MHz clock
-                                      Reset,     // reset signal
+module  vga_controller ( 
+input        Clk,       // 50 MHz clock
+                                Reset,     // reset signal
                          output logic hs,        // Horizontal sync pulse.  Active low
 								              vs,        // Vertical sync pulse.  Active low
-												  pixel_clk, // 25 MHz pixel clock output
+													pixel_clk, // 25 MHz pixel clock output
 												  blank,     // Blanking interval indicator.  Active low.
 												  sync,      // Composite Sync signal.  Active low.  We don't use it in this lab,
 												             //   but the video DAC on the DE2 board requires an input for it.
@@ -48,7 +49,7 @@ module  vga_controller ( input        Clk,       // 50 MHz clock
     //Disable Composite Sync
     assign sync = 1'b0;
      
-	//This cuts the 50 Mhz clock in half to generate a 25 MHz pixel clock  
+//This cuts the 50 Mhz clock in half to generate a 25 MHz pixel clock  
     always_ff @ (posedge Clk or posedge Reset )
     begin 
         if (Reset) 
@@ -119,7 +120,7 @@ module  vga_controller ( input        Clk,       // 50 MHz clock
     end 
    
     assign blank = display;
-    assign pixel_clk = clkdiv;
+    assign pixel_clk=clkdiv;
     
 
 endmodule
