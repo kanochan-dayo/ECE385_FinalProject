@@ -1,5 +1,5 @@
 module Draw_sprites(
-input clk,reset,sdram_wait,sdram_ac,ram_wr,new_frame,frame_flip,d_changed,f_changed,j_changed,k_changed,
+input clk,reset,auto,sdram_wait,sdram_ac,ram_wr,new_frame,frame_flip,d_changed,f_changed,j_changed,k_changed,
 input [15:0] un_time,
 input [3:0]DFJK,
 input [7:0] ram_wraddr,
@@ -10,7 +10,8 @@ output sdram_wr,busy,done,
 output [12:0] score,
 output [3:0] combo,
 output [1:0] precises,
-output [15:0] sdram_be
+output [15:0] sdram_be,
+output [3:0]auto_DFJK
 );
 always_comb
 begin
@@ -93,26 +94,26 @@ begin
     score=score_d+score_f+score_j+score_k;
     case(precise_d_x)
     2'b00:score_d=0;
-    2'b10:score_d=950;
-    2'b01:score_d=1900;
+    2'b10:score_d=953;
+    2'b01:score_d=1907;
     2'b11:score_d=0;
     endcase
     case(precise_f_x)
     2'b00:score_f=0;
-    2'b10:score_f=950;
-    2'b01:score_f=1900;
+    2'b10:score_f=953;
+    2'b01:score_f=1907;
     2'b11:score_f=0;
     endcase
     case(precise_j_x)
     2'b00:score_j=0;
-    2'b10:score_j=950;
-    2'b01:score_j=1900;
+    2'b10:score_j=953;
+    2'b01:score_j=1907;
     2'b11:score_j=0;
     endcase
     case(precise_k_x)
     2'b00:score_k=0;
-    2'b10:score_k=950;
-    2'b01:score_k=1900;
+    2'b10:score_k=953;
+    2'b01:score_k=1907;
     2'b11:score_k=0;
     endcase
 end
@@ -232,7 +233,7 @@ always_ff @(posedge new_frame or posedge reset)
     end
 end
 
-
+logic [3:0] [3:0] hold_DFJK,hold_DFJK_x;
 
 always_comb 
 begin
@@ -240,106 +241,177 @@ begin
     f_next=precise_f_x[0]|precise_f_x[1];
     j_next=precise_j_x[0]|precise_j_x[1];
     k_next=precise_k_x[0]|precise_k_x[1];
-    if(d0_key[13:0]==un_time) 
-        precise_d_x=2'b11;
-    else if(d_changed==0&&d0_key[15:14]==2'b10 &&DFJK[3]==0)
-        precise_d_x=2'b11;
-    else if(d_changed==0)
-        precise_d_x=2'b00;
-    else
-    begin
-        if(d0_key[15:14]==2'b10)
+    if(~auto)
         begin
-             precise_d_x=2'b01;
+            hold_DFJK_x[0]=0;
+            hold_DFJK_x[1]=0;
+            hold_DFJK_x[2]=0;
+            hold_DFJK_x[3]=0;
+            if(d0_key[13:0]==un_time) 
+                precise_d_x=2'b11;
+            else if(d_changed==0&&d0_key[15:14]==2'b10 &&DFJK[3]==0)
+                precise_d_x=2'b11;
+            else if(d_changed==0)
+                precise_d_x=2'b00;
+            else
+            begin
+                if(d0_key[15:14]==2'b10)
+                begin
+                    precise_d_x=2'b01;
+                end
+                else if(DFJK[3]==0)
+                    precise_d_x=2'b00;
+
+                else if(d0_key[13:0]-un_time>26)
+                    precise_d_x=2'b00;
+                else if(d0_key[13:0]-un_time>22)
+                    precise_d_x=2'b11;
+                else if(d0_key[13:0]-un_time>18)
+                    precise_d_x=2'b10;
+                else
+                    precise_d_x=2'b01;
+            end
+
+            if(f0_key[13:0]==un_time) 
+                precise_f_x=2'b11;
+            else if(f_changed==0&&f0_key[15:14]==2'b10 &&DFJK[2]==0)
+                precise_f_x=2'b11;
+            else if(f_changed==0)
+                precise_f_x=2'b00;
+            else
+            begin
+                if(f0_key[15:14]==2'b10)
+                begin
+                    precise_f_x=2'b01;
+                end
+                else if(DFJK[2]==0)
+                    precise_f_x=2'b00;
+
+                else if(f0_key[13:0]-un_time>26)
+                    precise_f_x=2'b00;
+                else if(f0_key[13:0]-un_time>22)
+                    precise_f_x=2'b11;
+                else if(f0_key[13:0]-un_time>18)
+                    precise_f_x=2'b10;
+                else
+                    precise_f_x=2'b01;
+            end
+
+            if(j0_key[13:0]==un_time) 
+                precise_j_x=2'b11;
+            else if(j_changed==0&&j0_key[15:14]==2'b10 &&DFJK[1]==0)
+                precise_j_x=2'b11;
+            else if(j_changed==0)
+                precise_j_x=2'b00;
+            else
+            begin
+                if(j0_key[15:14]==2'b10)
+                begin
+                    precise_j_x=2'b01;
+                end
+                else if(DFJK[1]==0)
+                    precise_j_x=2'b00;
+
+                else if(j0_key[13:0]-un_time>26)
+                    precise_j_x=2'b00;
+                else if(j0_key[13:0]-un_time>22)
+                    precise_j_x=2'b11;
+                else if(j0_key[13:0]-un_time>18)
+                    precise_j_x=2'b10;
+                else
+                    precise_j_x=2'b01;
+            end
+
+            if(k0_key[13:0]==un_time) 
+                precise_k_x=2'b11;
+            else if(k_changed==0&&k0_key[15:14]==2'b10 &&DFJK[0]==0)
+                precise_k_x=2'b11;
+            else if(k_changed==0)
+                precise_k_x=2'b00;
+            else
+            begin
+                if(k0_key[15:14]==2'b10)
+                begin
+                        precise_k_x=2'b01;
+                end
+                else if(DFJK[0]==0)
+                    precise_k_x=2'b00;
+
+                else if(k0_key[13:0]-un_time>26)
+                    precise_k_x=2'b00;
+                else if(k0_key[13:0]-un_time>22)
+                    precise_k_x=2'b11;
+                else if(k0_key[13:0]-un_time>18)
+                    precise_k_x=2'b10;
+                else
+                    precise_k_x=2'b01;
+            end
         end
-        else if(DFJK[3]==0)
+    else
+        begin
+            hold_DFJK_x=hold_DFJK;
             precise_d_x=2'b00;
-
-        else if(d0_key[13:0]-un_time>26)
-            precise_d_x=2'b00;
-        else if(d0_key[13:0]-un_time>22)
-            precise_d_x=2'b11;
-        else if(d0_key[13:0]-un_time>18)
-            precise_d_x=2'b10;
-        else
-            precise_d_x=2'b01;
-    end
-
-    if(f0_key[13:0]==un_time) 
-        precise_f_x=2'b11;
-    else if(f_changed==0&&f0_key[15:14]==2'b10 &&DFJK[2]==0)
-        precise_f_x=2'b11;
-    else if(f_changed==0)
-        precise_f_x=2'b00;
-    else
-    begin
-        if(f0_key[15:14]==2'b10)
-        begin
-             precise_f_x=2'b01;
-        end
-        else if(DFJK[2]==0)
             precise_f_x=2'b00;
-
-        else if(f0_key[13:0]-un_time>26)
-            precise_f_x=2'b00;
-        else if(f0_key[13:0]-un_time>22)
-            precise_f_x=2'b11;
-        else if(f0_key[13:0]-un_time>18)
-            precise_f_x=2'b10;
-        else
-            precise_f_x=2'b01;
-    end
-
-    if(j0_key[13:0]==un_time) 
-        precise_j_x=2'b11;
-    else if(j_changed==0&&j0_key[15:14]==2'b10 &&DFJK[1]==0)
-        precise_j_x=2'b11;
-    else if(j_changed==0)
-        precise_j_x=2'b00;
-    else
-    begin
-        if(j0_key[15:14]==2'b10)
-        begin
-            precise_j_x=2'b01;
-        end
-        else if(DFJK[1]==0)
             precise_j_x=2'b00;
-
-        else if(j0_key[13:0]-un_time>26)
-            precise_j_x=2'b00;
-        else if(j0_key[13:0]-un_time>22)
-            precise_j_x=2'b11;
-        else if(j0_key[13:0]-un_time>18)
-            precise_j_x=2'b10;
-        else
-            precise_j_x=2'b01;
-    end
-
-    if(k0_key[13:0]==un_time) 
-        precise_k_x=2'b11;
-    else if(k_changed==0&&k0_key[15:14]==2'b10 &&DFJK[0]==0)
-        precise_k_x=2'b11;
-    else if(k_changed==0)
-        precise_k_x=2'b00;
-    else
-    begin
-        if(k0_key[15:14]==2'b10)
-        begin
-				precise_k_x=2'b01;
+            precise_k_x=2'b00;
+            if(d0_key[13:0]==un_time+8)
+                precise_d_x=2'b01;
+            if(f0_key[13:0]==un_time+8)
+                precise_f_x=2'b01;
+            if(j0_key[13:0]==un_time+8)
+                precise_j_x=2'b01;
+            if(k0_key[13:0]==un_time+8)
+                precise_k_x=2'b01;
+            if(precise_d_x==2'b01&&d0_key[15:14]==2'b10)
+                hold_DFJK_x[3]=0;
+            else if(precise_d_x==2'b01)
+                hold_DFJK_x[3]=4'h7;
+            else if(d0_key[15:14]==2'b10)
+                hold_DFJK_x[3]=4'h7;
+            if (precise_f_x==2'b01&&f0_key[15:14]==2'b10)
+                hold_DFJK_x[2]=0;
+            else if(precise_f_x==2'b01)
+                hold_DFJK_x[2]=4'h7;
+            else if(f0_key[15:14]==2'b10)
+                hold_DFJK_x[2]=4'h7;
+            if (precise_j_x==2'b01&&j0_key[15:14]==2'b10)
+                hold_DFJK_x[1]=0;
+            else if(precise_j_x==2'b01)
+                hold_DFJK_x[1]=4'h7;
+            else if(j0_key[15:14]==2'b10)
+                hold_DFJK_x[1]=4'h7;
+            if (precise_k_x==2'b01&&k0_key[15:14]==2'b10)
+                hold_DFJK_x[0]=0;
+            else if(precise_k_x==2'b01)
+                hold_DFJK_x[0]=4'h7;
+            else if(k0_key[15:14]==2'b10)
+                hold_DFJK_x[0]=4'h7;
         end
-        else if(DFJK[0]==0)
-            precise_k_x=2'b00;
-
-        else if(k0_key[13:0]-un_time>26)
-            precise_k_x=2'b00;
-        else if(k0_key[13:0]-un_time>22)
-            precise_k_x=2'b11;
-        else if(k0_key[13:0]-un_time>18)
-            precise_k_x=2'b10;
-        else
-            precise_k_x=2'b01;
-    end
 end
+
+always_ff @(posedge new_frame)
+begin
+    if (hold_DFJK_x[0]>0)
+        hold_DFJK[0]<=hold_DFJK_x[0]-1;
+    else
+        hold_DFJK[0]<=hold_DFJK_x[0];
+    if (hold_DFJK_x[1]>0)
+        hold_DFJK[1]<=hold_DFJK_x[1]-1;
+    else
+        hold_DFJK[1]<=hold_DFJK_x[1];
+    if (hold_DFJK_x[2]>0)
+        hold_DFJK[2]<=hold_DFJK_x[2]-1;
+    else
+        hold_DFJK[2]<=hold_DFJK_x[2];
+    if (hold_DFJK_x[3]>0)
+        hold_DFJK[3]<=hold_DFJK_x[3]-1;
+    else
+        hold_DFJK[3]<=hold_DFJK_x[3];
+end
+assign auto_DFJK[0]=hold_DFJK[0][0]||hold_DFJK[0][1]||hold_DFJK[0][2]||hold_DFJK[0][3];
+assign auto_DFJK[1]=hold_DFJK[1][0]||hold_DFJK[1][1]||hold_DFJK[1][2]||hold_DFJK[1][3];
+assign auto_DFJK[2]=hold_DFJK[2][0]||hold_DFJK[2][1]||hold_DFJK[2][2]||hold_DFJK[2][3];
+assign auto_DFJK[3]=hold_DFJK[3][0]||hold_DFJK[3][1]||hold_DFJK[3][2]||hold_DFJK[3][3];
 
 always_comb 
 begin

@@ -49,14 +49,14 @@ module lineb (
 	22'h159100,22'h15DC00,22'h162700,22'h167200,22'h16BD00,22'h170800,
 	22'h175300,22'h179E00,22'h17E900,22'h183400,22'h187F00,22'h18CA00};
 
-logic[4:0] Startscreen_index;
+logic[5:0] Startscreen_index;
 always_ff @(posedge new_frame)
 begin
 if (reset)
 	begin
 		Startscreen_index<=0;
 	end
-else if(Startscreen_index==29)
+else if(Startscreen_index==60)
 	begin
 		Startscreen_index<=Startscreen_index;
 	end
@@ -170,7 +170,7 @@ end
 always_comb
 begin
 WriteY=(DrawY==524)?0:DrawY+1;
-if(Startscreen_index==29)
+if(Startscreen_index==60)
 	begin
 		if(frame_flip)
 			sdram_addr=WriteX[9:4]+(WriteY*40)+Address1;
@@ -179,7 +179,7 @@ if(Startscreen_index==29)
 	end
 else 
 	begin
-		sdram_addr=Startscreen_addr[Startscreen_index]+WriteX[9:4]+(WriteY*40);
+		sdram_addr=Startscreen_addr[Startscreen_index[5:1]]+WriteX[9:4]+(WriteY*40);
 	end
 	
 flip=WriteY[0];

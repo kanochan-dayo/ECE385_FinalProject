@@ -68,11 +68,12 @@ module rhythm (
 	logic [1:0] signs;
 	logic [1:0] hundreds;
 	logic [7:0] keycode;
-	logic [3:0] DFJK,DFJK_x;
+	logic [3:0] DFJK,DFJK_x,auto_DFJK;
 	logic [9:0] LEDRR;
 	logic SD_CS;
-	assign LEDR[9:6]=LEDRR[9:6];
+	assign LEDR[9:7]=LEDRR[9:7];
 	assign LEDR[4:1]=DFJK;
+	assign LEDR[6]=auto;
 
 //=======================================================
 //  Structural coding
@@ -180,7 +181,7 @@ assign ARDUINO_IO[14] = i2c_serial_sda_oe ? 1'b0 : 1'bz;
 
 
 		// DFJK
-		.key_dfjk_export(DFJK_x),
+		.key_dfjk_export({auto,DFJK_x}),
 		
 		
 	 );
@@ -194,13 +195,16 @@ vga_controller vga_ctr(
 //background_mapper bk(.*,.clock(MAX10_CLK1_50));
 //
 logic [9:0] DrawX, DrawY;
-logic pixel_clk,blank,sync;
+logic pixel_clk,blank,sync,auto;
 
 
 
 always_ff @ (posedge new_frame)
 begin
+if(~auto)
 DFJK<=DFJK_x;
+else
+DFJK<=auto_DFJK;
 end
 
 assign d_changed=(DFJK_prestate[0][3]!=DFJK_prestate[1][3])?1'b1:1'b0;
