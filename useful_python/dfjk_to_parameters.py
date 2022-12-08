@@ -13,6 +13,7 @@ j_pre="00"
 k_pre="00"
 pretime=0
 line_num=0
+offset=65
 with open(imput_file) as f:
     for line in f:
         line_num+=1
@@ -31,7 +32,7 @@ with open(imput_file) as f:
                 print("Error: D key is error(时间顺序错误) in line: "+line+"at index: "+str(line_num))
                 sys.exit()
             pretime=number
-            number=round(number*1250/21)
+            number=round(number*1250/21)+offset
             number=str(bin(number))[2:]
             number=number.zfill(14)
             d_pre = line[1:3]
@@ -49,7 +50,7 @@ with open(imput_file) as f:
                 print("Error: F key is error(时间顺序错误) in line: "+line+"at index: "+str(line_num))
                 sys.exit()
             pretime=number
-            number=round(number*1250/21)
+            number=round(number*1250/21)+offset
             number=str(bin(number))[2:]
             number=number.zfill(14)
             f_pre = line[1:3]
@@ -67,7 +68,7 @@ with open(imput_file) as f:
                 print("Error: J key is error(时间顺序错误) in line: "+line+"at index: "+str(line_num))
                 sys.exit()
             pretime=number
-            number=round(number*1250/21)
+            number=round(number*1250/21)+offset
             number=str(bin(number))[2:]
             number=number.zfill(14)
             j_pre = line[1:3]
@@ -85,7 +86,7 @@ with open(imput_file) as f:
                 print("Error: K key is error(时间顺序错误) in line: "+line+"at index: "+str(line_num))
                 sys.exit()
             pretime=number
-            number=round(number*1250/21)
+            number=round(number*1250/21)+offset
             number=str(bin(number))[2:]
             number=number.zfill(14)
             k_pre = line[1:3]
@@ -101,5 +102,6 @@ with open(imput_file) as f:
 
 for output_file in output_files:
     out=open(output_file, "a")
+    out.write("16'b0001011011010011,\n16'b0001011011010011,\n16'b0001011011010011,\n16'b0001011011010011")
     out.write("};\n\nassign	key_1 = mem[addr];\nassign	key_2 = mem[addr+1];\nassign	key_3 = mem[addr+2];\nassign	key_4 = mem[addr+3];\n\nendmodule\n")
     out.close()

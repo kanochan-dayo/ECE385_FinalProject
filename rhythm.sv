@@ -385,6 +385,9 @@ universal_timer times(
 .un_time(un_time)
 );
 
-logic start_sign,stop_sign;
+logic start_sign,stop_sign,keyboard_start;
 logic [15:0]un_time;
+
+keycode_machine km(.keycode(keycode),.clk(MAX10_CLK1_50),.reset(Reset_h)
+,.keyboard_start(keyboard_start),.stop_sign(stop_sign));
 endmodule
