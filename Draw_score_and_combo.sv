@@ -46,21 +46,21 @@ parameter [4:0][11:0] combo_sdram_addr_start={
     12'd3325,12'd3765,12'd3766,12'd3767,12'd3768
 };
 parameter [4:0][12:0] combo_sdram_addr_end={
-    13'd3568,13'd4405,13'd4406,13'd4407,13'd4408
+    13'd3528,13'd4365,13'd4366,13'd4367,13'd4368
 };
 
 parameter [5:0][14:0]score_sdram_addr_start={
 15'd16324,15'd16325,15'd16326,15'd16327,15'd16328,15'd16329
 };
 parameter [5:0][14:0]score_sdram_addr_end={
-15'd17004,15'd17005,15'd17006,15'd17007,15'd17008,15'd17009
+15'd16964,15'd16965,15'd16966,15'd16967,15'd16968,15'd16969
 };
 parameter wraddr_offset0=22'h100000;
 parameter wraddr_offset1=22'h200000;
 
 parameter [0:3][9:0]precise_ram_start={10'd0,10'd462,10'd514,10'd566};
 parameter precise_sdram_start=9805;
-parameter precise_sdram_addr_end=10328;
+parameter precise_sdram_addr_end=10248;
 
 score_ram ram1(
 	.clock(clk),

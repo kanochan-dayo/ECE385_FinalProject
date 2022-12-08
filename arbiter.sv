@@ -2,7 +2,7 @@ module arbiter_sdram (
 //general input
 input clk,reset,new_frame,
 input [9:0] DrawY,DrawX,
-input stop_sign,
+input stop_sign, keyboard_start,
 
 //sdram_init_input
 input [21:0]init_addr,
@@ -77,7 +77,7 @@ output SPI0_CS_N, SPI0_SCLK, SPI0_MOSI,SD_CS,start_sign
 enum logic[7:0] 
 {
 	Bootup, Init_sdram, Init_sdram_done,
-	Init_memory, Init_memory_done,
+	Init_memory, Init_memory_done, Line_buffer_startscreen,
 	Line_buffer_pre_bk, Line_buffer_pre_sp, Line_buffer_pre_nt, Line_buffer, Line_buffer_mid, Line_buffer_done,
 	Background, 
 	Score, Note, PCM, PCM_done,
@@ -119,6 +119,10 @@ Init_memory:
 	
 Init_memory_done:
 	if (new_frame)
+		Next_state=Line_buffer_startscreen;
+
+Line_buffer_startscreen:
+	if (new_frame && keyboard_start)
 		Next_state=Line_buffer_pre_bk;
 
 Line_buffer:
@@ -203,7 +207,7 @@ DS_sdram_wait=1;
 DFJK_sdram_rddata=0;
 DFJK_sdram_wait=1;
 DFJK_sdram_ac=0;
-start_sign=0;
+start_sign=1;
 lb_sdram_Wait=1;
 lb_sdram_ac=0;
 lb_sdram_data=0;
@@ -242,6 +246,7 @@ begin
 	SD_CS=init_cs_bo;
 	ar_addr=init_addr;
 	ar_write=init_we;
+	start_sign=0;
 end
 
 Init_sdram:
@@ -257,6 +262,7 @@ begin
 	SPI0_SCLK=init_sclk_o;
 	SPI0_MOSI=init_mosi_o;
 	SD_CS=init_cs_bo;
+	start_sign=0;
 end
 
 Init_sdram_done:
@@ -267,6 +273,7 @@ begin
 	mem_init_sdram_data=ar_rddata;
 	ar_addr=mem_init_sdram_addr;
 	ar_read=mem_init_sdram_rd;
+	start_sign=0;
 end
 
 Init_memory:
@@ -277,12 +284,13 @@ begin
 	mem_init_sdram_data=ar_rddata;
 	ar_addr=mem_init_sdram_addr;
 	ar_read=mem_init_sdram_rd;
+	start_sign=0;
 end
 
 Init_memory_done:
 begin
 init_wait=0;
-start_sign=1;
+start_sign=0;
 end
 
 PCM:
@@ -310,6 +318,17 @@ begin
 	ar_read=lb_sdram_rd;
 	lb_sdram_data=ar_rddata;
 	lb_sdram_ac=ar_ac;
+end
+Line_buffer_startscreen:
+begin
+	init_wait=0;
+	ar_write=0;
+	lb_sdram_Wait=0;
+	ar_addr=lb_sdram_addr;
+	ar_read=lb_sdram_rd;
+	lb_sdram_data=ar_rddata;
+	lb_sdram_ac=ar_ac;
+	start_sign=0;
 end
 Line_buffer_mid:
 begin

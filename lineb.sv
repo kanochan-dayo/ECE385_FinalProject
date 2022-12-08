@@ -12,6 +12,7 @@ module lineb (
 		new_frame,
 		sdram_Wait,
 		stop_sign,
+		start_sign,
 		output frame_flip,
       output   [ 3: 0]   VGA_R,
       output   [ 3: 0]   VGA_G,
@@ -40,6 +41,32 @@ module lineb (
  
  parameter [21:0]Address1=22'h100000;
  parameter [21:0]Address2=22'h200000;
+ 
+ parameter [0:29] [21:0] Startscreen_addr={
+	22'h104B00,22'h109600,22'h10E100,22'h112C00,22'h117700,22'h11C200,
+	22'h120D00,22'h125800,22'h12A300,22'h12EE00,22'h133900,22'h138400,
+	22'h13CF00,22'h141A00,22'h146500,22'h14B000,22'h14FB00,22'h154600,
+	22'h159100,22'h15DC00,22'h162700,22'h167200,22'h16BD00,22'h170800,
+	22'h175300,22'h179E00,22'h17E900,22'h183400,22'h187F00,22'h18CA00};
+
+logic[4:0] Startscreen_index;
+always_ff @(posedge new_frame)
+begin
+if (reset)
+	begin
+		Startscreen_index<=0;
+	end
+else if(Startscreen_index==29)
+	begin
+		Startscreen_index<=Startscreen_index;
+	end
+else if(start_sign)
+Startscreen_index<=Startscreen_index+1;
+else
+Startscreen_index<=Startscreen_index;
+end
+
+//  parameter [4:0] [21:0] Endscreen_data;
  
  enum logic[2:0] {Halted,Read,Read1,Pause,Pause1,Done} State,Next_state;
  
@@ -138,25 +165,29 @@ Done:
 done=1;
 
 endcase
- 
- 
-
 end
 
 always_comb
 begin
 WriteY=(DrawY==524)?0:DrawY+1;
-if(frame_flip)
-sdram_addr=WriteX[9:4]+(WriteY*40)+Address1;
-else
-sdram_addr=WriteX[9:4]+(WriteY*40)+Address2;
-
-	flip=WriteY[0];
-	place_a[5:0] = (DrawX[9:4]<=41)?DrawX[9:4]+1:0;
-	place_a[6]=DrawX[9:4]<=41?flip:~flip;
-	place_b[6]=~flip;
-	place_b[5:0] = WriteX[9:4];
-	number=DrawX[3:0];
+if(Startscreen_index==29)
+	begin
+		if(frame_flip)
+			sdram_addr=WriteX[9:4]+(WriteY*40)+Address1;
+		else
+			sdram_addr=WriteX[9:4]+(WriteY*40)+Address2;
+	end
+else 
+	begin
+		sdram_addr=Startscreen_addr[Startscreen_index]+WriteX[9:4]+(WriteY*40);
+	end
+	
+flip=WriteY[0];
+place_a[5:0] = (DrawX[9:4]<=41)?DrawX[9:4]+1:0;
+place_a[6]=DrawX[9:4]<=41?flip:~flip;
+place_b[6]=~flip;
+place_b[5:0] = WriteX[9:4];
+number=DrawX[3:0];
 	case (number)
 	4'h0:
 	pixel_palette_index=pixel_palette_a[7:0];
