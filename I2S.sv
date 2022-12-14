@@ -290,7 +290,7 @@ counter_x[4:0]=1;
 counter_x[7:5]=counter[7:5];
 end
 
-if(counters[4]==1)
+if(counters[4]==1||stop_sign)
 Dout=0;
 else
 Dout=tempdata[(15+(counters[7:5]<<4))-counters[3:0]];

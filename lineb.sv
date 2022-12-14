@@ -222,7 +222,7 @@ number=DrawX[3:0];
 	4'hF:
 	pixel_palette_index=pixel_palette_a[127:120];
 	endcase
-if (blank&&(~stop_sign))
+if (blank)
  begin
 	VGA_R<=RGB_ALL[23:20];
 	VGA_G<=RGB_ALL[15:12];
