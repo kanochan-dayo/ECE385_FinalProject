@@ -30,7 +30,7 @@ begin
 				Next_state=Halted;
 //			else if (pause_sign)
 //				Next_state=pause;
-			else if (un_time==16'd5680)
+			else if (un_time==16'd5669)
 				Next_state=Done;
 //		pause:
 //			if (reset)
@@ -59,7 +59,7 @@ begin
 		pause:
 			un_time<=un_time;
 		Done:
-			un_time<=0;
+			un_time<=5680;
 	endcase
 end
 

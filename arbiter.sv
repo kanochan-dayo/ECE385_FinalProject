@@ -139,8 +139,10 @@ Line_buffer_done:
 		Next_state=Score;
 	else if(~Dnum_done)
 		Next_state=Note;
-	else
+	else if(~stop_sign)
 		Next_state=PCM;
+	else
+		Next_state=Halted;
 
 Line_buffer_mid:
 	
@@ -181,9 +183,7 @@ if (DrawX==765)
 
 
 Halted:
-	if (stop_sign)
-		Next_state=Done;
-	else if (new_frame)
+	if (new_frame)
 		Next_state=Line_buffer_pre_bk;
 		
 PCM:

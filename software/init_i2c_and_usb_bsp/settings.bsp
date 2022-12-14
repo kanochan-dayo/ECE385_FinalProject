@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Dec 1, 2022 11:42:05 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1669959725517</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>2022-12-8 13:17:23</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1670527043896</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>G:\ECE385\ECE385_FinalProject\software\init_i2c_and_usb_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\rhythm_soc.sopcinfo</SopcDesignFile>

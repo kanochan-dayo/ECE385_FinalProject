@@ -66,6 +66,46 @@ void setdfjk(BYTE keycode)
 {
 	IOWR_ALTERA_AVALON_PIO_DATA(DFJK_BASE, keycode);
 }
+BYTE calc_autoflag(BYTE flag,BYTE keycode){
+
+	switch(flag)
+	{
+	case 4:
+	return 4;
+	break;
+	case 0:
+		if(keycode==4)
+			return 1;
+		else
+			return 0;
+		break;
+	case 1:
+		if(keycode==24||keycode==4)
+			return 2;
+		else if(keycode==0)
+			return 1;
+		else
+			return 0;
+		break;
+	case 2:
+		if(keycode==23)
+			return 3;
+		else if(keycode==0||keycode==24)
+			return 2;
+		else
+			return 0;
+		break;
+	case 3:
+		if (keycode == 18)
+			return 4;
+		else if (keycode ==0||keycode==23)
+			return 3;
+		else
+			return 0;
+		break;
+	}
+	return 0;
+}
 int usb_set() {
 	BYTE rcode;
 	BOOT_MOUSE_REPORT buf;		//USB mouse report
@@ -80,6 +120,7 @@ int usb_set() {
 	MAX3421E_init();
 //	printf("initializing USB...\n");
 	USB_init();
+	BYTE auto_flag=0;
 	while (1) {
 		MAX3421E_Task();
 		USB_Task();
@@ -101,7 +142,10 @@ int usb_set() {
 					continue;
 				}
 //				printf("dfjk: ");
-				dfjk = 0;
+				if(auto_flag==4)
+					dfjk=1<<4;
+				else
+					dfjk = 0;
 				for (int i = 0; i < 6; i++) {
 					if (kbdbuf.keycode[i] == 0x7 )
 					{
@@ -129,6 +173,7 @@ int usb_set() {
 				setdfjk(dfjk);
 //				printf("%x \n", dfjk);
 				setKeycode(temp_keycode);
+				auto_flag=calc_autoflag(auto_flag,temp_keycode);
 //				if(kbdbuf.keycode[0])
 //				printSignedHex0(kbdbuf.keycode[0]);
 //				printSignedHex1(kbdbuf.keycode[1]);
